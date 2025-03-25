@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import '@/assets/styles/globals.css'
 import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from '@/lib/constants';
 import { ThemeProvider } from 'next-themes';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
+// import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 const inter = Inter( { subsets: ['latin']})
 
@@ -24,9 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
 
-      <UserProvider>
 
         <body className={`${inter.className}  antialiased`}>
+      {/* <UserProvider> */}
         <ThemeProvider
           attribute='class'
           defaultTheme='light'
@@ -35,9 +35,9 @@ export default function RootLayout({
         >
           {children}
           </ThemeProvider>
+      {/* </UserProvider> */}
         </body>
 
-      </UserProvider>
 
     </html>
   );
