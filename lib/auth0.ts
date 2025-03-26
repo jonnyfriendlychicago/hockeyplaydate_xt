@@ -1,3 +1,7 @@
+import { Auth0Client } from "@auth0/nextjs-auth0/server";
+
+export const auth0 = new Auth0Client();
+
 // // // https://chatgpt.com/c/67e19ec4-d1dc-8010-b3dc-e9e73efadca8
 
 // import { initAuth0 } from '@auth0/nextjs-auth0';
