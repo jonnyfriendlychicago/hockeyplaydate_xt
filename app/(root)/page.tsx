@@ -2,6 +2,7 @@
 // from Auth0
 import { Button } from "@/components/ui/button";
 import { auth0 } from "@/lib/auth0";
+// import { Image } from "lucide-react";
 // import './globals.css'; // JRF: commOut this line, b/c I think this already coming from projRoot/layout.tsx
 
 export default async function Home() {
@@ -10,20 +11,18 @@ export default async function Home() {
 
   // If no session, show sign-up and login buttons
   if (!session) {
+
+    
     return (
       <main>
 
-        <a href="/auth/login?screen_hint=signup">
-          {/* <button>Sign up</button> */}
-          <Button>Sign up</Button>
-
-        </a>
+        {/* <a href="/auth/login?screen_hint=signup"> */}
+          {/* <Button>Sign up</Button> */}
+        {/* </a> */}
 
 
         <a href="/auth/login">
-          {/* <button>Log in</button> */}
-          <Button>Log in</Button>
-
+          <Button>Sign in</Button>
         </a>
       
       
@@ -31,14 +30,25 @@ export default async function Home() {
     );
   }
 
+  console.log(session.user)
   // If session exists, show a welcome message and logout button
   return (
+
+    
     <main>
       <h1>Welcome, {session.user.name}!</h1>
+
+      {/* <Image ></Image> */}
+
       <p>
+        {/* <a href="/auth/logout"> */}
+          {/* <button>Log out</button> */}
+        {/* </a> */}
+
         <a href="/auth/logout">
-          <button>Log out</button>
+          <Button>Logout</Button>
         </a>
+
       </p>
     </main>
   );
