@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   metadataBase: new URL(SERVER_URL),
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -23,10 +26,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>
+        <link rel="manifest" href="/site.webmanifest"></link>
+      </head>
 
         <body className={`${inter.className}  antialiased`}>
-      {/* <UserProvider> */}
         <ThemeProvider
           attribute='class'
           defaultTheme='light'
@@ -35,7 +42,6 @@ export default function RootLayout({
         >
           {children}
           </ThemeProvider>
-      {/* </UserProvider> */}
         </body>
 
 
