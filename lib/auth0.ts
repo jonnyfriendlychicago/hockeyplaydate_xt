@@ -13,7 +13,3 @@ export const auth0 = new Auth0Client();
 // clientID: process.env.AUTH0_CLIENT_ID!,
 // clientSecret: process.env.AUTH0_CLIENTx_SECRET!,
 // });
-
-// // import { Auth0Client } from "@auth0/nextjs-auth0/server";
-
-// // export const auth0 = new Auth0Client();

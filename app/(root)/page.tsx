@@ -15,9 +15,7 @@ export default async function Home() {
 
   console.log(session.user)
   // If session exists, show a welcome message 
-  return (
-
-    
+  return ( 
     <main>
       <h1>Welcome, {session.user.name}!</h1>
     </main>
