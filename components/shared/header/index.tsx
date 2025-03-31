@@ -12,7 +12,6 @@ const Header = () => {
           <Link href='/' className='flex-start'>
             <Image
               priority={true}
-              // src='/images/logo.svg'
               src='/images/HP_logo_02_1024x1024_transp.svg'
               width={48}
               height={48}

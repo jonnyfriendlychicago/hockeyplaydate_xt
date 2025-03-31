@@ -4,8 +4,6 @@ import Footer from '@/components/footer';
 import { auth0 } from '@/lib/auth0';
 import { syncUserFromAuth0 } from '@/lib/syncUser';
 
-
-
 // export default function RootLayout({
 // above replaced by below to get the auth'ed user saved to db
 export default async function RootLayout({

@@ -1,5 +1,5 @@
+// everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive
 import { EllipsisVertical} from 'lucide-react';
-// import { ShoppingCart , UserIcon} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -13,7 +13,6 @@ import { auth0 } from "@/lib/auth0"; // from Auth0
 import Image from 'next/image';
 import profileDefault from '@/public/images/HP_logo_02_1024x1024_transp.svg';
 
-// const Menu = () => {
 export default async function  Menu  ()  {
 
   const session = await auth0.getSession();
@@ -25,12 +24,6 @@ export default async function  Menu  ()  {
       <nav className='hidden md:flex w-full max-w-xs gap-1'>
         
         <ModeToggle />
-        
-        {/* <Button asChild variant='ghost'>
-          <Link href='/cart'>
-            <ShoppingCart /> Cart
-          </Link>
-        </Button> */}
 
         {session ? 
           <>
@@ -50,11 +43,6 @@ export default async function  Menu  ()  {
         <a href="/auth/login">
             <Button>Sign in / Sign Up</Button>
             </a>
-      // <Button asChild>
-      //       <Link href='/sign-in'>
-      //         <UserIcon/>Sign In
-      //         </Link>
-      //     </Button>
         }
 
       </nav>
@@ -68,18 +56,6 @@ export default async function  Menu  ()  {
             <SheetTitle>Menu</SheetTitle>
             
             <ModeToggle />
-            
-            {/* <Button asChild variant='ghost'>
-              <Link href='/cart'>
-                <ShoppingCart /> Cart
-              </Link>
-            </Button>
-            
-            <Button asChild>
-              <Link href='/sign-in'>
-                <UserIcon/>Sign In
-              </Link>
-            </Button> */}
 
         {session ? 
           <>
@@ -110,4 +86,3 @@ export default async function  Menu  ()  {
   );
 };
 
-// export default Menu;
