@@ -1,0 +1,22 @@
+// This is your Prisma schema file.  Defines all tables.columns that shall exist in db
+// skeleton file created automatically by 'npx prisma init'
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  // email     String?   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  // added below to support a0 enhancement: https://chatgpt.com/c/67e6aad2-24c4-8010-a2b2-28bf5abb178b
+  auth0Id       String   @unique   // The `sub` field from Auth0
+  picture       String?            // Profile image URL
+  updatedAt     DateTime @updatedAt
+}

@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import '@/assets/styles/globals.css'
 import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from '@/lib/constants';
 import { ThemeProvider } from 'next-themes';
-// import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 const inter = Inter( { subsets: ['latin']})
 
@@ -48,32 +47,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
-// // from CG
-// export default function RootLayout({ 
-//   children 
-// }: { children: React.ReactNode }) {
-//   return (
-//     <html lang="en">
-//       <body>
-//         <UserProvider>{children}
-//       </body>
-//     </html>
-//   );
-// }
-
-// from authO
-// export default function RootLayout({ 
-//   children 
-// }) {
-//   return (
-//     <html lang="en">
-//     <UserProvider>
-//       <body>{children}</body>
-//     </UserProvider>
-//     </html>
-//   );
-// }
-
-
