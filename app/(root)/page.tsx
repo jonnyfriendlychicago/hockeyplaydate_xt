@@ -1,4 +1,5 @@
 // everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive
+// additional documentation: https://github.com/auth0/nextjs-auth0
 import { auth0 } from "@/lib/auth0"; // from Auth0
 
 export default async function Home() {
