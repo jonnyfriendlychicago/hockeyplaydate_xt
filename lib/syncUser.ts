@@ -4,7 +4,8 @@ import { nanoid } from 'nanoid';
 
 type Auth0User = {
   sub: string;
-  email: string;
+  // email: string;
+  email?: string;
   email_verified?: boolean;
   name?: string;
   given_name?: string;
@@ -35,6 +36,7 @@ async function generateUniqueSlug(): Promise<string> {
   }
 
   return slug;
+  // red squiggle error on slug in line above: "Variable 'slug' is used before being assigned.ts(2454)"
 }
 
 export async function syncUserFromAuth0(user: Auth0User) {
