@@ -1,5 +1,6 @@
 // This is your Prisma schema file.  Defines all tables.columns that shall exist in db
 // skeleton file created automatically by 'npx prisma init'
+// file name: schema.prisma;
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,14 +10,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  // email     String?   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  // added below to support a0 enhancement: https://chatgpt.com/c/67e6aad2-24c4-8010-a2b2-28bf5abb178b
-  auth0Id       String   @unique   // The `sub` field from Auth0
-  picture       String?            // Profile image URL
-  updatedAt     DateTime @updatedAt
+// model User {
+//   id        Int      @id @default(autoincrement())
+//   email     String   @unique
+//   // email     String?   @unique
+//   name      String?
+//   createdAt DateTime @default(now())
+//   // added below to support a0 enhancement: https://chatgpt.com/c/67e6aad2-24c4-8010-a2b2-28bf5abb178b
+//   auth0Id       String   @unique   // The `sub` field from Auth0
+//   picture       String?            // Profile image URL
+//   updatedAt     DateTime @updatedAt
+// }
+
+// above commOUT replaced by below. 03-apr-2025
+
+model AuthUser {
+  id             Int       @id @default(autoincrement())
+  auth0Id        String    @unique         @map("auth0_id")
+  email          String    @unique
+  emailVerified  Boolean   @default(false) @map("email_verified")
+  name           String?
+  givenName      String?   @map("given_name")
+  familyName     String?   @map("family_name")
+  nickname       String?
+  picture        String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  profile        UserProfile?
+
+  @@map("auth_user")
 }
+
+model UserProfile {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique         @map("user_id")
+  altEmail     String?  @map("alt_email")
+  altNickname  String?  @map("alt_nickname")
+  phone        String?
+  slugDefault  String   @unique         @map("slug_default")
+  slugVanity   String?  @unique         @map("slug_vanity")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+
+  user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profile")
+}
+
