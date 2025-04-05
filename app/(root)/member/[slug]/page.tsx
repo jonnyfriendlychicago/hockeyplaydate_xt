@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'; // required prerequisi
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // required prerequisite: npx shadcn@latest add avatar   
 import { Badge } from '@/components/ui/badge'; // required prerequisite: npx shadcn@latest add badge   
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 type PageProps = {
   params: {
