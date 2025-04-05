@@ -17,8 +17,12 @@
 // console.log("✅ Patched tsconfig.json before build");
 
 // above replaced by below
+
+
 // fix-tsconfig.js
-import fs from "fs";
+/* eslint-disable @typescript-eslint/no-require-imports */
+// import fs from "fs";
+const fs = require("fs");
 
 const tsconfigPath = "./tsconfig.json";
 
