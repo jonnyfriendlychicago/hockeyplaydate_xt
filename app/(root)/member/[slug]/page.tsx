@@ -7,13 +7,17 @@ import { Badge } from '@/components/ui/badge'; // required prerequisite: npx sha
 import { Button } from '@/components/ui/button';
 // import Image from 'next/image';
 
-type PageProps = {
-  params: {
-    slug: string;
-  };
-};
+// type PageProps = {
+//   params: {
+//     slug: string;
+//   };
+// };
 
-export default async function MemberPage({ params }: PageProps) {
+// app/(root)/member/[slug]/page.tsx
+
+export default async function MemberPage({ params }: { params: { slug: string } }) {
+// 2025apr04: above replaced by below to resolve deployment issue 
+// export default async function MemberPage({ params }: PageProps) {
   const profile = await prisma.userProfile.findFirst({
     where: {
       OR: [
