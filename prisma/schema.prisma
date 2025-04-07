@@ -1,3 +1,4 @@
+// schema.prisma
 // This is your Prisma schema file.  Defines all tables.columns that shall exist in db
 // skeleton file created automatically by 'npx prisma init'
 // file name: schema.prisma;
@@ -37,7 +38,8 @@ model AuthUser {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt      @map("updated_at")
 
-  profile        UserProfile?
+  // profile        UserProfile?
+  userProfile        UserProfile?
 
   @@map("auth_user")
 }
@@ -53,7 +55,8 @@ model UserProfile {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt      @map("updated_at")
 
-  user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authUser         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profile")
 }

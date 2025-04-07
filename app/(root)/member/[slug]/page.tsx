@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card'; // required prerequisite: npx shadcn@latest add card   
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // required prerequisite: npx shadcn@latest add avatar   
 import { Badge } from '@/components/ui/badge'; // required prerequisite: npx shadcn@latest add badge   
-import { Button } from '@/components/ui/button';
-// import Image from 'next/image';
+import { Button } from '@/components/ui/button'; // required prerequisite: npx shadcn@latest add button   
+import { UserAvatar } from '@/components/shared/user-avatar'; // required prerequisite: npx shadcn@latest add UserAvatar   
 
 // type PageProps = {
 //   params: {
@@ -26,14 +26,14 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       ],
     },
     include: {
-      user: true,
+      authUser: true,
     },
   });
 
   if (!profile) notFound();
 
   const {
-    user,
+    authUser,
     altEmail,
     altNickname,
     phone,
@@ -41,7 +41,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
     slugVanity,
   } = profile;
 
-  const displayName = user.name || altNickname || `${user.givenName ?? ''} ${user.familyName ?? ''}`.trim() || 'Unnamed User';
+  const displayName = authUser.name || altNickname || `${authUser.givenName ?? ''} ${authUser.familyName ?? ''}`.trim() || 'Unnamed User';
   const displaySlug = slugVanity || slugDefault;
 
   return (
@@ -49,12 +49,15 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Profile Pic */}
         <div className="col-span-2 flex flex-col items-center gap-4">
-          <Avatar className="w-28 h-28">
-            <AvatarImage src={user.picture || ''} alt={displayName} />
-            <AvatarFallback>{user.nickname?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-          </Avatar>
 
-
+          <UserAvatar
+            src={authUser.picture}
+            fallback="A"
+            // size="lg"
+            size="xl"
+            className=' ring-2 ring-gray-400 shadow-lg'
+            altProp={displayName}
+          />
 
           <div className="text-center">
             <h1 className="text-2xl font-bold">{displayName}</h1>
@@ -67,7 +70,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         <div className="col-span-2 space-y-4 p-2">
           <div>
             <p className="text-sm text-muted-foreground">Email</p>
-            <p className="font-medium">{user.email}</p>
+            <p className="font-medium">{authUser.email}</p> 
           </div>
           {altEmail && (
             <div>

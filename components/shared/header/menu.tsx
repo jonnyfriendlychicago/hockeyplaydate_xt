@@ -25,6 +25,7 @@ import profileDefault from '@/public/images/HP_logo_02_1024x1024_transp.svg';
 export default async function Menu() {
   const session = await auth0.getSession();
   const profileImage = session?.user?.picture;
+  // const profileLink  = '/member/' + session?.user.  // let's get back to this later.  need to get member slug and have that be the link to profile. 
 
   return (
     <div className='flex justify-end gap-3 items-center'>
@@ -48,6 +49,7 @@ export default async function Menu() {
             <DropdownMenuContent align='end'>
               <DropdownMenuItem asChild>
                 <Link href='/profile'>Profile</Link>
+                {/* <Link href={}>Profile</Link> // let's get back to this later.  need to get member slug and have that be the link to profile. */} 
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href='/auth/logout'>Logout</a>
