@@ -2,14 +2,15 @@
   "name": "hockeyplaydate_xt",
   "version": "0.1.0",
   "private": true,
-  
+
   "scripts": {
-  "dev": "next dev",
-  "prebuild": "next build --no-lint || true",
-  "build": "node fix-tsconfig.js && next build",
-  "start": "next start",
-  "lint": "next lint"
-}, 
+    "prebuild": "node runFixScripts/fix-tsconfig.js",
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "next lint"
+    }, 
+
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.2.1",
     "@prisma/client": "^6.5.0",
@@ -21,10 +22,10 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.483.0",
     "nanoid": "^5.1.5",
-"next": "14.2.25",
+    "next": "14.2.25",
     "next-themes": "^0.4.6",
-"react": "18.2.0",
-"react-dom": "18.2.0", 
+    "react": "18.2.0",
+    "react-dom": "18.2.0", 
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7"
   },
