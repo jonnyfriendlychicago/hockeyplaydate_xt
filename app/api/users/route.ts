@@ -13,6 +13,6 @@
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const users = await prisma.authUser.findMany(); // ✅ fixed!
+  const users = await prisma.authUser.findMany(); 
   return Response.json(users);
 }

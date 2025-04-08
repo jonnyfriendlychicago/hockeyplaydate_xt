@@ -8,13 +8,13 @@
 // const raw = fs.readFileSync(tsconfigPath, "utf-8");
 // const config = JSON.parse(raw);
 
-// // ✅ Strip .next/types from the include array
+// // Strip .next/types from the include array
 // config.include = config.include?.filter(
 //   (entry) => !entry.includes(".next/types")
 // );
 
 // fs.writeFileSync(tsconfigPath, JSON.stringify(config, null, 2));
-// console.log("✅ Patched tsconfig.json before build");
+// console.log("Patched tsconfig.json before build");
 
 // above replaced by below
 
@@ -22,19 +22,22 @@
 // fix-tsconfig.js
 /* eslint-disable @typescript-eslint/no-require-imports */
 // import fs from "fs";
-const fs = require("fs");
 
-const tsconfigPath = "./tsconfig.json";
+// 2025apr07: commenting out this entire file now, b/c no longer needed
 
-const raw = fs.readFileSync(tsconfigPath, "utf-8");
-const config = JSON.parse(raw);
+// const fs = require("fs");
 
-// Strip '.next/types/**/*.ts' from include array if it got added
-if (Array.isArray(config.include)) {
-  config.include = config.include.filter(
-    (entry) => !entry.includes(".next/types")
-  );
-}
+// const tsconfigPath = "./tsconfig.json";
 
-fs.writeFileSync(tsconfigPath, JSON.stringify(config, null, 2));
-console.log("✅ Cleaned tsconfig.json after Next.js attempted rewrite");
+// const raw = fs.readFileSync(tsconfigPath, "utf-8");
+// const config = JSON.parse(raw);
+
+// // Strip '.next/types/**/*.ts' from include array if it got added
+// if (Array.isArray(config.include)) {
+//   config.include = config.include.filter(
+//     (entry) => !entry.includes(".next/types")
+//   );
+// }
+
+// fs.writeFileSync(tsconfigPath, JSON.stringify(config, null, 2));
+// console.log("Cleaned tsconfig.json after Next.js attempted rewrite");
