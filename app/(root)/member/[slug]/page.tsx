@@ -2,7 +2,6 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card'; // required prerequisite: npx shadcn@latest add card   
-// import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // required prerequisite: npx shadcn@latest add avatar   
 import { Badge } from '@/components/ui/badge'; // required prerequisite: npx shadcn@latest add badge   
 import { Button } from '@/components/ui/button'; // required prerequisite: npx shadcn@latest add button   
 import { UserAvatar } from '@/components/shared/user-avatar'; // required prerequisite: npx shadcn@latest add UserAvatar   
