@@ -5,7 +5,6 @@ import { nanoid } from 'nanoid';
 // Why this works (instead of prev version)
 // - slug is definitely assigned before being used
 // - TypeScript is happy because the return only occurs after a valid value is assigned
-// - Logic stays clean and exactly what you want
 
 type Auth0User = {
   sub: string;
@@ -39,36 +38,37 @@ async function generateUniqueSlug(): Promise<string> {
   } while (true);
 }
 
-export async function syncUserFromAuth0(user: Auth0User) {
-  if (!user?.sub || !user.email) return;
+export async function syncUserFromAuth0(returnedA0userObj: Auth0User) {
+  if (!returnedA0userObj?.sub || !returnedA0userObj.email) return;
 
   const dbUser = await prisma.authUser.upsert({
-    where: { auth0Id: user.sub },
+    where: { auth0Id: returnedA0userObj.sub },
     update: {
-      email: user.email,
-      emailVerified: user.email_verified ?? false,
-      name: user.name ?? null,
-      givenName: user.given_name ?? null,
-      familyName: user.family_name ?? null,
-      nickname: user.nickname ?? null,
-      picture: user.picture ?? null,
+      email: returnedA0userObj.email,
+      emailVerified: returnedA0userObj.email_verified ?? false, // 101: The ?? operator is the nullish coalescing operator. It returns the right-hand value only if the left-hand value is null or undefined.
+      name: returnedA0userObj.name ?? null,
+      givenName: returnedA0userObj.given_name ?? null,
+      familyName: returnedA0userObj.family_name ?? null,
+      nickname: returnedA0userObj.nickname ?? null,
+      picture: returnedA0userObj.picture ?? null,
     },
     create: {
-      auth0Id: user.sub,
-      email: user.email,
-      emailVerified: user.email_verified ?? false,
-      name: user.name ?? null,
-      givenName: user.given_name ?? null,
-      familyName: user.family_name ?? null,
-      nickname: user.nickname ?? null,
-      picture: user.picture ?? null,
+      auth0Id: returnedA0userObj.sub,
+      email: returnedA0userObj.email,
+      emailVerified: returnedA0userObj.email_verified ?? false,
+      name: returnedA0userObj.name ?? null,
+      givenName: returnedA0userObj.given_name ?? null,
+      familyName: returnedA0userObj.family_name ?? null,
+      nickname: returnedA0userObj.nickname ?? null,
+      picture: returnedA0userObj.picture ?? null,
     },
   });
 
+  // check: does userProfile record exist for this authUser record?  (it might not yet, if first login ever, b/c such was just upserted above)
   const existingProfile = await prisma.userProfile.findUnique({
     where: { userId: dbUser.id },
   });
-
+  // if not, create it! 
   if (!existingProfile) {
     const slug = await generateUniqueSlug();
 
@@ -76,9 +76,14 @@ export async function syncUserFromAuth0(user: Auth0User) {
       data: {
         userId: dbUser.id,
         slugDefault: slug,
+        givenName: returnedA0userObj.given_name ?? null,  // populate from authUser record (same as returned object), if value there
+        familyName: returnedA0userObj.family_name ?? null, // populate from authUser record (same as returned object), if value there
+        // 101: in context of above, || returns the right-hand side if the left is falsy (like "", 0, false, null, undefined), while ?? returns the right-hand side only if the left is null or undefined
       },
     });
   }
+
+  return dbUser; // added this return, to enable 
 }
 
 

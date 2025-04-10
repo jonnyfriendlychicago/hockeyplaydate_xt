@@ -31,12 +31,17 @@
 
       // You can get it working with extra setup (like next-plugin-transpile-modules or a custom build script), but it's not recommended.
 
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 
   // experimental: {
   //   tsconfigMetadata: false, // prevent Next.js from rewriting tsconfig.json
   // },
+
+  // experimental: {
+  //   serverActions: true, // and other options you're using
+  // }, 
 
   images: {
 

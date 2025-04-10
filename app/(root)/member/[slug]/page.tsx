@@ -35,14 +35,17 @@ export default async function MemberPage({ params }: { params: { slug: string } 
   const {
     authUser,
     altEmail,
-    altNickname,
+    // altNickname,
     phone,
-    slugDefault,
-    slugVanity,
+    // slugDefault,
+    // slugVanity,
+    // givenName, 
+    // familyName
   } = profile;
 
-  const displayName = authUser.name || altNickname || `${authUser.givenName ?? ''} ${authUser.familyName ?? ''}`.trim() || 'Unnamed User';
-  const displaySlug = slugVanity || slugDefault;
+  // const displayName = authUser.name || altNickname || `${authUser.givenName ?? ''} ${authUser.familyName ?? ''}`.trim() || 'Unnamed User';
+  const displayName =`${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || profile.authUser.email || 'Nameless Emailless User';
+  // const displaySlug = slugVanity || slugDefault;
 
   return (
     <section className="max-w-6xl mx-auto p-6">
@@ -61,8 +64,8 @@ export default async function MemberPage({ params }: { params: { slug: string } 
 
           <div className="text-center">
             <h1 className="text-2xl font-bold">{displayName}</h1>
-            <p className="text-muted-foreground text-sm font-mono">{displaySlug}</p>
-            {altNickname && <p className="italic text-muted-foreground text-sm">“Also known as {altNickname}”</p>}
+            {/* <p className="text-muted-foreground text-sm font-mono">{displaySlug}</p> */}
+            {/* {altNickname && <p className="italic text-muted-foreground text-sm">“Also known as {altNickname}”</p>} */}
           </div>
         </div>
 
