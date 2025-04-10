@@ -13,6 +13,9 @@ type Profile = {
   altEmail: string | null;
   altNickname: string | null;
   phone: string | null;
+  givenName: string | null; // 2025arp09: newly added field to model/table, and using herein now
+  familyName: string | null; // 2025arp09: newly added field to model/table, and using herein now
+
   authUser: {
     name: string | null;
     email: string;
@@ -38,11 +41,8 @@ export default function MembersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {profiles.map((profile) => {
-          const displayName =
-            profile.authUser.name ||
-            profile.altNickname ||
-            `${profile.authUser.givenName ?? ''} ${profile.authUser.familyName ?? ''}`.trim() ||
-            'Unnamed User';
+          // const displayName = profile.authUser.name || profile.altNickname || `${profile.authUser.givenName ?? ''} ${profile.authUser.familyName ?? ''}`.trim() || 'Unnamed User';
+          const displayName =`${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || profile.authUser.email || 'Nameless Emailless User';
 
           const slug = profile.slugVanity || profile.slugDefault;
 
@@ -59,10 +59,8 @@ export default function MembersPage() {
 
                   <div className="flex flex-col">
                     <span className="font-medium text-lg">{displayName}</span>
-                    <span className="text-muted-foreground text-sm font-mono">{slug}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {profile.authUser.email}
-                    </span>
+                    {/* <span className="text-muted-foreground text-sm font-mono">{slug}</span> */}
+                    {/* <span className="text-sm text-muted-foreground">{profile.authUser.email}</span> */}
                   </div>
                 </CardContent>
               </Card>

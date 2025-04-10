@@ -1,4 +1,5 @@
 // app/api/members/route.ts
+// this function called by: app/members/page.tsx
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
