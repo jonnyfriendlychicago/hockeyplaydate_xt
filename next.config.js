@@ -19,7 +19,7 @@
 
 // export default nextConfig;
 
-// above replaced by below
+// 2025apr10: above replaced by below
 
 // NOTE: 2025apr07
       // In a TypeScript-based Next.js project, the correct default is:

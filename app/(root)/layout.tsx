@@ -21,6 +21,7 @@ export default async function RootLayout({
     await syncUserFromAuth0(auth0User);
   }
 
+  // check if authUser profile is complete/not
   const needsProfile = await incompleteUserProfileCheck();
 
   // serve all parts of app
