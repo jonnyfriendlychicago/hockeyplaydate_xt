@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const session = await auth0.getSession();
   const user = session?.user;
 
-  // If no session or user is found, the user is not logged in
+  // If no session or user is found, the user is not logged in.  How did they get here in the first place, right? 
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
@@ -31,24 +31,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  // ixnay on below:: 
+  // 2025apr10: ixnay on below, return to this later 
   // Basic validation: both fields are required
   // if (!givenName || !familyName) {
   //   return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   // }
 
-  // // Update the related userProfile row with the new name values
-  // await prisma.userProfile.update({
-  //   where: { userId: authUser.id },
-  //   data: {
-  //     givenName,
-  //     familyName,
-  //   },
-  // });
-
-  // // Return a simple success response
-  // return NextResponse.json({ success: true });
-
+  // Update the related userProfile row with the new name values
   const updatedProfile = await prisma.userProfile.update({
     where: { userId: dbUser.id },
     data: {

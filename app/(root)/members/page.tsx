@@ -1,4 +1,4 @@
-// app/members/page.tsx
+// app/(root)/members/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -41,7 +41,6 @@ export default function MembersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {profiles.map((profile) => {
-          // const displayName = profile.authUser.name || profile.altNickname || `${profile.authUser.givenName ?? ''} ${profile.authUser.familyName ?? ''}`.trim() || 'Unnamed User';
           const displayName =`${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || profile.authUser.email || 'Nameless Emailless User';
 
           const slug = profile.slugVanity || profile.slugDefault;

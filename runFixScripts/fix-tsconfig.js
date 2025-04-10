@@ -19,3 +19,5 @@ console.log('Cleaned tsconfig.json after Next.js attempted rewrite');
 
 // First line ('const fs = require('fs');'  is perfectly valid for a .js script outside of your main app code (like in runFixScripts/fix-tsconfig.js).
 // TS wants to yell about it; to silence the ESLint red squiggle, you can add an ESLint comment above the line.
+
+// 2025apr10: this file created early april to address deployment errors continuously encountered

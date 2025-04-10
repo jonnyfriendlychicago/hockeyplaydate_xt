@@ -1,3 +1,4 @@
+// app/not-found.tsx
 'use client';
 import { APP_NAME } from '@/lib/constants';
 import Image from 'next/image';

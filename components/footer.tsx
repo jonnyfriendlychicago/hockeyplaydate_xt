@@ -1,3 +1,4 @@
+// components/footer.tsx
 import { APP_NAME } from '@/lib/constants';
 
 const Footer = () => {

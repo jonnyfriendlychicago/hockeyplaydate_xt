@@ -1,5 +1,5 @@
+// components/shared/user-avatar.tsx
 'use client';
-
 import Image from 'next/image';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import clsx from 'clsx';
