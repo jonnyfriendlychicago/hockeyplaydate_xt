@@ -1,6 +1,7 @@
 // lib/syncUser.ts
 import { prisma } from './prisma';
-import { nanoid } from 'nanoid';
+// import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid'; // 2025apr10: used to remove possiblity of spelling unsavory words in defaultSlug generation
 
 // Why this works (instead of prev version)
 // - slug is definitely assigned before being used
@@ -17,11 +18,15 @@ type Auth0User = {
   picture?: string;
 };
 
+// Safe characters only: consonants + digits (no vowels to avoid accidental words)
+const nanoidCustomAlphaNumFunc = customAlphabet('bcdfghjklmnpqrstvwxyz0123456789', 8);
+
 async function generateUniqueSlug(): Promise<string> {
   let slug: string;
 
   do {
-    slug = nanoid(8);
+    // slug = nanoid(8);
+    slug = nanoidCustomAlphaNumFunc(); // Generates an 8-char ID from the safe character set
 
     const existing = await prisma.userProfile.findFirst({
       where: {
