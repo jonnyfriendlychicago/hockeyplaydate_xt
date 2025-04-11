@@ -1,6 +1,7 @@
 // app/(root)/member/[slug]/page.tsx
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card'; // required prerequisite: npx shadcn@latest add card   
 import { Badge } from '@/components/ui/badge'; // required prerequisite: npx shadcn@latest add badge   
 import { Button } from '@/components/ui/button'; // required prerequisite: npx shadcn@latest add button   
@@ -80,6 +81,13 @@ export default async function MemberPage({ params }: { params: { slug: string } 
 
         {/* Sidebar Card */}
         <div className="col-span-1">
+
+        {authUser.id === profile.authUser.id && (
+          <Link href="/member/edit">
+            <Button className="mt-4">Edit My Profile</Button>
+          </Link>
+        )}
+
           <Card>
             <CardContent className="p-4 space-y-4">
               <div className="flex justify-between">

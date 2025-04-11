@@ -1,6 +1,5 @@
 // components/shared/header/menu.tsx
-// everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive
-// additional documentation: https://github.com/auth0/nextjs-auth0
+// everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive Additional documentation: https://github.com/auth0/nextjs-auth0
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,11 +20,27 @@ import { auth0 } from '@/lib/auth0';
 import Image from 'next/image';
 import Link from 'next/link';
 import profileDefault from '@/public/images/HP_logo_02_1024x1024_transp.svg';
+import { prisma } from '@/lib/prisma'; //  Add this line to your imports
 
 export default async function Menu() {
+  // get session user, set variables
   const session = await auth0.getSession();
   const profileImage = session?.user?.picture;
-  // const profileLink  = '/member/' + session?.user.  // let's get back to this later.  need to get member slug and have that be the link to profile. 
+  
+  let profileUrl = '/profile'; // Fallback URL
+
+  if (session?.user?.sub) {
+    const authUser = await prisma.authUser.findUnique({
+      where: { auth0Id: session.user.sub },
+      include: { userProfile: true },
+    });
+
+    const slug = authUser?.userProfile?.slugVanity || authUser?.userProfile?.slugDefault;
+
+    if (slug) {
+      profileUrl = `/member/${slug}`;
+    }
+  }
 
   return (
     <div className='flex justify-end gap-3 items-center'>
@@ -48,8 +63,10 @@ export default async function Menu() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuItem asChild>
-                <Link href='/profile'>Profile</Link>
-                {/* <Link href={}>Profile</Link> // let's get back to this later.  need to get member slug and have that be the link to profile. */} 
+                <Link href='/profile'>ol-Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={profileUrl}>Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href='/auth/logout'>Logout</a>
@@ -86,6 +103,9 @@ export default async function Menu() {
             {session ? (
               <>
                 <Link href='/profile'>
+                  <Button variant='ghost'>ol-Profile</Button>
+                </Link>
+                <Link href={profileUrl}>
                   <Button variant='ghost'>Profile</Button>
                 </Link>
                 <a href='/auth/logout'>
