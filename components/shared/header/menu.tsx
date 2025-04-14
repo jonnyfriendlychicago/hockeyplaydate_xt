@@ -14,6 +14,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator, 
+  DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
 import ModeToggle from './mode-toggler';
 import { auth0 } from '@/lib/auth0';
@@ -25,9 +27,10 @@ import { prisma } from '@/lib/prisma'; //  Add this line to your imports
 export default async function Menu() {
   // get session user, set variables
   const session = await auth0.getSession();
+  const sessionUser = session?.user; 
   const profileImage = session?.user?.picture;
   
-  let profileUrl = '/profile'; // Fallback URL
+  let profileUrl = '/profile'; // Fallback URL; don't see how this would ever be reached, but whatev
 
   if (session?.user?.sub) {
     const authUser = await prisma.authUser.findUnique({
@@ -61,13 +64,14 @@ export default async function Menu() {
                 />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem asChild>
-                <Link href='/profile'>ol-Profile</Link>
-              </DropdownMenuItem>
+            <DropdownMenuContent align='end'> {/* below this line begins what's displayed */}
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuItem disabled>{sessionUser?.email}</DropdownMenuItem>
+            <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={profileUrl}>Profile</Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a href='/auth/logout'>Logout</a>
               </DropdownMenuItem>
@@ -102,9 +106,6 @@ export default async function Menu() {
 
             {session ? (
               <>
-                <Link href='/profile'>
-                  <Button variant='ghost'>ol-Profile</Button>
-                </Link>
                 <Link href={profileUrl}>
                   <Button variant='ghost'>Profile</Button>
                 </Link>

@@ -19,7 +19,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  const { altEmail, phone, slugVanity, givenName, familyName } = await req.json();
+  const { 
+    altEmail, 
+    phone, 
+    slugVanity, 
+    givenName, 
+    familyName, 
+    altNickname,
+  
+  } = await req.json();
 
   const updated = await prisma.userProfile.update({
     where: { userId: dbUser.id },
@@ -29,6 +37,7 @@ export async function POST(req: Request) {
       slugVanity,
       givenName,
       familyName,
+      altNickname,
     },
   });
 
