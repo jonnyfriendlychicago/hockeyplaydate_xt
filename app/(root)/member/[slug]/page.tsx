@@ -1,4 +1,11 @@
 // app/(root)/member/[slug]/page.tsx
+
+export const dynamic = 'force-dynamic';
+// 101: This server-side page, by default, doesn't refresh data when its been visited just recently.  
+// Result is that upon routing here from edit form, the page will display with cached (and now stale) data.
+// Above disables caching and should force the server to re-fetch fresh data on each navigation to this page.  
+// BUT, that's not happening actually b/c force-dynamic only applies to server-side rendering, not to client-side router state. 
+// Keep this here, however, because it works on first navigation or reload.
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -50,23 +57,28 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       )}
 
       {/* Family Display Name (altNickname as brand/hero) */}
-{profile.altNickname && (
-  <>
-  <div className="text-center mb-6">
-    <h1 className="text-4xl font-extrabold tracking-tight text-primary">
-      {profile.altNickname}
-    </h1>
-    {/* <p className="text-muted-foreground text-sm mt-1">
-      Family display name
-    </p> */}
-  </div>
+      {profile.altNickname && (
+        <>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary">
+            {profile.altNickname}
+          </h1>
+        </div>
 
-{/* <div className="bg-muted p-4 rounded-xl shadow text-center mb-6">
-<h1 className="text-3xl font-bold">{profile.altNickname}</h1>
-<p className="text-sm text-muted-foreground mt-1">Family display name</p>
-</div> */}
-</>
-)}
+      </>
+      )}
+
+      {!profile.altNickname && isSessionUserProfile && (
+        <>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary">
+            [PLACEHOLDER FOR YOUR FAMILY BRAND!]
+          </h1>
+          <p className="text-sm text-muted-foreground">Only you are seeing above placeholder.  Click 'edit', then enter/save your Family Brand Name.  Then it will appear to users in the space above. </p>
+        </div>
+
+      </>
+      )}
 
       {/* Top Row: Avatar + Placeholder */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">

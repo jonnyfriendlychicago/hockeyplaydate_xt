@@ -5,6 +5,9 @@ import EditProfileForm from '@/components/UserProfile/EditProfileForm';
 import { redirect } from 'next/navigation';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
   const session = await auth0.getSession();
@@ -28,9 +31,22 @@ export default async function EditProfilePage() {
     `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() ||
     dbUser.email ||
     'Nameless User';
+  
+  const sluggy= userProfile.slugVanity || userProfile.slugDefault
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
+
+        <div className="flex justify-end">
+          <Link href={`/member/${sluggy}`}>
+            <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-muted">
+              <CircleX className="w-4 h-4" />
+              Cancel
+            </Button>
+          </Link>
+        </div>
+
+
       {/* Top Grid: Avatar + Placeholder (non-editable) */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Left: Avatar */}
@@ -59,7 +75,8 @@ export default async function EditProfilePage() {
       <div className="w-full">
         {/* <Card> */}
           {/* <CardContent className="p-0"> */}
-            <EditProfileForm userProfile={userProfile} slug={userProfile.slugVanity || userProfile.slugDefault} />
+            {/* <EditProfileForm userProfile={userProfile} slug={userProfile.slugVanity || userProfile.slugDefault} /> */}
+            <EditProfileForm userProfile={userProfile} slug={sluggy} />
           {/* </CardContent> */}
         {/* </Card> */}
       </div>
