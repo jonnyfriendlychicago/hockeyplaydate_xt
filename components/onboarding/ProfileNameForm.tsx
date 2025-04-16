@@ -1,4 +1,5 @@
 // components/onboarding/ProfileNameForm.tsx
+// this component is conditionally displayed; invoked by app/(root)/layout.tsx
 'use client';
 
 import { useState} from 'react';

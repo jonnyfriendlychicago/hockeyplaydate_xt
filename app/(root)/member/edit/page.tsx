@@ -34,6 +34,16 @@ export default async function EditProfilePage() {
   
   const sluggy= userProfile.slugVanity || userProfile.slugDefault
 
+  // Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls
+  const normalizedProfile = {
+    ...userProfile,
+    altNickname: userProfile.altNickname ?? '',
+    givenName: userProfile.givenName ?? '',
+    familyName: userProfile.familyName ?? '',
+    altEmail: userProfile.altEmail ?? '',
+    phone: userProfile.phone ?? '',
+  };
+
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
 
@@ -73,12 +83,7 @@ export default async function EditProfilePage() {
 
       {/* Bottom Row: Editable Form */}
       <div className="w-full">
-        {/* <Card> */}
-          {/* <CardContent className="p-0"> */}
-            {/* <EditProfileForm userProfile={userProfile} slug={userProfile.slugVanity || userProfile.slugDefault} /> */}
-            <EditProfileForm userProfile={userProfile} slug={sluggy} />
-          {/* </CardContent> */}
-        {/* </Card> */}
+        <EditProfileForm userProfile={normalizedProfile} slug={sluggy} />
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ import { useSafeRedirect } from '@/lib/navigation';
 // 101: In TypeScript, 'type' is a way to define a custom type alias — kind of like defining a blueprint or shape for your data.
 // Rough translation: "A UserProfile object should always have those fields and their types."
 // this helps react-hook-form understand what the shape of form data should be.
-type UserProfile = {
+type UserProfileFormValues = {
   // altNickname: string | null; // this line is giving Typescript a fit
   altNickname: string ;
   givenName: string ;
@@ -27,7 +27,7 @@ type UserProfile = {
 };
 
 type Props = {
-  userProfile: UserProfile;
+  userProfile: UserProfileFormValues;
   slug: string; // dynamic profile slug used in redirect
 };
 
@@ -36,7 +36,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
 
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<UserProfile>({
+  const form = useForm<UserProfileFormValues>({
     defaultValues: {
       altNickname: userProfile.altNickname ?? '',
       givenName: userProfile.givenName ?? '',
@@ -46,7 +46,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
     },
   });
 
-  const onSubmit = async (data: UserProfile) => {
+  const onSubmit = async (data: UserProfileFormValues) => {
     setLoading(true);
     try {
       const res = await fetch('/api/user-profile/updateProfile', {
