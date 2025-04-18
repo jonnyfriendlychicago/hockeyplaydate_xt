@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "leo-profanity": "^1.7.0",
     "lucide-react": "^0.483.0",
     "nanoid": "^5.1.5",
     "next": "14.2.25",
@@ -28,6 +29,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.55.0",
     "sharp": "^0.34.1",
+    "slugify": "^1.6.6",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
