@@ -18,8 +18,8 @@ type Auth0User = {
 // BEGIN: referenced functions
 // 101: below are are functions, but more specifically, each is executing a factory that returns a function; this is a utility constant.  That  why each is written as a "const"
 const nanoidAlphaNumeric = customAlphabet('bcdfghjklmnpqrstvwxyz0123456789', 8); // Safe characters only: consonants + digits (no vowels to avoid accidental words)
-const nanoidDigitsFour = customAlphabet('2345789', 4);
-const nanoidDigitsTwo = customAlphabet('2345789', 2);
+const nanoidDigitsFour = customAlphabet('2345789', 4); // missing 1 and 6, for clarity and avoiding awkward numbers
+const nanoidDigitsTwo = customAlphabet('2345789', 2); // missing 1 and 6, for clarity and avoiding awkward numbers
 // 101: Below are custom functions built in this file, and as such, the code types/arranges better to write starting with keyword "function" (or, "async function", etc.)
 
 async function generateDefaultSlugFunc(): Promise<string> {
@@ -38,7 +38,7 @@ async function generateDefaultSlugFunc(): Promise<string> {
     if (!existing) {
       return attemptedDefaultSlug;
     }
-  } while (true); // this function will keep firing a trillion+ times, approaching infinite, if that's what it takes to get a new unique value.  Ever needing to run even twice, let alone more, if a practical impossibility.
+  } while (true); // this function will keep firing a trillion+ times, approaching infinite, if that's what it takes to get a new unique value.  Ever needing to run even twice, let alone more, is a practical impossibility.
 }
 
 function sanitizeNameFunc(name: string | undefined | null): string | null {
@@ -56,7 +56,7 @@ function sanitizeNameFunc(name: string | undefined | null): string | null {
   // (c) '’ / straight or curly apostrophes
   // (d) hyphens, spaces or periods.  
   // this all means that Anne-Marie St. Germaine, Renée Zell, Zoë Dash, Jean-Luc Picard, and D’Angelo Brownsugar et al will be accepted, but Asian / Sanskrit / Arabic / Cyrillic / etc. won't pass
-  // As of 2025, this web application and client business are not prepared to support such non-Englishy languages. 
+  // As of 2025, this web application and client business are not prepared to support such non-Englishy languages/characters. 
   // case 3: validFormat?  if so, return it, if else, return null and be done
   return isEnglishyFormat ? nameTrimmedAndCropped : null; // isEnglishyFormat is a ternary function, so using ternary operator with it: if true is returned by isEnglishyFormat, then return the nameTrimmedAndCropped; else, return null
 }
@@ -67,7 +67,7 @@ async function generateVanitySlugFunc(
 ): Promise<string | null> {
   // Step 1: establish baseline variable, and quit if both incomingGivenName and incomingFamilyName is null / nullish
   const concatGivenNameFamilyName = `${incomingCleanGivenName ?? ''}${incomingCleanFamilyName ?? ''}`.trim();
-  if (!concatGivenNameFamilyName) return null;  // if either incomingGivenName is null or incomingFamilyName is null, vanitySlug will be null, we're done! Else, we proceed trying to set it...
+  if (!concatGivenNameFamilyName) return null;  
   // Step 2: slugify the variable, and quit if somehone that results in null 
   const slugifiedConcatGivenFamilyName  = slugify(concatGivenNameFamilyName, { // slugify function makes URL-safe slugs: changes space to -, strips symbols/accents, etc.  Probably overkill here, b/c we are replacing with '' anything not a-thru-z and 0-9.  But if is lower-ing everything.  Either way, good for future utilization/reference.
     lower: true,
@@ -115,7 +115,7 @@ async function generateVanitySlugFunc(
   return null;
   }
 
-  // Case 2: slugifiedConcatGivenFamilyName is too short ? Then pad and retry
+  // Case 2: slugifiedConcatGivenFamilyName is too short? Then pad and retry
   const maxAttempts = 40; // fyi, the nanoidDigitsFour function has 2,401 possible unique resulting values
   for (let i = 0; i < maxAttempts; i++) {
     const paddedSlugifiedConcatGivenFamilyName = `${slugifiedConcatGivenFamilyName}${nanoidDigitsFour()}`; // e.g. bo4832
@@ -136,10 +136,10 @@ async function generateVanitySlugFunc(
   return null;
 }
 
-function generateAltNicknameFunc( // NEW: proactively set userProfile.altNickname, e.g. "The Smith Family"
+function generateAltNicknameFunc( // proactively set userProfile.altNickname, e.g. "The Smith Family"
   incomingCleanFamilyName: string | null 
 ): string | null {
-  // Step 1: quit if either incomingGivenName or incomingFamilyName is null
+  // Step 1: quit if incomingFamilyName is null
   if ( !incomingCleanFamilyName) return null;  // if incomingFamilyName is null, nothing more to do, return null.  Else... 
   // Step 2: return familyName wrapped in title-like text
   return `The ${incomingCleanFamilyName} Family`;
@@ -150,7 +150,7 @@ function generateAltNicknameFunc( // NEW: proactively set userProfile.altNicknam
 export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
   if (!receivedA0userObj?.sub || !receivedA0userObj.email) return;
 
-  const dbUser = await prisma.authUser.upsert({
+  const dbAuthUser = await prisma.authUser.upsert({
     where: { auth0Id: receivedA0userObj.sub },
     update: {
       email: receivedA0userObj.email,
@@ -175,8 +175,10 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
 
   // check: does userProfile record exist for this authUser record?  (if returning login, it surely does; if first-time login, it doesn't)
   const existingProfile = await prisma.userProfile.findUnique({
-    where: { userId: dbUser.id },
+    where: { userId: dbAuthUser.id },
   });
+
+  let dbUserProfile;
   
   if (!existingProfile) { // if not, proceed to create it
 
@@ -191,9 +193,9 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
     // create value to populate userProfile.altNickname
     const altyNickname = generateAltNicknameFunc(cleanFamilyName); 
 
-    await prisma.userProfile.create({
+    dbUserProfile = await prisma.userProfile.create({
       data: {
-        userId: dbUser.id,
+        userId: dbAuthUser.id,
         slugDefault: sluggyDefault, 
         slugVanity: sluggyVanity,  
         givenName: cleanGivenName,
@@ -201,7 +203,10 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
         altNickname: altyNickname 
       },
     });
+  } else { 
+    dbUserProfile = existingProfile;
   }
 
-  return dbUser; 
+  // return dbAuthUser; 
+  return dbUserProfile; 
 }

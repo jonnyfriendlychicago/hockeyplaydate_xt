@@ -1,4 +1,6 @@
 // lib/incompleteUserProfileCheck.ts
+// This file retired from service, replaced by overhauled syncUser.ts file
+
 // Server-side function to check if user is missing givenName or familyName
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';

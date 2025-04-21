@@ -3,8 +3,9 @@ import Header from '@/components/shared/header';
 import Footer from '@/components/footer';
 import { auth0 } from '@/lib/auth0'; // added to get the auth'ed user saved to db
 import { syncUserFromAuth0 } from '@/lib/syncUser'; // added to get the auth'ed user saved to db
-import { incompleteUserProfileCheck } from '@/lib/incompleteUserProfileCheck';
+// import { incompleteUserProfileCheck } from '@/lib/incompleteUserProfileCheck';
 import { ProfileNameForm } from '@/components/onboarding/ProfileNameForm';
+// import { Toaster } from "@/components/ui/toaster" // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
 
 // export default function RootLayout({ // this line replaced by line below to get the auth'ed user saved to db
 export default async function RootLayout({
@@ -13,24 +14,27 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // set current user variables 
-  const session = await auth0.getSession();
-  const auth0User = session?.user; 
+  const authSession = await auth0.getSession();
+  const authSessionUser = authSession?.user; //  formerly: const auth0User = session?.user; ... and this was easily confused with actual entity authUser / auth_user; 
 
-  // ensures DB record for user stays in sync
-  if (auth0User) {
-    await syncUserFromAuth0(auth0User);
-  }
-
-  // check if authUser profile is complete/not
-  const needsProfile = await incompleteUserProfileCheck();
-
-  // serve all parts of app
+  const userProfile = authSessionUser? await syncUserFromAuth0(authSessionUser) : null; // runs the sync every login, AND get user profile from sync
+  // 101: above ternary could also be written as traditional 'if' syntax: 
+  // let userProfile = null; if (auth0User) {userProfile = await syncUserFromAuth0(auth0User);}
+  
+  const profileMinimallyInsufficient = !!authSessionUser && (!userProfile?.givenName || !userProfile?.familyName); // determine if the users profile doesn't meet minimal biz goals
+  // 101: The !! (double bang) above is a JavaScript trick to coerce any value into a boolean:
+  // The first ! negates the value (e.g. turns truthy → false, or falsy → true)
+  // The second ! negates it again, flipping it back — but now it's guaranteed to be a boolean (true or false)
+  // Using !! ensures that the left-hand value is strictly boolean, which makes the whole expression return true or false as expected.
+  
   return (
     <div className='flex h-screen flex-col'>
       <Header />
-      {needsProfile && <ProfileNameForm />}
+      {/* {needsProfile && <ProfileNameForm />} */}
+      {profileMinimallyInsufficient && <ProfileNameForm givenName={userProfile?.givenName} familyName={userProfile?.familyName} />}
       <main className='flex-1 wrapper'>{children}</main>
       <Footer/>
+      {/* <Toaster /> */}
     </div>
   );
 }

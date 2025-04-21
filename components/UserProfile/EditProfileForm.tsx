@@ -81,7 +81,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>Family Brand Name</FormLabel>
               <FormControl>
-                <Input placeholder="The Smith Family" {...field} />
+                <Input placeholder="The Smith Family" {...field} disabled={loading} />
               </FormControl>
             </FormItem>
           )}
@@ -95,7 +95,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="Jon" {...field} />
+                <Input placeholder="Jon" {...field} disabled={loading} />
               </FormControl>
             </FormItem>
           )}
@@ -109,7 +109,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input placeholder="Friend" {...field} />
+                <Input placeholder="Friend" {...field} disabled={loading}/>
               </FormControl>
             </FormItem>
           )}
@@ -123,7 +123,7 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>Alternate Email</FormLabel>
               <FormControl>
-                <Input placeholder="alternate@email.com" {...field} />
+                <Input placeholder="alternate@email.com" {...field} disabled={loading}/>
               </FormControl>
             </FormItem>
           )}
@@ -137,14 +137,18 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="(123) 456-7890" {...field} />
+                <Input placeholder="(123) 456-7890" {...field} disabled={loading}/>
               </FormControl>
             </FormItem>
           )}
         />
 
         {/* Submit Button */}
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button 
+          type="submit" 
+          // className="w-full" 
+          className={loading ? 'opacity-50 cursor-not-allowed' : ''}
+          disabled={loading}>
           {loading ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>
