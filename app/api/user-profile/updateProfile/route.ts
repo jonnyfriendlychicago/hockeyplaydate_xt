@@ -29,16 +29,27 @@ export async function POST(req: Request) {
   
   } = await req.json();
 
+  // ensure string of spaces definitely converted to null.  Essential to have this handled on back-end / route.ts
+  const sanitizedSlugVanity =
+  typeof slugVanity === 'string' && slugVanity.trim() !== ''
+    ? slugVanity.trim()
+    : null;
+
   const updated = await prisma.userProfile.update({
     where: { userId: dbUser.id },
     data: {
       altEmail,
       phone,
-      slugVanity,
+      // slugVanity,
+      slugVanity: sanitizedSlugVanity,
       givenName,
       familyName,
       altNickname,
     },
+    select: { // this object added: ensures these fields are returned in the update, even tho slugDefault isn't being touched. This ensures that attribute is accessible on the originating form/page. 
+      slugDefault: true, 
+      slugVanity: true
+    }
   });
 
   return NextResponse.json(updated);

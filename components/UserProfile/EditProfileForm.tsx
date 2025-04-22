@@ -9,6 +9,7 @@ import {
   FormItem,
   FormLabel,
   FormControl,
+  FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ type UserProfileFormValues = {
   familyName: string ;
   altEmail: string ;
   phone: string ;
+  slugVanity: string; 
 };
 
 type Props = {
@@ -33,7 +35,6 @@ type Props = {
 
 export default function EditProfileForm({ userProfile, slug }: Props) {
   const safeRedirect = useSafeRedirect();
-
   const [loading, setLoading] = useState(false);
 
   const form = useForm<UserProfileFormValues>({
@@ -43,20 +44,34 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
       familyName: userProfile.familyName ?? '',
       altEmail: userProfile.altEmail ?? '',
       phone: userProfile.phone ?? '',
+      slugVanity: userProfile.slugVanity ?? '',
     },
   });
 
   const onSubmit = async (data: UserProfileFormValues) => {
     setLoading(true);
     try {
+      
+      // create new payload variable/object, with nulled vanity slug instead of spaces
+      const payload = {
+        ...data,
+        slugVanity: data.slugVanity?.trim() || null, // convert empty or whitespace to null
+      };
+
       const res = await fetch('/api/user-profile/updateProfile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        // body: JSON.stringify(data),
+        body: JSON.stringify(payload), // this line replaces above line
       });
 
       if (res.ok) {
-        safeRedirect(`/member/${slug}`);
+        // safeRedirect(`/member/${slug}`); // this simple redirect replaced by below
+        const updatedProfile = await res.json();
+        const sluggy = updatedProfile.slugVanity || updatedProfile.slugDefault;
+        safeRedirect(`/member/${sluggy}`);
+        // safeRedirect(`/member/${payload.slugVanity || slug}`); // this tried to ensure redirect will send usng to new slugVanity instead of default, but insufficient, replaced by above
+
       } else {
         console.error('Update failed');
       }
@@ -73,6 +88,32 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-6"
       >
+        {/* slugVanity */}
+        <FormField
+          control={form.control}
+          name="slugVanity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Custom Profile URL</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="awesomehockeyparent1234"
+                  {...field}
+                  disabled={loading}
+                />
+              </FormControl>
+              <FormDescription>
+              {/* <p className="text-sm text-muted-foreground"> */}
+                This is your profile URL: <br />
+                <code>https://hockeyplaydate.com/member/yourcustomurl</code>. <br /> 
+                This value must be unique among all HPD members. If left blank, your default URL will be used: <br /> 
+                <code>https://hockeyplaydate.com/member/your-generated-id</code>
+              {/* </p> */}
+              </FormDescription>
+            </FormItem>
+          )}
+        />
+
         {/* altNickname: Family Brand Name */}
         <FormField
           control={form.control}
@@ -137,11 +178,16 @@ export default function EditProfileForm({ userProfile, slug }: Props) {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="(123) 456-7890" {...field} disabled={loading}/>
+                <Input 
+                placeholder="(123) 456-7890" 
+                {...field} disabled={loading}/>
               </FormControl>
             </FormItem>
           )}
         />
+
+        
+
 
         {/* Submit Button */}
         <Button 
