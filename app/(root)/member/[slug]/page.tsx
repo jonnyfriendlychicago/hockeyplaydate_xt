@@ -106,40 +106,30 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            {/* <div className="flex flex-col md:flex-row md:items-center md:gap-12 gap-4"> */}
             
-            <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-4">
-              <div className="md:max-w-md w-full">
+            <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-6">
+              {/* Left Column: Email + Phone */}
+              <div className="md:max-w-md w-full space-y-4">
                 <EmailBlock
                   altEmail={altEmail}
                   loginEmail={authUser.email}
                   isOwner={isSessionUserProfile}
                 />
+
+                {phone && (
+                  <div id="phone">
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{phone}</p>
+                  </div>
+                )}
               </div>
 
-              {phone && (
-                <div id="phone">
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{phone}</p>
-                </div>
-              )}
+              {/* Right Column: Social Links (placeholder) */}
+              <div className="w-full md:flex-1">
+                <p className="text-sm text-muted-foreground mb-1">Social</p>
+                <p className="text-muted-foreground italic">[Coming Soon: links to your social media]</p>
+              </div>
             </div>
-            
-            {/* <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-4">
- 
-              <EmailBlock
-                  altEmail={altEmail}
-                  loginEmail={authUser.email}
-                  isOwner={isSessionUserProfile}
-                />
-
-              {phone && (
-                <div id='phone'>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{phone}</p>
-                </div>
-              )}
-            </div> */}
 
           </CardContent>
         </Card>
