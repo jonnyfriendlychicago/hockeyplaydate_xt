@@ -106,28 +106,32 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <div className="flex flex-col md:flex-row md:items-center md:gap-12 gap-4">
-              
-            <EmailBlock
-                altEmail={altEmail}
-                loginEmail={authUser.email}
-                isOwner={isSessionUserProfile}
-              />
+            {/* <div className="flex flex-col md:flex-row md:items-center md:gap-12 gap-4"> */}
+            
+            <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-4">
+              <div className="md:max-w-md w-full">
+                <EmailBlock
+                  altEmail={altEmail}
+                  loginEmail={authUser.email}
+                  isOwner={isSessionUserProfile}
+                />
+              </div>
 
-              {/* <div id='email'>
-                <p className="text-sm text-muted-foreground">Email (old section)</p>
-                <p className="font-medium">
-                {altEmail ? altEmail : authUser.email}
-                </p>
-                {(sessionUser?.sub === authUser.auth0Id &&
-                  altEmail &&
-                  altEmail !== authUser.email) && (
-                      <p>
-                        <span className="ml-0 text-sm text-muted-foreground italic">(NOTE: above is the email that you have selected to display to other Hockey Playdate members as your preferred email address.  This is different from the non-displayed email you use to login to this site (HockeyPlaydate.com): {authUser.email})
-                        </span>
-                      </p>
-                )}
-              </div> */}
+              {phone && (
+                <div id="phone">
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="font-medium">{phone}</p>
+                </div>
+              )}
+            </div>
+            
+            {/* <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-4">
+ 
+              <EmailBlock
+                  altEmail={altEmail}
+                  loginEmail={authUser.email}
+                  isOwner={isSessionUserProfile}
+                />
 
               {phone && (
                 <div id='phone'>
@@ -135,7 +139,8 @@ export default async function MemberPage({ params }: { params: { slug: string } 
                   <p className="font-medium">{phone}</p>
                 </div>
               )}
-            </div>
+            </div> */}
+
           </CardContent>
         </Card>
       </div>
