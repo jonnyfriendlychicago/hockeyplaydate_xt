@@ -43,6 +43,9 @@ export default async function MemberPage({ params }: { params: { slug: string } 
 
   const isSessionUserProfile = sessionUser?.sub === authUser.auth0Id;
 
+  const formatPhoneNumber = (raw: string) =>
+    raw.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1.$2.$3');
+
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Edit Icon Top-Right */}
@@ -119,7 +122,9 @@ export default async function MemberPage({ params }: { params: { slug: string } 
                 {phone && (
                   <div id="phone">
                     <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium">{phone}</p>
+                    {/* <p className="font-medium">{phone}</p> */}
+                    <p className="font-medium">{formatPhoneNumber(phone)}</p>
+
                   </div>
                 )}
               </div>
