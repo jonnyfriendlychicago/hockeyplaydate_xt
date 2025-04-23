@@ -32,8 +32,8 @@ model AuthUser {
 model UserProfile {
   id           Int      @id @default(autoincrement())
   userId       Int      @unique         @map("user_id")
-  altEmail     String?  @map("alt_email")
-  altNickname  String?  @map("alt_nickname") // 2025apr08: this is a deprecated field. when convenient, whack from here and db. 
+  altEmail     String?  @map("alt_email")     
+  altNickname  String?  @map("alt_nickname")  // 2025apr08: this is a deprecated field. when convenient, whack from here and db. 
   phone        String?
   slugDefault  String   @unique         @map("slug_default")
   slugVanity   String?  @unique         @map("slug_vanity")

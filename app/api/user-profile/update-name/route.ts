@@ -1,5 +1,5 @@
 // app/api/user-profile/update-name/route.ts
-// this function called by: app/(root)/onboarding/name/page.tsx
+// this function called by: components/onboarding/ProfileNameForm.tsx
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
