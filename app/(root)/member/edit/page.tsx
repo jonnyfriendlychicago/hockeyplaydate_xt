@@ -42,6 +42,7 @@ export default async function EditProfilePage() {
     familyName: userProfile.familyName ?? '',
     altEmail: userProfile.altEmail ?? '',
     phone: userProfile.phone ?? '',
+    slugVanity: userProfile.slugVanity ?? ''
   };
 
   return (

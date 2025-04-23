@@ -33,7 +33,8 @@ type Props = {
   slug: string; // dynamic profile slug used in redirect
 };
 
-export default function EditProfileForm({ userProfile, slug }: Props) {
+// export default function EditProfileForm({ userProfile, slug }: Props) {
+export default function EditProfileForm({ userProfile }: Props) {
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
 
