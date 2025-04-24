@@ -15,6 +15,7 @@ import { UserAvatar } from '@/components/shared/user-avatar';
 import { Pencil } from 'lucide-react';
 import { auth0 } from '@/lib/auth0';
 import { EmailBlock } from '@/components/UserProfile/EmailBlock';
+import { CopyText } from '@/components/shared/copyText';
 
 export default async function MemberPage({ params }: { params: { slug: string } }) {
   const session = await auth0.getSession();
@@ -42,6 +43,9 @@ export default async function MemberPage({ params }: { params: { slug: string } 
     'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
 
   const isSessionUserProfile = sessionUser?.sub === authUser.auth0Id;
+
+  const formatPhoneNumber = (raw: string) =>
+    raw.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1.$2.$3');
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
@@ -106,36 +110,34 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <div className="flex flex-col md:flex-row md:items-center md:gap-12 gap-4">
-              
-            <EmailBlock
-                altEmail={altEmail}
-                loginEmail={authUser.email}
-                isOwner={isSessionUserProfile}
-              />
+            
+            <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-6">
+              {/* Left Column: Email + Phone */}
+              <div className="md:max-w-md w-full space-y-4">
+                <EmailBlock
+                  altEmail={altEmail}
+                  loginEmail={authUser.email}
+                  isOwner={isSessionUserProfile}
+                />
 
-              {/* <div id='email'>
-                <p className="text-sm text-muted-foreground">Email (old section)</p>
-                <p className="font-medium">
-                {altEmail ? altEmail : authUser.email}
-                </p>
-                {(sessionUser?.sub === authUser.auth0Id &&
-                  altEmail &&
-                  altEmail !== authUser.email) && (
-                      <p>
-                        <span className="ml-0 text-sm text-muted-foreground italic">(NOTE: above is the email that you have selected to display to other Hockey Playdate members as your preferred email address.  This is different from the non-displayed email you use to login to this site (HockeyPlaydate.com): {authUser.email})
-                        </span>
-                      </p>
+                {phone && (
+                  <div id="phone">
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{formatPhoneNumber(phone)}</p>
+                      <CopyText text={phone} />
+                    </div>
+                  </div>
                 )}
-              </div> */}
+              </div>
 
-              {phone && (
-                <div id='phone'>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{phone}</p>
-                </div>
-              )}
+              {/* Right Column: Social Links (placeholder) */}
+              <div className="w-full md:flex-1">
+                <p className="text-sm text-muted-foreground mb-1">Social</p>
+                <p className="text-muted-foreground italic">[Coming Soon: links to your social media]</p>
+              </div>
             </div>
+
           </CardContent>
         </Card>
       </div>
