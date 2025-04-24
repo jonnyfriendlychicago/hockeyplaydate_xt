@@ -1,10 +1,11 @@
 // components/UserProfile/EmailBlock.tsx
 'use client';
 
-import * as React from 'react';
+// import * as React from 'react';
+import { useState } from 'react';
 import {Collapsible,CollapsibleContent,CollapsibleTrigger,} from '@/components/ui/collapsible'; // npx shadcn@latest add collapsible
 import { Info } from 'lucide-react';
-// import { cn } from '@/lib/utils'; // If you're using Tailwind helper function
+import { CopyText } from '@/components/shared/copyText';
 
 type Props = {
   altEmail: string | null;
@@ -14,12 +15,18 @@ type Props = {
 
 export function EmailBlock({ altEmail, loginEmail, isOwner }: Props) {
   const shouldShowAExpander = isOwner && altEmail && altEmail !== loginEmail;
-  const [open, setOpen] = React.useState(false);
+  // const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="relative">
       <p className="text-sm text-muted-foreground flex items-center gap-1">Email</p>
-      <p className="font-medium">{altEmail || loginEmail}</p>
+        <div className="flex items-center gap-1">
+          <p className="font-medium">{altEmail || loginEmail}</p>
+          <CopyText text={altEmail || loginEmail} />
+        </div>
+
+
         {shouldShowAExpander && (
           <Collapsible open={open} onOpenChange={setOpen} className="text-sm text-muted-foreground">
           <div className="flex items-center gap-2">

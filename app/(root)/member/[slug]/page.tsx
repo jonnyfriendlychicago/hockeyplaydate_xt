@@ -15,6 +15,7 @@ import { UserAvatar } from '@/components/shared/user-avatar';
 import { Pencil } from 'lucide-react';
 import { auth0 } from '@/lib/auth0';
 import { EmailBlock } from '@/components/UserProfile/EmailBlock';
+import { CopyText } from '@/components/shared/copyText';
 
 export default async function MemberPage({ params }: { params: { slug: string } }) {
   const session = await auth0.getSession();
@@ -122,9 +123,10 @@ export default async function MemberPage({ params }: { params: { slug: string } 
                 {phone && (
                   <div id="phone">
                     <p className="text-sm text-muted-foreground">Phone</p>
-                    {/* <p className="font-medium">{phone}</p> */}
-                    <p className="font-medium">{formatPhoneNumber(phone)}</p>
-
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{formatPhoneNumber(phone)}</p>
+                      <CopyText text={phone} />
+                    </div>
                   </div>
                 )}
               </div>
