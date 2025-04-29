@@ -1,4 +1,4 @@
-// components/profile/EditProfileForm.tsx
+// components/UserProfile/EditUserProfileForm.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -34,7 +34,7 @@ type Props = {
 };
 
 // export default function EditProfileForm({ userProfile, slug }: Props) {
-export default function EditProfileForm({ userProfile }: Props) {
+export default function EditUserProfileForm({ userProfile }: Props) {
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
 

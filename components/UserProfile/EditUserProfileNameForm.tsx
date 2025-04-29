@@ -1,4 +1,4 @@
-// components/onboarding/ProfileNameForm.tsx
+// components/UserProfile/userProfileNameForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -28,7 +28,7 @@ type Props = {
   familyName: string | null | undefined;
 };
 
-export function ProfileNameForm({ givenName, familyName }: Props) {
+export function EditUserProfileNameForm({ givenName, familyName }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   // const [submitted, setSubmitted] = useState(false);

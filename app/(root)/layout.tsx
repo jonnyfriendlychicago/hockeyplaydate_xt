@@ -4,7 +4,7 @@ import Footer from '@/components/footer';
 import { auth0 } from '@/lib/auth0'; // added to get the auth'ed user saved to db
 import { syncUserFromAuth0 } from '@/lib/syncUser'; // added to get the auth'ed user saved to db
 // import { incompleteUserProfileCheck } from '@/lib/incompleteUserProfileCheck';
-import { ProfileNameForm } from '@/components/onboarding/ProfileNameForm';
+import { EditUserProfileNameForm } from '@/components/UserProfile/EditUserProfileNameForm';
 // import { Toaster } from "@/components/ui/toaster" // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
 
 // export default function RootLayout({ // this line replaced by line below to get the auth'ed user saved to db
@@ -31,7 +31,7 @@ export default async function RootLayout({
     <div className='flex h-screen flex-col'>
       <Header />
       {/* {needsProfile && <ProfileNameForm />} */}
-      {profileMinimallyInsufficient && <ProfileNameForm givenName={userProfile?.givenName} familyName={userProfile?.familyName} />}
+      {profileMinimallyInsufficient && <EditUserProfileNameForm givenName={userProfile?.givenName} familyName={userProfile?.familyName} />}
       <main className='flex-1 wrapper'>{children}</main>
       <Footer/>
       {/* <Toaster /> */}
