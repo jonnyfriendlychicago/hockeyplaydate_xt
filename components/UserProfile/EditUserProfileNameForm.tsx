@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { userProfileNameValSchema } from '@/lib/validation/userProfileNameValSchema';
+import { UserProfileNameFormType } from '@/app/types/forms/userProfileNameFormType';
 // import { useToast } from '@/components/ui/use-toast'; 
 // import { useToast } from "@/hooks/use-toast" // // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
 
@@ -33,7 +36,8 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
   const [loading, setLoading] = useState(false);
   // const [submitted, setSubmitted] = useState(false);
 
-  const form = useForm<FormData>({
+  const form = useForm<UserProfileNameFormType>({
+    resolver: zodResolver(userProfileNameValSchema),
     defaultValues: {
       givenName: givenName ?? '',
       familyName: familyName ?? '',
