@@ -1,7 +1,7 @@
 // app/(root)/member/edit/page.tsx
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
-import EditProfileForm from '@/components/UserProfile/EditProfileForm';
+import EditUserProfileForm from '@/components/UserProfile/EditUserProfileForm';
 import { redirect } from 'next/navigation';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -87,7 +87,7 @@ export default async function EditProfilePage() {
 
       {/* Bottom Row: Editable Form */}
       <div className="w-full">
-        <EditProfileForm userProfile={normalizedProfile} slug={sluggy} />
+        <EditUserProfileForm userProfile={normalizedProfile} slug={sluggy} />
       </div>
     </section>
   );
