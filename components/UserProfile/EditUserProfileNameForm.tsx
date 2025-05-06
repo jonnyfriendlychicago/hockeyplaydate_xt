@@ -1,4 +1,4 @@
-// components/UserProfile/userProfileNameForm.tsx
+// components/UserProfile/EdiUserProfileNameForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -19,7 +19,6 @@ import { userProfileNameValSchema } from '@/lib/validation/userProfileNameValSch
 import { UserProfileNameFormType } from '@/app/types/forms/userProfileNameFormType';
 // import { useToast } from '@/components/ui/use-toast'; 
 // import { useToast } from "@/hooks/use-toast" // // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
-
 
 type FormData = {
   givenName: string;
@@ -73,8 +72,6 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
     }
   };
 
-  // if (submitted) return null;
-
   return (
     <div className="bg-yellow-50 border border-yellow-300 p-4 my-4 rounded-md max-w-2xl mx-auto">
       <h2 className="text-lg font-semibold mb-2">
@@ -93,7 +90,10 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
               <FormItem>
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your first name" {...field} disabled={loading}/>
+                  <Input 
+                  placeholder="Your first name" 
+                  {...field} 
+                  disabled={loading}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,7 +107,10 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your last name" {...field} disabled={loading}/>
+                  <Input 
+                  placeholder="Your last name" 
+                  {...field} 
+                  disabled={loading}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -76,7 +76,6 @@ export default function MembersPage() {
 
           return (
             <Link key={profile.id} href={`/member/${slug}`}>
-              {/* <Card className="transition hover:shadow-md cursor-pointer"> */}
               <Card
               className={`transition hover:shadow-md cursor-pointer ${incompleteProfileName ? 'bg-yellow-50 border border-yellow-300' : ''}`}
               >
@@ -91,9 +90,6 @@ export default function MembersPage() {
                   </Avatar>
 
                   <div className="flex flex-col">
-                  
-                  {/* <span className="font-medium text-lg">{familyBrand}</span>
-                  <span className="font-medium text-lg">{displayName}</span> */}
 
                   {familyBrand ? (
                     <>

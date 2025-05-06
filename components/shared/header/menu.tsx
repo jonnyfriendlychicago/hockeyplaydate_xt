@@ -1,16 +1,7 @@
 // components/shared/header/menu.tsx
 // everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive Additional documentation: https://github.com/auth0/nextjs-auth0
 
-// import { useRouter } from 'next/navigation'; // for optional enhanced navigation
-// import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-// import {
-//   Sheet,
-//   SheetContent,
-//   SheetDescription,
-//   SheetTitle,
-//   SheetTrigger,
-// } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +23,6 @@ export default async function Menu() {
   const session = await auth0.getSession();
   const sessionUser = session?.user; 
   const profileImage = session?.user?.picture;
-  // const email = sessionUser?.email ?? null;
   
   let profileUrl = '/profile'; // Fallback URL; don't see how this would ever be reached, but whatev
 
@@ -96,52 +86,7 @@ export default async function Menu() {
         // sessionEmail={email}
         isLoggedIn={!!session}
       />
-
-      {/* above replaces all of below */}
-
-      {/* <div className='md:hidden'>
-        <Sheet>
-          <SheetTrigger className='align-middle'>
-            <EllipsisVertical />
-          </SheetTrigger>
-          <SheetContent className='flex flex-col items-start gap-4'>
-            <SheetTitle>Menu</SheetTitle>
-            <nav className='flex flex-col gap-2 text-base'>
-              {['/events', '/groups', '/members', '/getting-started', '/about'].map((path) => (
-                <Link key={path} href={path} >
-                  {path.replace('/', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Link>
-              ))}
-            </nav>
-
-            <ModeToggle />
-
-            {session ? (
-              <div className="flex flex-col gap-2 text-base">
-                <Link href={profileUrl} >
-                  Profile
-                </Link>
-                <a href="/auth/logout" >
-                  Logout
-                </a>
-                <Image
-                  className='h-8 w-8 rounded-full mt-2'
-                  src={profileImage || profileDefault}
-                  alt='User avatar'
-                  width={40}
-                  height={40}
-                />
-              </div>
-            ) : (
-              <a href='/auth/login' >
-                <Button>Sign in</Button>
-              </a>
-            )}
-
-            <SheetDescription />
-          </SheetContent>
-        </Sheet>
-      </div> */}
+      
     </div>
   );
 }

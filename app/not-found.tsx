@@ -1,4 +1,6 @@
 // app/not-found.tsx
+
+// 2025may05: note for future - this page doesn't show the header/navbar/footer.  consider ways to have that included. 
 'use client';
 import { APP_NAME } from '@/lib/constants';
 import Image from 'next/image';

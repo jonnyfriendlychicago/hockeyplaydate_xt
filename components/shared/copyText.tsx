@@ -1,6 +1,6 @@
-'use client';
+// components/shared/copyText.tsx
 
-// import { Copy, Check } from 'lucide-react';
+'use client';
 import { useState } from 'react';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline'; // npm install @heroicons/react // more info: https://github.com/tailwindlabs/heroicons
 
@@ -34,7 +34,5 @@ export function CopyText({ text }: Props) {
       <ClipboardIcon className="w-4 h-4" />
     )}
     </button>
-
-
   );
 }

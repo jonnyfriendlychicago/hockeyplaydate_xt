@@ -3,7 +3,6 @@
 // combination of push and refresh is explained in the Next.js docs and is a recommended pattern. (site?)
 
 'use client';
-
 import { useRouter } from 'next/navigation';
 
 export function useSafeRedirect() {

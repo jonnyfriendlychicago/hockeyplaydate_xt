@@ -38,13 +38,6 @@ export default function EditUserProfileForm({ userProfile }: Props) {
     resolver: zodResolver(userProfileValSchema),
 
     defaultValues: {
-      // altNickname: userProfile.altNickname ?? '',
-      // givenName: userProfile.givenName ?? '',
-      // familyName: userProfile.familyName ?? '',
-      // altEmail: userProfile.altEmail ?? '',
-      // phone: userProfile.phone ?? '',
-      // slugVanity: userProfile.slugVanity ?? '',
-      // above replaced to enable nulling to work correctly
       altNickname: userProfile.altNickname ?? null,
       givenName: userProfile.givenName ?? '',
       familyName: userProfile.familyName ?? '',
@@ -61,11 +54,8 @@ export default function EditUserProfileForm({ userProfile }: Props) {
           ...data,
           // altNickname: data.altNickname?.trim() || null, // RED SQUIGGLE ON 'trim' in this line
           altNickname: typeof data.altNickname === 'string' ? data.altNickname.trim() || null : null,
-          // altEmail: data.altEmail?.trim() || null, 
           altEmail: typeof data.altEmail === 'string' ? data.altEmail.trim() || null : null,
-          // phone: data.phone?.trim() || null, 
           phone: typeof data.phone === 'string' ? data.phone.trim() || null : null,
-          // slugVanity: data.slugVanity?.trim() || null, // convert empty or whitespace to null
           slugVanity: typeof data.slugVanity === 'string' ? data.slugVanity.trim() || null : null,
         };
         
@@ -107,8 +97,7 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                 <Input
                   placeholder="awesomehockeyparent1234"
                   {...field}
-                  // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                  value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                  value={(field.value ?? '') as string} 
                   disabled={loading}
                   />
               </FormControl>
@@ -137,8 +126,7 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                 <Input 
                 placeholder="The Smith Family" 
                 {...field} 
-                // value={field.value ?? ''} // red squiggle on 'value' here
-                value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                value={(field.value ?? '') as string} 
                 disabled={loading} />
               </FormControl>
               <FormMessage />
@@ -154,7 +142,8 @@ export default function EditUserProfileForm({ userProfile }: Props) {
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="Jon" 
+                <Input 
+                placeholder="Jon" 
                 {...field} 
                 disabled={loading} />
               </FormControl>
@@ -171,7 +160,10 @@ export default function EditUserProfileForm({ userProfile }: Props) {
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input placeholder="Friend" {...field} disabled={loading}/>
+                <Input 
+                placeholder="Friend" 
+                {...field} 
+                disabled={loading}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -189,8 +181,7 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                 <Input 
                 placeholder="alternate@email.com" 
                 {...field} 
-                // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                value={(field.value ?? '') as string} 
                 disabled={loading}/>
               </FormControl>
               <FormMessage />
@@ -210,9 +201,7 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                   mask="999.999.9999"
                   placeholder="123.456.7890"
                   maskChar=""
-                  // value={field.value}
-                  // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                  value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                  value={(field.value ?? '') as string} 
                   onChange={(e) => {
                     const onlyDigits = e.target.value.replace(/\D/g, '');
                     field.onChange(onlyDigits);
@@ -232,7 +221,6 @@ export default function EditUserProfileForm({ userProfile }: Props) {
         {/* Submit Button */}
         <Button 
           type="submit" 
-          // className="w-full" 
           className={loading ? 'opacity-50 cursor-not-allowed' : ''}
           disabled={loading}>
           {loading ? 'Saving...' : 'Save Changes'}

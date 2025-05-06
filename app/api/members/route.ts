@@ -19,7 +19,7 @@ export async function GET() {
         'Cache-Control': 'no-store',
       },
     }
-    // begin: this (along with export above) ensures not displaying outdated data
+    // end: this (along with export above) ensures not displaying outdated data
 
   );
 }

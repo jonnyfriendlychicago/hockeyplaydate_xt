@@ -1,4 +1,5 @@
 // components/shared/user-avatar.tsx
+
 'use client';
 import Image from 'next/image';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -7,7 +8,6 @@ import clsx from 'clsx';
 type UserAvatarProps = {
   src?: string | null;
   fallback?: string;
-  //   size?: 'sm' | 'md' | 'lg'     ;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   altProp : string
