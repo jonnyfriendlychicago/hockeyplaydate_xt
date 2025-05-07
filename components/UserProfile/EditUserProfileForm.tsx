@@ -1,6 +1,6 @@
 // components/UserProfile/EditUserProfileForm.tsx
-'use client';
 
+'use client';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {
@@ -23,28 +23,32 @@ import InputMask from 'react-input-mask'; // npm install --save-dev @types/react
 // import { UseFormReturn } from 'react-hook-form';
 
 type Props = {
-  userProfile: UserProfileFormType;
-  slug: string; // dynamic profile slug used in redirect
+  // userProfile: UserProfileFormType;
+  initialValues: UserProfileFormType;
+  // slug: string; // dynamic profile slug used in redirect
 };
 
 // export default function EditProfileForm({ userProfile, slug }: Props) {
-export default function EditUserProfileForm({ userProfile }: Props) {
+export default function EditUserProfileForm({ initialValues }: Props) {
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
 
-  
+  // define the 'form' that is used in the actual return section of this code
   const form = useForm<UserProfileFormType>({
     // resolver: zodResolver(userProfileValSchema, undefined, { raw: true }),
     resolver: zodResolver(userProfileValSchema),
 
-    defaultValues: {
-      altNickname: userProfile.altNickname ?? null,
-      givenName: userProfile.givenName ?? '',
-      familyName: userProfile.familyName ?? '',
-      altEmail: userProfile.altEmail ?? null,
-      phone: userProfile.phone ?? null,
-      slugVanity: userProfile.slugVanity ?? null,
-    },
+    // defaultValues: {
+    //   altNickname: initialValues.altNickname ?? null,
+    //   givenName: initialValues.givenName ?? '',
+    //   familyName: initialValues.familyName ?? '',
+    //   altEmail: initialValues.altEmail ?? null,
+    //   phone: initialValues.phone ?? null,
+    //   slugVanity: initialValues.slugVanity ?? null,
+    // },
+    // above default values no longer needed, b/c the incoming prop object already normalized for consumption by form
+    // above can be deleted when we feel like it. 2025may07
+    defaultValues: initialValues,
   });
 
     const onSubmit = async (data: UserProfileFormType) => {

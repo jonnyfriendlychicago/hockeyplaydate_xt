@@ -1,4 +1,5 @@
 // app/(root)/member/edit/page.tsx
+
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import EditUserProfileForm from '@/components/UserProfile/EditUserProfileForm';
@@ -10,46 +11,51 @@ import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
+  // ensure authentication
   const session = await auth0.getSession();
-  const user = session?.user;
-
-  if (!user) redirect('/auth/login');
-
+  const sessionUser = session?.user;
+  if (!sessionUser) redirect('/auth/login');
   const dbUser = await prisma.authUser.findUnique({
-    where: { auth0Id: user.sub },
+    where: { auth0Id: sessionUser.sub },
   });
-
   if (!dbUser) redirect('/auth/login');
 
+  // get as-is user profile (for downstream use in form)
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId: dbUser.id },
   });
+  if (!userProfile) redirect('/'); // hard to see how this could occur at this point, but it's a safety check
 
-  if (!userProfile) redirect('/');
-
-  const displayName =
-    `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() ||
-    dbUser.email ||
-    'Nameless User';
+  // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
+  const displayName =`${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email || 'Nameless User';
   
-  const sluggy= userProfile.slugVanity || userProfile.slugDefault
+  // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
+  const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault
 
-  // Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls
+  // Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. Explanation:
+  // Prisma.UserProfile.familyName and Prisma.UserProfile.givenName are typed as string | null (nullable), b/c db needs to allow null values on initial record creation, e.g., no values provided by Auth0
+  // But our validation schema that this form hits requires a value (rightly so), so is not nullable: userProfileValSchema.familyName is typed as string (non-nullable, required via .min(1)). Same for givenName.
+  // This would cause a typescript mismatch, and break the app.  
+  // We resolve this by creating this "normalized" version of the object, which ensures givenName and familyName are guaranteed string going into the form flow.
   const normalizedProfile = {
-    ...userProfile,
-    altNickname: userProfile.altNickname ?? '',
-    givenName: userProfile.givenName ?? '',
+    ...userProfile, // this is a spread operator: takes all the key:value paries from the object, exposes them for use
+    // givenName kvp, familyName kvp, etc. comes out of above, but then we override it with the following lines:
+    givenName: userProfile.givenName ?? '', // 101: '??' is a nullish coalescing operator: It means: If userProfile.givenName is null or undefined, use '' (empty string) instead.
     familyName: userProfile.familyName ?? '',
-    altEmail: userProfile.altEmail ?? '',
-    phone: userProfile.phone ?? '',
-    slugVanity: userProfile.slugVanity ?? ''
+
+    // below is legacy code, to be deleted when feel like it.  2025may07
+    // altNickname: userProfile.altNickname ?? '',
+    // altEmail: userProfile.altEmail ?? '',
+    // phone: userProfile.phone ?? '',
+    // slugVanity: userProfile.slugVanity ?? ''
   };
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
 
+        {/* Row 1: cancel button area */}
         <div className="flex justify-end">
-          <Link href={`/member/${sluggy}`}>
+          <Link href={`/member/${cancelButtonSluggy}`}>
             <Button 
             variant="ghost" 
             size="sm" 
@@ -60,8 +66,7 @@ export default async function EditProfilePage() {
           </Link>
         </div>
 
-
-      {/* Top Grid: Avatar + Placeholder (non-editable) */}
+      {/* Row 2: Avatar + Family photo  (non-editable) */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Left: Avatar */}
         <div className="col-span-2 flex flex-col items-center justify-center gap-4">
@@ -74,7 +79,7 @@ export default async function EditProfilePage() {
           />
         </div>
 
-        {/* Right: Placeholder */}
+        {/* Right: Family photo and blurb (placeholder) */}
         <div className="col-span-3">
           <Card className="h-full">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
@@ -85,9 +90,12 @@ export default async function EditProfilePage() {
         </div>
       </div>
 
-      {/* Bottom Row: Editable Form */}
+      {/* Row 3: Editable Form */}
       <div className="w-full">
-        <EditUserProfileForm userProfile={normalizedProfile} slug={sluggy} />
+        {/* <EditUserProfileForm userProfile={userProfile} slug={sluggy} /> */}
+        {/* <EditUserProfileForm userProfile={normalizedProfile} slug={sluggy} /> */}
+        {/* <EditUserProfileForm initialValues={normalizedProfile} slug={sluggy} /> */}
+        <EditUserProfileForm initialValues={normalizedProfile}  />
       </div>
     </section>
   );

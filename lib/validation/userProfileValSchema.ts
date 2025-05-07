@@ -1,7 +1,5 @@
 // lib/validation/userProfileValSchema.ts
 
-// action item: nothing in this file is engaging that leoProfanity library we set up for syncUser.ts.  That should be part of this, if possible/practical.
-
 import { z } from 'zod';
 import validator from 'validator'; // npm install --save-dev @types/validator
 import leoProfanity from 'leo-profanity'; // npm install leo-profanity
@@ -14,8 +12,6 @@ const englishyRegex = /^[a-zA-ZÀ-ÿ'’\-\s.]+$/;
 
 export const userProfileValSchema = z.object({
   
-  // nothing fancy related to familyName, givenName, etc.: these are simple required fields.  
-  // actionItem: : need max 25 on each name, and if incoming from google is more than 25 for a name, need to trim to that
   familyName: z
   .string()
   .min(1, 'Last name is required')
