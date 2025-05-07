@@ -21,6 +21,7 @@ import { UserProfileFormType } from '@/app/types/forms/userProfileFormType';
 import InputMask from 'react-input-mask'; // npm install --save-dev @types/react-input-mask 
 // Note: 'npm install react-input-mask' for above won't work: react-input-mask is written in JavaScript and doesn't ship its own TypeScript types by default.
 // import { UseFormReturn } from 'react-hook-form';
+import { normalizeNullable } from '@/lib/helpers/normalize';
 
 type Props = {
   // userProfile: UserProfileFormType;
@@ -57,10 +58,15 @@ export default function EditUserProfileForm({ initialValues }: Props) {
         const payload = {
           ...data,
           // altNickname: data.altNickname?.trim() || null, // RED SQUIGGLE ON 'trim' in this line
-          altNickname: typeof data.altNickname === 'string' ? data.altNickname.trim() || null : null,
-          altEmail: typeof data.altEmail === 'string' ? data.altEmail.trim() || null : null,
-          phone: typeof data.phone === 'string' ? data.phone.trim() || null : null,
-          slugVanity: typeof data.slugVanity === 'string' ? data.slugVanity.trim() || null : null,
+          // altNickname: typeof data.altNickname === 'string' ? data.altNickname.trim() || null : null,
+          // altEmail: typeof data.altEmail === 'string' ? data.altEmail.trim() || null : null,
+          // phone: typeof data.phone === 'string' ? data.phone.trim() || null : null,
+          // slugVanity: typeof data.slugVanity === 'string' ? data.slugVanity.trim() || null : null,
+          // above replaced by below, which uses helper file
+          altNickname: normalizeNullable(data.altNickname),
+          altEmail: normalizeNullable(data.altEmail),
+          phone: normalizeNullable(data.phone),
+          slugVanity: normalizeNullable(data.slugVanity),
         };
         
         const res = await fetch('/api/user-profile/updateProfile', {
