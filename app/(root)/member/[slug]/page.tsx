@@ -18,9 +18,12 @@ import { EmailBlock } from '@/components/UserProfile/EmailBlock';
 import { CopyText } from '@/components/shared/copyText';
 
 export default async function MemberPage({ params }: { params: { slug: string } }) {
+  // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
+  // PLACEHOLDER FOR REDIRECTING NOT-AUTHENTICATED / NOT-ALLOWED USERS
 
+  // (1) essential variables
   const profile = await prisma.userProfile.findFirst({
     where: {
       OR: [
@@ -28,19 +31,22 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         { slugDefault: params.slug },
       ],
     },
-    include: { // this include here means: get parent authUser object? yes!
+    include: { // this include here means: get sibling authUser object? yes!
       authUser: true, 
     },
   });
+  // (1.1) abandon if path failure encountered
+  if (!profile) notFound(); // this is essential, b/c profile record comes from slug, which comes from URL param, which could be junk, ergo: display notfound page
 
-  if (!profile) notFound();
-
-  const { authUser, altEmail, phone } = profile;
+  const { authUser, altEmail, phone } = profile; // Extract common fields from profile for easier reference below
+  // 101 on above: this is object destructuring to cleanly extract values from the profile object. It’s equivalent to this:
+  // const authUser = profile.authUser;
+  // const altEmail = profile.altEmail;
+  // const phone = profile.phone;
 
   const displayName =
-    `${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() ||
-    authUser.email ||
-    'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
+    `${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || authUser.email 
+    ||'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
 
   const isSessionUserProfile = sessionUser?.sub === authUser.auth0Id;
 
@@ -75,7 +81,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             [PLACEHOLDER FOR YOUR FAMILY BRAND!]
           </h1>
-          <p className="text-sm text-muted-foreground">Only you are seeing above placeholder.  Click 'edit', then enter/save your Family Brand Name.  Then it will appear to users in the space above. </p>
+          <p className="text-sm text-muted-foreground">Only you are seeing above placeholder.  Click 'Edit', then enter/save your Family Brand Name, then that will appear to users in the space above. </p>
         </div>
       )}
 
@@ -114,6 +120,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
             <div className="flex flex-col md:flex-row md:items-start md:gap-12 gap-6">
               {/* Left Column: Email + Phone */}
               <div className="md:max-w-md w-full space-y-4">
+                {/* note: EmailBlock could be smaller, put all that show/not logic on this page, and then only pass altEmail and loginEmail to the component; but leaving well-enough alone for now. 2025may08 */}
                 <EmailBlock
                   altEmail={altEmail}
                   loginEmail={authUser.email}

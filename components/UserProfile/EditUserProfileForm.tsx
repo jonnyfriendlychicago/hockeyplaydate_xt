@@ -27,10 +27,12 @@ type Props = {
   // userProfile: UserProfileFormType;
   initialValues: UserProfileFormType;
   // slug: string; // dynamic profile slug used in redirect
+  defaultSluggy: string
+  authUserEmail: string
 };
 
 // export default function EditProfileForm({ userProfile, slug }: Props) {
-export default function EditUserProfileForm({ initialValues }: Props) {
+export default function EditUserProfileForm({ initialValues , defaultSluggy, authUserEmail  }: Props) {
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
 
@@ -103,22 +105,38 @@ export default function EditUserProfileForm({ initialValues }: Props) {
               render={({ field }) => (
                 <FormItem>
               <FormLabel>Custom Profile URL</FormLabel>
-              <FormControl>
+
+              {/* <FormControl>
                 <Input
                   placeholder="awesomehockeyparent1234"
                   {...field}
                   value={(field.value ?? '') as string} 
                   disabled={loading}
                   />
+              </FormControl> */}
+
+              <FormControl>
+                <div className="flex items-center rounded-md border px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-ring">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    https://hockeyplaydate.com/member/
+                  </span>
+                  <Input
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-1"
+                    placeholder="radhockeydad"
+                    {...field}
+                    value={(field.value ?? '') as string}
+                    disabled={loading}
+                  />
+                </div>
               </FormControl>
+
               
               <FormDescription>
               {/* <p className="text-sm text-muted-foreground"> */}
-                This is your profile URL: <br />
-                <code>https://hockeyplaydate.com/member/yourcustomurl</code>. <br /> 
-                This value must be unique among all HPD members. If left blank, your default URL will be used: <br /> 
-                <code>https://hockeyplaydate.com/member/your-generated-id</code>
-              {/* </p> */}
+              By default, your profile is located at: <code className="break-all text-muted-foreground">https://hockeyplaydate.com/member/{defaultSluggy}</code> <br />
+              You can create a custom profile address using the field above, which will make your profile address: <br />
+              <code className="break-all text-muted-foreground">https://hockeyplaydate.com/member/what-you-enter-above</code> <br />
+              You can change this custom profile value anytime; you can also delete it, which will reset your profile address to be the default.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -134,7 +152,7 @@ export default function EditUserProfileForm({ initialValues }: Props) {
               <FormLabel>Family Brand Name</FormLabel>
               <FormControl>
                 <Input 
-                placeholder="The Smith Family" 
+                placeholder="The Smith Family, Jones Crew, Miller Hockey Squad, etc." 
                 {...field} 
                 value={(field.value ?? '') as string} 
                 disabled={loading} />
@@ -153,7 +171,7 @@ export default function EditUserProfileForm({ initialValues }: Props) {
               <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input 
-                placeholder="Jon" 
+                // placeholder="" 
                 {...field} 
                 disabled={loading} />
               </FormControl>
@@ -171,7 +189,7 @@ export default function EditUserProfileForm({ initialValues }: Props) {
               <FormLabel>Last Name</FormLabel>
               <FormControl>
                 <Input 
-                placeholder="Friend" 
+                // placeholder="Friend" 
                 {...field} 
                 disabled={loading}/>
               </FormControl>
@@ -194,6 +212,18 @@ export default function EditUserProfileForm({ initialValues }: Props) {
                 value={(field.value ?? '') as string} 
                 disabled={loading}/>
               </FormControl>
+              <FormDescription>
+              {/* <p className="text-sm text-muted-foreground"> */}
+
+              {authUserEmail} is the email you use to login to this site, which cannot be changed.   <br/>
+              If you prefer, provide an alternate email address above, and that email (not your login email) will be:  <br/>
+              (1) shared with Hockey Playdate organizers and other members as your preferred email address (if you elect) <br/>
+              (2) used for invitations, inquiries, and other communications.  <br/>
+              You can change this value anytime; you can also delete it, which means your login email ({authUserEmail}) will be used/shared instead.
+
+              
+          {/* <span className="font-medium">{loginEmail}</span> <br/> */}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

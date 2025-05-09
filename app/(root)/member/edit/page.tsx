@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
-  // ensure authentication
+  // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
   if (!sessionUser) redirect('/auth/login');
@@ -20,19 +20,29 @@ export default async function EditProfilePage() {
   });
   if (!dbUser) redirect('/auth/login');
 
-  // get as-is user profile (for downstream use in form)
-  const userProfile = await prisma.userProfile.findUnique({
+  // (1) essential variables
+  const userProfile = await prisma.userProfile.findUnique({ // get as-is user profile (for downstream use in form)
     where: { userId: dbUser.id },
+    // adding below to get sibling authuser object
+    include: { // this include here means: get sibling authUser object? yes! 2025may08
+      authUser: true, 
+    },
   });
-  if (!userProfile) redirect('/'); // hard to see how this could occur at this point, but it's a safety check
+  // (1.1) abandon if path failure encountered
+  if (!userProfile) redirect('/'); // this scenario should never be reached, b/c every authUser record will have an associated userProfile record, unless Auth0 or core HPD usermgmt code went berzerk at login
 
-  // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
-  const displayName =`${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email || 'Nameless User';
+  const displayName = // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
+  `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email 
+  || 'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
   
-  // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
-  const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault
+  const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
 
-  // Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. Explanation:
+  const authUserEmail = userProfile.authUser.email; // super simple var we need to pass into the form for a form description value
+
+
+  // (2) Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. 
+  
+  // Explanation:
   // Prisma.UserProfile.familyName and Prisma.UserProfile.givenName are typed as string | null (nullable), b/c db needs to allow null values on initial record creation, e.g., no values provided by Auth0
   // But our validation schema that this form hits requires a value (rightly so), so is not nullable: userProfileValSchema.familyName is typed as string (non-nullable, required via .min(1)). Same for givenName.
   // This would cause a typescript mismatch, and break the app.  
@@ -92,10 +102,11 @@ export default async function EditProfilePage() {
 
       {/* Row 3: Editable Form */}
       <div className="w-full">
-        {/* <EditUserProfileForm userProfile={userProfile} slug={sluggy} /> */}
-        {/* <EditUserProfileForm userProfile={normalizedProfile} slug={sluggy} /> */}
-        {/* <EditUserProfileForm initialValues={normalizedProfile} slug={sluggy} /> */}
-        <EditUserProfileForm initialValues={normalizedProfile}  />
+        <EditUserProfileForm 
+        initialValues={normalizedProfile} 
+        defaultSluggy={userProfile.slugDefault} 
+        authUserEmail= {authUserEmail}
+        />
       </div>
     </section>
   );

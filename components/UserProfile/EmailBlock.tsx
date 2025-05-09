@@ -3,7 +3,7 @@
 'use client';
 import { useState } from 'react';
 import {Collapsible,CollapsibleContent,CollapsibleTrigger,} from '@/components/ui/collapsible'; // npx shadcn@latest add collapsible
-import { Info } from 'lucide-react';
+// import { Info } from 'lucide-react';
 import { CopyText } from '@/components/shared/copyText';
 
 type Props = {
@@ -25,7 +25,7 @@ export function EmailBlock({ altEmail, loginEmail, isOwner }: Props) {
         </div>
 
 
-        {shouldShowAExpander && (
+        {shouldShowAExpander && ( // remember: this is saying: 'shouldShowAExpander' is truthy?  then do this stuff
           <Collapsible open={open} onOpenChange={setOpen} className="text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <CollapsibleTrigger asChild>
@@ -33,15 +33,17 @@ export function EmailBlock({ altEmail, loginEmail, isOwner }: Props) {
                 className="flex items-center gap-1 hover:text-primary focus:outline-none"
                 aria-expanded={open}
               >
-                <Info className="w-4 h-4" />
+                {/* <Info className="w-4 h-4" /> */}
                 {open ? 'Collapse...' : 'More info...'}
               </button>
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent className="mt-2 leading-snug">
-          Above is the email that you have selected to share with Hockey Playdate organizers and other members as your preferred email address. <br/>
-          Invitations, communications and inquiries (as needed) will be sent to this email address. <br/>
-          It differs from the non-shared email you use to login to this site, which is visible only to HPD administrators:  <span className="font-medium">{loginEmail}</span> <br/>
+          
+          Above is the alternative email address you provided:  <br/>
+              (1) to share with Hockey Playdate organizers and other members as your preferred email address (if you elect) <br/>
+              (2) for invitations, inquiries, and other communications.  <br/>
+          It differs from the non-shared email you use to login to this site (which cannot be changed):  <span className="font-medium">{loginEmail}</span> <br/>
           </CollapsibleContent>
         </Collapsible>
       )}
