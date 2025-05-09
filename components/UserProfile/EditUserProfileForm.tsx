@@ -173,6 +173,7 @@ export default function EditUserProfileForm({ initialValues , defaultSluggy, aut
                 <Input 
                 // placeholder="" 
                 {...field} 
+                value={(field.value ?? '') as string} 
                 disabled={loading} />
               </FormControl>
               <FormMessage />
@@ -188,9 +189,10 @@ export default function EditUserProfileForm({ initialValues , defaultSluggy, aut
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input 
+                <Input // red squiggle here!!!!! 
                 // placeholder="Friend" 
                 {...field} 
+                value={(field.value ?? '') as string} 
                 disabled={loading}/>
               </FormControl>
               <FormMessage />

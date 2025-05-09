@@ -47,12 +47,12 @@ let parsed;
   // Sanitize nullable fields
   const payload = {
     ...parsed,
-    givenName: parsed.givenName.trim(), // this ensures trim independent of trimming that occurred in the form + Zod schema
-    familyName: parsed.familyName.trim(), // ditto above
-    slugVanity: parsed.slugVanity?.trim() || null,
-    altNickname: parsed.altNickname?.trim() || null,
-    altEmail: parsed.altEmail?.trim() || null,
-    phone: parsed.phone?.trim() || null,
+    // slugVanity: parsed.slugVanity?.trim() || null,
+    // altNickname: parsed.altNickname?.trim() || null,
+    // altEmail: parsed.altEmail?.trim() || null,
+    // phone: parsed.phone?.trim() || null,
+    // note: above trim, then set to null if empty has been moved to zodSchema
+    // this section reserved for any additional unforeseen post-Zod data manipulation
   };
   
   // run the update
