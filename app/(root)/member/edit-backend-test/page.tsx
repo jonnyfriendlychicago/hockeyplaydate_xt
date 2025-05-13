@@ -18,7 +18,7 @@ import { CircleX } from 'lucide-react';
 
 
 export default async function EditProfilePage() {
-  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true')  redirect('/'); 
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
