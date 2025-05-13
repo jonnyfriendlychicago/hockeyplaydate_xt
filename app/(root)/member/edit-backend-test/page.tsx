@@ -18,7 +18,6 @@ import { CircleX } from 'lucide-react';
 
 
 export default async function EditProfilePage() {
-  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
@@ -27,7 +26,7 @@ export default async function EditProfilePage() {
     where: { auth0Id: sessionUser.sub },
   });
   if (!dbUser) return redirect('/auth/login');
-
+  
   // (1) essential variables
   const userProfile = await prisma.userProfile.findUnique({ // get as-is user profile (for downstream use in form)
     where: { userId: dbUser.id },
@@ -36,6 +35,9 @@ export default async function EditProfilePage() {
       authUser: true, 
     },
   });
+  // (1.001) // redirect if directed
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
+
   // (1.1) abandon if path failure encountered
   if (!userProfile) return redirect('/'); // this scenario should never be reached, b/c every authUser record will have an associated userProfile record, unless Auth0 or core HPD usermgmt code went berzerk at login
 
