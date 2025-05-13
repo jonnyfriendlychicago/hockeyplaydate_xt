@@ -1,4 +1,5 @@
 // components/shared/header/index.tsx
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { APP_NAME } from '@/lib/constants';

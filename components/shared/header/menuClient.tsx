@@ -1,6 +1,6 @@
 // components/shared/header/MenuClient.tsx
-'use client';
 
+'use client';
 import { useState } from 'react';
 import { EllipsisVertical } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -20,7 +20,6 @@ type Props = {
 export default function MenuClient({
   profileUrl,
   profileImage,
-//   sessionEmail,
   isLoggedIn,
 }: Props) {
   const [open, setOpen] = useState(false);

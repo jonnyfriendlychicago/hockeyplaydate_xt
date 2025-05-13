@@ -1,6 +1,6 @@
 // components/UserProfile/EditUserProfileForm.tsx
-'use client';
 
+'use client';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {
@@ -21,37 +21,37 @@ import { UserProfileFormType } from '@/app/types/forms/userProfileFormType';
 import InputMask from 'react-input-mask'; // npm install --save-dev @types/react-input-mask 
 // Note: 'npm install react-input-mask' for above won't work: react-input-mask is written in JavaScript and doesn't ship its own TypeScript types by default.
 // import { UseFormReturn } from 'react-hook-form';
+import { normalizeNullable } from '@/lib/helpers/normalize';
 
 type Props = {
-  userProfile: UserProfileFormType;
-  slug: string; // dynamic profile slug used in redirect
+  // userProfile: UserProfileFormType;
+  initialValues: UserProfileFormType;
+  // slug: string; // dynamic profile slug used in redirect
+  defaultSluggy: string
+  authUserEmail: string
 };
 
 // export default function EditProfileForm({ userProfile, slug }: Props) {
-export default function EditUserProfileForm({ userProfile }: Props) {
+export default function EditUserProfileForm({ initialValues , defaultSluggy, authUserEmail  }: Props) {
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
 
-  
+  // define the 'form' that is used in the actual return section of this code
   const form = useForm<UserProfileFormType>({
     // resolver: zodResolver(userProfileValSchema, undefined, { raw: true }),
     resolver: zodResolver(userProfileValSchema),
 
-    defaultValues: {
-      // altNickname: userProfile.altNickname ?? '',
-      // givenName: userProfile.givenName ?? '',
-      // familyName: userProfile.familyName ?? '',
-      // altEmail: userProfile.altEmail ?? '',
-      // phone: userProfile.phone ?? '',
-      // slugVanity: userProfile.slugVanity ?? '',
-      // above replaced to enable nulling to work correctly
-      altNickname: userProfile.altNickname ?? null,
-      givenName: userProfile.givenName ?? '',
-      familyName: userProfile.familyName ?? '',
-      altEmail: userProfile.altEmail ?? null,
-      phone: userProfile.phone ?? null,
-      slugVanity: userProfile.slugVanity ?? null,
-    },
+    // defaultValues: {
+    //   altNickname: initialValues.altNickname ?? null,
+    //   givenName: initialValues.givenName ?? '',
+    //   familyName: initialValues.familyName ?? '',
+    //   altEmail: initialValues.altEmail ?? null,
+    //   phone: initialValues.phone ?? null,
+    //   slugVanity: initialValues.slugVanity ?? null,
+    // },
+    // above default values no longer needed, b/c the incoming prop object already normalized for consumption by form
+    // above can be deleted when we feel like it. 2025may07
+    defaultValues: initialValues,
   });
 
     const onSubmit = async (data: UserProfileFormType) => {
@@ -60,13 +60,15 @@ export default function EditUserProfileForm({ userProfile }: Props) {
         const payload = {
           ...data,
           // altNickname: data.altNickname?.trim() || null, // RED SQUIGGLE ON 'trim' in this line
-          altNickname: typeof data.altNickname === 'string' ? data.altNickname.trim() || null : null,
-          // altEmail: data.altEmail?.trim() || null, 
-          altEmail: typeof data.altEmail === 'string' ? data.altEmail.trim() || null : null,
-          // phone: data.phone?.trim() || null, 
-          phone: typeof data.phone === 'string' ? data.phone.trim() || null : null,
-          // slugVanity: data.slugVanity?.trim() || null, // convert empty or whitespace to null
-          slugVanity: typeof data.slugVanity === 'string' ? data.slugVanity.trim() || null : null,
+          // altNickname: typeof data.altNickname === 'string' ? data.altNickname.trim() || null : null,
+          // altEmail: typeof data.altEmail === 'string' ? data.altEmail.trim() || null : null,
+          // phone: typeof data.phone === 'string' ? data.phone.trim() || null : null,
+          // slugVanity: typeof data.slugVanity === 'string' ? data.slugVanity.trim() || null : null,
+          // above replaced by below, which uses helper file
+          altNickname: normalizeNullable(data.altNickname),
+          altEmail: normalizeNullable(data.altEmail),
+          phone: normalizeNullable(data.phone),
+          slugVanity: normalizeNullable(data.slugVanity),
         };
         
         const res = await fetch('/api/user-profile/updateProfile', {
@@ -103,23 +105,38 @@ export default function EditUserProfileForm({ userProfile }: Props) {
               render={({ field }) => (
                 <FormItem>
               <FormLabel>Custom Profile URL</FormLabel>
-              <FormControl>
+
+              {/* <FormControl>
                 <Input
                   placeholder="awesomehockeyparent1234"
                   {...field}
-                  // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                  value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                  value={(field.value ?? '') as string} 
                   disabled={loading}
                   />
+              </FormControl> */}
+
+              <FormControl>
+                <div className="flex items-center rounded-md border px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-ring">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    https://hockeyplaydate.com/member/
+                  </span>
+                  <Input
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-1"
+                    placeholder="radhockeydad"
+                    {...field}
+                    value={(field.value ?? '') as string}
+                    disabled={loading}
+                  />
+                </div>
               </FormControl>
+
               
               <FormDescription>
               {/* <p className="text-sm text-muted-foreground"> */}
-                This is your profile URL: <br />
-                <code>https://hockeyplaydate.com/member/yourcustomurl</code>. <br /> 
-                This value must be unique among all HPD members. If left blank, your default URL will be used: <br /> 
-                <code>https://hockeyplaydate.com/member/your-generated-id</code>
-              {/* </p> */}
+              By default, your profile is located at: <code className="break-all text-muted-foreground">https://hockeyplaydate.com/member/{defaultSluggy}</code> <br />
+              You can create a custom profile address using the field above, which will make your profile address: <br />
+              <code className="break-all text-muted-foreground">https://hockeyplaydate.com/member/what-you-enter-above</code> <br />
+              You can change this custom profile value anytime; you can also delete it, which will reset your profile address to be the default.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -135,10 +152,9 @@ export default function EditUserProfileForm({ userProfile }: Props) {
               <FormLabel>Family Brand Name</FormLabel>
               <FormControl>
                 <Input 
-                placeholder="The Smith Family" 
+                placeholder="The Smith Family, Jones Crew, Miller Hockey Squad, etc." 
                 {...field} 
-                // value={field.value ?? ''} // red squiggle on 'value' here
-                value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                value={(field.value ?? '') as string} 
                 disabled={loading} />
               </FormControl>
               <FormMessage />
@@ -154,8 +170,10 @@ export default function EditUserProfileForm({ userProfile }: Props) {
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="Jon" 
+                <Input 
+                // placeholder="" 
                 {...field} 
+                value={(field.value ?? '') as string} 
                 disabled={loading} />
               </FormControl>
               <FormMessage />
@@ -171,7 +189,11 @@ export default function EditUserProfileForm({ userProfile }: Props) {
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input placeholder="Friend" {...field} disabled={loading}/>
+                <Input // red squiggle here!!!!! 
+                // placeholder="Friend" 
+                {...field} 
+                value={(field.value ?? '') as string} 
+                disabled={loading}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -189,10 +211,21 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                 <Input 
                 placeholder="alternate@email.com" 
                 {...field} 
-                // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                value={(field.value ?? '') as string} 
                 disabled={loading}/>
               </FormControl>
+              <FormDescription>
+              {/* <p className="text-sm text-muted-foreground"> */}
+
+              {authUserEmail} is the email you use to login to this site, which cannot be changed.   <br/>
+              If you prefer, provide an alternate email address above, and that email (not your login email) will be:  <br/>
+              (1) shared with Hockey Playdate organizers and other members as your preferred email address (if you elect) <br/>
+              (2) used for invitations, inquiries, and other communications.  <br/>
+              You can change this value anytime; you can also delete it, which means your login email ({authUserEmail}) will be used/shared instead.
+
+              
+          {/* <span className="font-medium">{loginEmail}</span> <br/> */}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -210,9 +243,7 @@ export default function EditUserProfileForm({ userProfile }: Props) {
                   mask="999.999.9999"
                   placeholder="123.456.7890"
                   maskChar=""
-                  // value={field.value}
-                  // value={field.value ?? ''} // this line resolves nulls to empty string, for zod-form cooperation
-                  value={(field.value ?? '') as string} // This tells TypeScript: I know this will always end up a string in the UI.
+                  value={(field.value ?? '') as string} 
                   onChange={(e) => {
                     const onlyDigits = e.target.value.replace(/\D/g, '');
                     field.onChange(onlyDigits);
@@ -232,7 +263,6 @@ export default function EditUserProfileForm({ userProfile }: Props) {
         {/* Submit Button */}
         <Button 
           type="submit" 
-          // className="w-full" 
           className={loading ? 'opacity-50 cursor-not-allowed' : ''}
           disabled={loading}>
           {loading ? 'Saving...' : 'Save Changes'}

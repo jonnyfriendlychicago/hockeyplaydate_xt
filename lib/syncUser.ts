@@ -45,7 +45,7 @@ function sanitizeNameFunc(name: string | undefined | null): string | null {
   // case 1:  if incoming value is null, undefined, empty string, or string of empty spaces, return null
   if (!name || !name.trim()) return null;
   // set up next cases: arrived here b/c incoming value has at least one non-space char.  Next line removes both leading and trailng blank spaces, then whacks char 25 onward
-  const nameTrimmedAndCropped = name.trim().slice(0, 24); 
+  const nameTrimmedAndCropped = name.trim().slice(0, 25); // this was 24 before; wrong!  25, so we allow 25 characters
   // case 2: if has bad words, return null
   if (leoProfanity.check(nameTrimmedAndCropped)) return null;
   // set up next case: contains ONLY letters (including accented), spaces, apostrophes, hyphens, and periods
@@ -73,7 +73,7 @@ async function generateVanitySlugFunc(
     lower: true,
     strict: true,
     locale: 'en', // needed? 
-  }).replace(/[^a-z0-9]/g, '').slice(0, 24); // remove any chars that are not a-thru-z and 0-9, then whack char 25 onward
+  }).replace(/[^a-z0-9]/g, '').slice(0, 25); // remove any chars that are not a-thru-z and 0-9, then whack char 25 onward.  fyi, this was 24 before; wrong!  25, so we allow 25 characters
   if (!slugifiedConcatGivenFamilyName) return null;  // this is a double-check: if somehow (even tho it shouldn't be possible at this point) the slugifiedConcatGivenFamilyName got set to null by the slugify/replace/slice process, then return null / escape the function. 
   // Step 3: Explore/resolve length-based cases
   // Case A: base slug is already long enough
@@ -141,7 +141,11 @@ function generateAltNicknameFunc( // proactively set userProfile.altNickname, e.
 ): string | null {
   // Step 1: quit if incomingFamilyName is null
   if ( !incomingCleanFamilyName) return null;  // if incomingFamilyName is null, nothing more to do, return null.  Else... 
-  // Step 2: return familyName wrapped in title-like text
+  // Step 2: check if family name too long
+  // 45 total char max on altNickName field; prefix 'The ' + suffix ' Family' = 11 reserved spaces.
+  const MAX_LENGTH_FOR_FAMILY = 34;
+  if (incomingCleanFamilyName.length > MAX_LENGTH_FOR_FAMILY) return null;
+  // Step 3: return familyName wrapped in title-like text
   return `The ${incomingCleanFamilyName} Family`;
 }
 

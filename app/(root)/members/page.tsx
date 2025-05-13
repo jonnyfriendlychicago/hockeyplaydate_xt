@@ -32,7 +32,31 @@ export default function MembersPage() {
   useEffect(() => {
     fetch('/api/members')
       .then((res) => res.json())
-      .then((data) => setProfiles(data));
+      // .then((data) => setProfiles(data));
+      // above is simple "display the data"; below is sorting this data.  
+      .then((data) => {
+        const sorted = data.sort((a: Profile, b: Profile) => {
+          const aHasNames = a.givenName && a.familyName;
+          const bHasNames = b.givenName && b.familyName;
+      
+          // If only one has names, prioritize the one that does
+          if (aHasNames && !bHasNames) return -1;
+          if (!aHasNames && bHasNames) return 1;
+      
+          // If both are missing names, keep order
+          if (!aHasNames && !bHasNames) return 0;
+      
+          // Both have names: sort by givenName, then familyName
+          const givenCompare = a.givenName!.localeCompare(b.givenName!);
+          if (givenCompare !== 0) return givenCompare;
+          return a.familyName!.localeCompare(b.familyName!);
+        });
+      
+        setProfiles(sorted);
+
+        
+      });
+
   }, []);
 
   return (
@@ -41,13 +65,22 @@ export default function MembersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {profiles.map((profile) => {
+
+          const familyBrand = profile.altNickname || null;
+
           const displayName =`${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || profile.authUser.email || 'Nameless Emailless User';
+
+          const incompleteProfileName = !profile.familyName || !profile.givenName; 
 
           const slug = profile.slugVanity || profile.slugDefault;
 
           return (
             <Link key={profile.id} href={`/member/${slug}`}>
-              <Card className="transition hover:shadow-md cursor-pointer">
+              <Card
+              className={`transition hover:shadow-md cursor-pointer ${incompleteProfileName ? 'bg-yellow-50 border border-yellow-300' : ''}`}
+              >
+
+
                 <CardContent className="flex items-center gap-4 p-4">
                   <Avatar className="w-12 h-12">
                     <AvatarImage src={profile.authUser.picture || ''} alt={displayName} />
@@ -57,9 +90,16 @@ export default function MembersPage() {
                   </Avatar>
 
                   <div className="flex flex-col">
+
+                  {familyBrand ? (
+                    <>
+                      <span className="font-medium text-lg">{familyBrand}</span>
+                      <span className="text-sm text-muted-foreground">{displayName}</span>
+                    </>
+                  ) : (
                     <span className="font-medium text-lg">{displayName}</span>
-                    {/* <span className="text-muted-foreground text-sm font-mono">{slug}</span> */}
-                    {/* <span className="text-sm text-muted-foreground">{profile.authUser.email}</span> */}
+                  )}
+
                   </div>
                 </CardContent>
               </Card>

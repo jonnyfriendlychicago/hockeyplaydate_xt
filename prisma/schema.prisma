@@ -1,7 +1,7 @@
 // prisma/schema.prisma
 // This is your Prisma schema file.  Defines all tables.columns that shall exist in db
 // this skeleton file was created automatically by 'npx prisma init'
-// file name: schema.prisma;
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -33,7 +33,7 @@ model UserProfile {
   id           Int      @id @default(autoincrement())
   userId       Int      @unique         @map("user_id")
   altEmail     String?  @map("alt_email")     
-  altNickname  String?  @map("alt_nickname")  // 2025apr08: this is a deprecated field. when convenient, whack from here and db. 
+  altNickname  String?  @map("alt_nickname")  // 2025may05: this *was* a deprecated field, to be whacked.  But then it got repurposed to be "family brand name"
   phone        String?
   slugDefault  String   @unique         @map("slug_default")
   slugVanity   String?  @unique         @map("slug_vanity")

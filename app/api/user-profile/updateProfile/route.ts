@@ -1,16 +1,16 @@
 // app/api/user-profile/updateProfile/route.ts
-
+// this function called by: components/UserProfile/EditUserProfileForm.tsx
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { userProfileValSchema } from '@/lib/validation/userProfileValSchema';
 import { ZodError } from 'zod';
 
-
 export async function POST(req: Request) {
   const session = await auth0.getSession();
   const sessionUser = session?.user;
 
+  // validate authentication
   if (!sessionUser) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -47,13 +47,15 @@ let parsed;
   // Sanitize nullable fields
   const payload = {
     ...parsed,
-    slugVanity: parsed.slugVanity?.trim() || null,
-    altNickname: parsed.altNickname?.trim() || null,
-    altEmail: parsed.altEmail?.trim() || null,
-    phone: parsed.phone?.trim() || null,
+    // slugVanity: parsed.slugVanity?.trim() || null,
+    // altNickname: parsed.altNickname?.trim() || null,
+    // altEmail: parsed.altEmail?.trim() || null,
+    // phone: parsed.phone?.trim() || null,
+    // note: above trim, then set to null if empty has been moved to zodSchema
+    // this section reserved for any additional unforeseen post-Zod data manipulation
   };
   
-  
+  // run the update
   const updated = await prisma.userProfile.update({
     where: { userId: dbUser.id },
     data: payload,
@@ -65,65 +67,3 @@ let parsed;
   
   return NextResponse.json(updated);
 }
-
-
-
-  // ensure string of spaces definitely converted to null.  Essential to have this handled on back-end / route.ts
-  // const sanitizedSlugVanity =
-  // typeof slugVanity === 'string' && slugVanity.trim() !== '' ? slugVanity.trim() : null;
-
- // const { 
-  //   altEmail, 
-  //   phone, 
-  //   slugVanity, 
-  //   givenName, 
-  //   familyName, 
-  //   altNickname,
-  // } = await req.json();
-
-  // above replaced by below
-
-  // Server-side validation with Zod
-//   let data;
-//   try {
-//     const body = await req.json();
-//     data = userProfileValSchema.parse(body);
-//   } catch (err) {
-//     return NextResponse.json(
-//       // { error: 'Validation failed', 
-//       //   details: error }, 
-
-// // above replaced by below
-// {
-//   error: 'Validation failed',
-//   issues: err.issues.map((issue) => ({
-//     field: issue.path.join('.'),
-//     message: issue.message,
-//   })),
-// },
-
-//         { status: 400 }
-//     );
-//   }
-
-
-
-  // const updated = await prisma.userProfile.update({
-  //   where: { userId: dbUser.id },
-  //   data: {
-    //     altEmail,
-    //     phone,
-    //     // slugVanity,
-    //     slugVanity: sanitizedSlugVanity,
-    //     givenName,
-    //     familyName,
-    //     altNickname,
-    //   },
-    //   // above replaced by below
-    //   // data: payload,
-    
-    //   select: { // this object added: ensures these fields are returned in the update, even tho slugDefault isn't being touched. This ensures that attribute is accessible on the originating form/page. 
-    //     slugDefault: true, 
-    //     slugVanity: true
-    //   }
-  // });

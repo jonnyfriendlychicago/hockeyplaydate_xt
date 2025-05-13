@@ -40,6 +40,7 @@
     "slugify": "^1.6.6",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "validator": "^13.15.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -48,6 +49,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-input-mask": "^3.0.6",
+    "@types/validator": "^13.15.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",

@@ -1,8 +1,9 @@
-// app/(root)/member/edit/page.tsx
+// app/(root)/member/edit-backend-test/page.tsx
+// this entire file purely for testing backend api; it is not intended for production use by end users
 
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
-import EditUserProfileForm from '@/components/UserProfile/EditUserProfileForm';
+import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
 import { redirect } from 'next/navigation';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +11,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 
+
 export default async function EditProfilePage() {
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true')  redirect('/'); 
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
@@ -79,22 +82,21 @@ export default async function EditProfilePage() {
       {/* Row 2: Avatar + Family photo  (non-editable) */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Left: Avatar */}
-        <div className="col-span-2 flex flex-col items-center justify-center gap-4">
+        <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
           <UserAvatar
             src={dbUser.picture}
             fallback="A"
             size="xl"
-            className="ring-2 ring-gray-400 shadow-lg"
+            className="ring-2 ring-gray-400 shadow-lg "
             altProp={displayName}
           />
         </div>
 
         {/* Right: Family photo and blurb (placeholder) */}
         <div className="col-span-3">
-          <Card className="h-full">
+          <Card className="h-full bg-black border">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
-              <p className="text-sm font-semibold">[Coming Soon]</p>
-              <p className="text-sm">Add your family photo and short blurb here</p>
+              <h1 className='bg-slate-600'>THIS ENTIRE PAGE/FORM IS FOR TESTING BACKEND ONLY</h1>
             </CardContent>
           </Card>
         </div>
@@ -102,7 +104,7 @@ export default async function EditProfilePage() {
 
       {/* Row 3: Editable Form */}
       <div className="w-full">
-        <EditUserProfileForm 
+        <EditUserProfileBackendTestForm
         initialValues={normalizedProfile} 
         defaultSluggy={userProfile.slugDefault} 
         authUserEmail= {authUserEmail}
