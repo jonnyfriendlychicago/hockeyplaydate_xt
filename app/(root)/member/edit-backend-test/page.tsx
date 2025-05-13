@@ -1,6 +1,11 @@
 // app/(root)/member/edit-backend-test/page.tsx
 // this entire file purely for testing backend api; it is not intended for production use by end users
 
+export const dynamic = 'force-dynamic';
+// 101 on above: this page references the .env file, and the page will either display or redirect based on that value.  
+// Next.js prerenders pages by default in the App Router (especially page.tsx files). If you want dynamic behavior — such as checking environment variables at request time — you must explicitly opt out of that behavior.
+// Without export const dynamic = 'force-dynamic', all the other steps will silently fail to achieve your intended effect. The redirect logic will look correct in code, but won’t execute at runtime as you expect.
+
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
