@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 // Next.js prerenders pages by default in the App Router (especially page.tsx files). If you want dynamic behavior — such as checking environment variables at request time — you must explicitly opt out of that behavior.
 // Without export const dynamic = 'force-dynamic', all the other steps will silently fail to achieve your intended effect. The redirect logic will look correct in code, but won’t execute at runtime as you expect.
 
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 // import { auth0 } from '@/lib/auth0';
 // import { prisma } from '@/lib/prisma';
 // import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
@@ -18,7 +19,8 @@ import { redirect } from 'next/navigation';
 // import { CircleX } from 'lucide-react';
 
 export default function EditProfilePage() {
- redirect('/'); // this replaces everything else. 
+//  redirect('/'); // this replaces everything else. 
+  notFound();
 }
   // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
   // if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
