@@ -1,6 +1,25 @@
 // app/(root)/member/edit-backend-test/page.tsx
 // this entire file purely for testing backend api; it is not intended for production use by end users
-// 2025may13: after nearly 10 tries, we cannot seem to get the conditional redirect to work reliably in deployed environment.  No idea why, doesn't make any sense.  Moved that line up/down this file multiple places, doesn't work reliably.  abandoning this env-based rendering. 
+// 2025may13: after more than 10 tries, we cannot seem to get the conditional redirect to work in a deployed environment.  No idea why, works fine in local dev under all scenarios; deployment failure doesn't make any sense.  
+// cont'd: we moved that env-based redirect line up/down this file multiple places, but it doesn't work reliably regardless. Abandoning env-based rendering with redirect. 
+// 2025may14: env-based conditional rendering with notFound() seems to work very solid, and in retrospect, this shoulda been the chosen path from get-go.  
+// below is a skeleton proof of this, which is being kept commOUT for future reference. 
+
+// begin skeleton file
+// export const dynamic = 'force-dynamic';
+// import { notFound } from 'next/navigation';
+
+// export default function EditProfilePage() {
+// //  redirect('/'); // this replaces everything else. 
+// if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
+
+// return (
+//   <div>
+//     <h1>hello hello</h1>
+//   </div>
+// )
+// } 
+// end skeleton file
 
 export const dynamic = 'force-dynamic';
 // 101 on above: this page references the .env file, and the page will either display or redirect based on that value.  
@@ -8,32 +27,20 @@ export const dynamic = 'force-dynamic';
 // Without export const dynamic = 'force-dynamic', all the other steps will silently fail to achieve your intended effect. The redirect logic will look correct in code, but won’t execute at runtime as you expect.
 
 import { notFound } from 'next/navigation';
-// import { redirect } from 'next/navigation';
-// import { auth0 } from '@/lib/auth0';
-// import { prisma } from '@/lib/prisma';
-// import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
-// import { UserAvatar } from '@/components/shared/user-avatar';
-// import { Card, CardContent } from '@/components/ui/card';
-// import Link from 'next/link';
-// import { Button } from '@/components/ui/button';
-// import { CircleX } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { auth0 } from '@/lib/auth0';
+import { prisma } from '@/lib/prisma';
+import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
+import { UserAvatar } from '@/components/shared/user-avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { CircleX } from 'lucide-react';
 
-export default function EditProfilePage() {
-//  redirect('/'); // this replaces everything else. 
-if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
-
-return (
-  <div>
-    <h1>hello hello</h1>
-  </div>
-)
-}
-  // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
-  // if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
-  
-  
-  /*BEGIN *************************************
+// this entire file (aside from the 'notFound' first line) is a dupe to file app/(root)/member/edit-backend-test/page.tsx.  This is by design, so that differences between prod-suited edit form and
+// this test-oriented form are limited to EditUserProfileBackendTestForm.tsx (and its imported files)
   export default async function EditProfilePage() {
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
@@ -85,54 +92,54 @@ return (
   };
   
 
-//   return (
-//     <section className="max-w-6xl mx-auto p-6 space-y-6">
+  return (
+    <section className="max-w-6xl mx-auto p-6 space-y-6">
 
 
-//         <div className="flex justify-end">
-//           <Link href={`/member/${cancelButtonSluggy}`}>
-//             <Button 
-//             variant="ghost" 
-//             size="sm" 
-//             className="flex items-center gap-1 hover:bg-red-50 ">
-//               <CircleX className="w-4 h-4 text-destructive" />
-//               <span className="text-destructive">Cancel</span>
-//             </Button>
-//           </Link>
-//         </div>
+        <div className="flex justify-end">
+          <Link href={`/member/${cancelButtonSluggy}`}>
+            <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 hover:bg-red-50 ">
+              <CircleX className="w-4 h-4 text-destructive" />
+              <span className="text-destructive">Cancel</span>
+            </Button>
+          </Link>
+        </div>
 
 
-//       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
 
-//         <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
-//           <UserAvatar
-//             src={dbUser.picture}
-//             fallback="A"
-//             size="xl"
-//             className="ring-2 ring-gray-400 shadow-lg "
-//             altProp={displayName}
-//           />
-//         </div>
-
-
-//         <div className="col-span-3">
-//           <Card className="h-full bg-black border">
-//             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
-//               <h1 className='bg-slate-600'>THIS ENTIRE PAGE/FORM IS FOR TESTING BACKEND ONLY</h1>
-//             </CardContent>
-//           </Card>
-//         </div>
-//       </div>
+        <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
+          <UserAvatar
+            src={dbUser.picture}
+            fallback="A"
+            size="xl"
+            className="ring-2 ring-gray-400 shadow-lg "
+            altProp={displayName}
+          />
+        </div>
 
 
-//       <div className="w-full">
-//         <EditUserProfileBackendTestForm
-//         initialValues={normalizedProfile} 
-//         defaultSluggy={userProfile.slugDefault} 
-//         authUserEmail= {authUserEmail}
-//         />
-//       </div>
-//     </section>
-//   );
-// }
-*/
+        <div className="col-span-3">
+          <Card className="h-full bg-black border">
+            <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
+              <h1 className='bg-slate-600'>THIS ENTIRE PAGE/FORM IS FOR TESTING BACKEND ONLY</h1>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+
+      <div className="w-full">
+        <EditUserProfileBackendTestForm
+        initialValues={normalizedProfile} 
+        defaultSluggy={userProfile.slugDefault} 
+        authUserEmail= {authUserEmail}
+        />
+      </div>
+    </section>
+  );
+}
+
