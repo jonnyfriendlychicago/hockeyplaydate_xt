@@ -20,7 +20,13 @@ import { notFound } from 'next/navigation';
 
 export default function EditProfilePage() {
 //  redirect('/'); // this replaces everything else. 
-  notFound();
+if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
+
+return (
+  <div>
+    <h1>hello hello</h1>
+  </div>
+)
 }
   // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
   // if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
