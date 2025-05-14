@@ -17,7 +17,7 @@ import { redirect } from 'next/navigation';
 // import { Button } from '@/components/ui/button';
 // import { CircleX } from 'lucide-react';
 
-export default async function EditProfilePage() {
+export default function EditProfilePage() {
  redirect('/'); // this replaces everything else. 
 }
   // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
@@ -25,7 +25,7 @@ export default async function EditProfilePage() {
   
   
   /*BEGIN *************************************
-  
+  export default async function EditProfilePage() {
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
