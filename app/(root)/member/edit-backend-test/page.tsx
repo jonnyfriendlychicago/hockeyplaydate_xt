@@ -1,5 +1,6 @@
 // app/(root)/member/edit-backend-test/page.tsx
 // this entire file purely for testing backend api; it is not intended for production use by end users
+// 2025may13: after nearly 10 tries, we cannot seem to get the conditional redirect to work reliably in deployed environment.  No idea why, doesn't make any sense.  Moved that line up/down this file multiple places, doesn't work reliably.  abandoning this env-based rendering. 
 
 export const dynamic = 'force-dynamic';
 // 101 on above: this page references the .env file, and the page will either display or redirect based on that value.  
@@ -7,18 +8,23 @@ export const dynamic = 'force-dynamic';
 // Without export const dynamic = 'force-dynamic', all the other steps will silently fail to achieve your intended effect. The redirect logic will look correct in code, but won’t execute at runtime as you expect.
 
 import { redirect } from 'next/navigation';
-import { auth0 } from '@/lib/auth0';
-import { prisma } from '@/lib/prisma';
-import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
-import { UserAvatar } from '@/components/shared/user-avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { CircleX } from 'lucide-react';
+// import { auth0 } from '@/lib/auth0';
+// import { prisma } from '@/lib/prisma';
+// import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
+// import { UserAvatar } from '@/components/shared/user-avatar';
+// import { Card, CardContent } from '@/components/ui/card';
+// import Link from 'next/link';
+// import { Button } from '@/components/ui/button';
+// import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
+
+  return redirect('/'); // this replaces everything else. 
   // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
-  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
+  // if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
+  
+  
+  /*BEGIN *************************************
   
   // (0) authentication / security
   const session = await auth0.getSession();
@@ -71,53 +77,54 @@ export default async function EditProfilePage() {
   };
   
 
-  return (
-    <section className="max-w-6xl mx-auto p-6 space-y-6">
+//   return (
+//     <section className="max-w-6xl mx-auto p-6 space-y-6">
 
-        {/* Row 1: cancel button area */}
-        <div className="flex justify-end">
-          <Link href={`/member/${cancelButtonSluggy}`}>
-            <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1 hover:bg-red-50 ">
-              <CircleX className="w-4 h-4 text-destructive" />
-              <span className="text-destructive">Cancel</span>
-            </Button>
-          </Link>
-        </div>
+//         {/* Row 1: cancel button area */}
+//         <div className="flex justify-end">
+//           <Link href={`/member/${cancelButtonSluggy}`}>
+//             <Button 
+//             variant="ghost" 
+//             size="sm" 
+//             className="flex items-center gap-1 hover:bg-red-50 ">
+//               <CircleX className="w-4 h-4 text-destructive" />
+//               <span className="text-destructive">Cancel</span>
+//             </Button>
+//           </Link>
+//         </div>
 
-      {/* Row 2: Avatar + Family photo  (non-editable) */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* Left: Avatar */}
-        <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
-          <UserAvatar
-            src={dbUser.picture}
-            fallback="A"
-            size="xl"
-            className="ring-2 ring-gray-400 shadow-lg "
-            altProp={displayName}
-          />
-        </div>
+//       {/* Row 2: Avatar + Family photo  (non-editable) */}
+//       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+//         {/* Left: Avatar */}
+//         <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
+//           <UserAvatar
+//             src={dbUser.picture}
+//             fallback="A"
+//             size="xl"
+//             className="ring-2 ring-gray-400 shadow-lg "
+//             altProp={displayName}
+//           />
+//         </div>
 
-        {/* Right: Family photo and blurb (placeholder) */}
-        <div className="col-span-3">
-          <Card className="h-full bg-black border">
-            <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
-              <h1 className='bg-slate-600'>THIS ENTIRE PAGE/FORM IS FOR TESTING BACKEND ONLY</h1>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+//         {/* Right: Family photo and blurb (placeholder) */}
+//         <div className="col-span-3">
+//           <Card className="h-full bg-black border">
+//             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
+//               <h1 className='bg-slate-600'>THIS ENTIRE PAGE/FORM IS FOR TESTING BACKEND ONLY</h1>
+//             </CardContent>
+//           </Card>
+//         </div>
+//       </div>
 
-      {/* Row 3: Editable Form */}
-      <div className="w-full">
-        <EditUserProfileBackendTestForm
-        initialValues={normalizedProfile} 
-        defaultSluggy={userProfile.slugDefault} 
-        authUserEmail= {authUserEmail}
-        />
-      </div>
-    </section>
-  );
-}
+//       {/* Row 3: Editable Form */}
+//       <div className="w-full">
+//         <EditUserProfileBackendTestForm
+//         initialValues={normalizedProfile} 
+//         defaultSluggy={userProfile.slugDefault} 
+//         authUserEmail= {authUserEmail}
+//         />
+//       </div>
+//     </section>
+//   );
+// }
+
