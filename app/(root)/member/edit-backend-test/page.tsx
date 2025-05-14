@@ -17,6 +17,9 @@ import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
+  // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
+  
   // (0) authentication / security
   const session = await auth0.getSession();
   const sessionUser = session?.user;
@@ -67,8 +70,6 @@ export default async function EditProfilePage() {
     // slugVanity: userProfile.slugVanity ?? ''
   };
   
-  // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
-  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
