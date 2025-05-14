@@ -6,16 +6,15 @@ export const dynamic = 'force-dynamic';
 // Next.js prerenders pages by default in the App Router (especially page.tsx files). If you want dynamic behavior — such as checking environment variables at request time — you must explicitly opt out of that behavior.
 // Without export const dynamic = 'force-dynamic', all the other steps will silently fail to achieve your intended effect. The redirect logic will look correct in code, but won’t execute at runtime as you expect.
 
+import { redirect } from 'next/navigation';
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import EditUserProfileBackendTestForm from '@/components/UserProfile/EditUserProfileBackendTestForm';
-import { redirect } from 'next/navigation';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
-
 
 export default async function EditProfilePage() {
   // (0) authentication / security
@@ -35,21 +34,19 @@ export default async function EditProfilePage() {
       authUser: true, 
     },
   });
-  // (1.001) // redirect if directed
-  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
-
+  
   // (1.1) abandon if path failure encountered
   if (!userProfile) return redirect('/'); // this scenario should never be reached, b/c every authUser record will have an associated userProfile record, unless Auth0 or core HPD usermgmt code went berzerk at login
-
+  
   const displayName = // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
   `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email 
   || 'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
   
   const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
-
+  
   const authUserEmail = userProfile.authUser.email; // super simple var we need to pass into the form for a form description value
-
-
+  
+  
   // (2) Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. 
   
   // Explanation:
@@ -62,13 +59,16 @@ export default async function EditProfilePage() {
     // givenName kvp, familyName kvp, etc. comes out of above, but then we override it with the following lines:
     givenName: userProfile.givenName ?? '', // 101: '??' is a nullish coalescing operator: It means: If userProfile.givenName is null or undefined, use '' (empty string) instead.
     familyName: userProfile.familyName ?? '',
-
+    
     // below is legacy code, to be deleted when feel like it.  2025may07
     // altNickname: userProfile.altNickname ?? '',
     // altEmail: userProfile.altEmail ?? '',
     // phone: userProfile.phone ?? '',
     // slugVanity: userProfile.slugVanity ?? ''
   };
+  
+  // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
+  if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
