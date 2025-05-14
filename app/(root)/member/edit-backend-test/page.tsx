@@ -18,8 +18,8 @@ import { redirect } from 'next/navigation';
 // import { CircleX } from 'lucide-react';
 
 export default async function EditProfilePage() {
-
-  return redirect('/'); // this replaces everything else. 
+ redirect('/'); // this replaces everything else. 
+}
   // in local dev, this makes auth'ed user get redirected home, and notauth'ed user get redirected to login, and then subsequently redirected to home
   // if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') return redirect('/'); 
   
@@ -80,7 +80,7 @@ export default async function EditProfilePage() {
 //   return (
 //     <section className="max-w-6xl mx-auto p-6 space-y-6">
 
-//         {/* Row 1: cancel button area */}
+
 //         <div className="flex justify-end">
 //           <Link href={`/member/${cancelButtonSluggy}`}>
 //             <Button 
@@ -93,9 +93,9 @@ export default async function EditProfilePage() {
 //           </Link>
 //         </div>
 
-//       {/* Row 2: Avatar + Family photo  (non-editable) */}
+
 //       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-//         {/* Left: Avatar */}
+
 //         <div className="col-span-2 flex flex-col items-center justify-center gap-4 ">
 //           <UserAvatar
 //             src={dbUser.picture}
@@ -106,7 +106,7 @@ export default async function EditProfilePage() {
 //           />
 //         </div>
 
-//         {/* Right: Family photo and blurb (placeholder) */}
+
 //         <div className="col-span-3">
 //           <Card className="h-full bg-black border">
 //             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
@@ -116,7 +116,7 @@ export default async function EditProfilePage() {
 //         </div>
 //       </div>
 
-//       {/* Row 3: Editable Form */}
+
 //       <div className="w-full">
 //         <EditUserProfileBackendTestForm
 //         initialValues={normalizedProfile} 
@@ -127,4 +127,4 @@ export default async function EditProfilePage() {
 //     </section>
 //   );
 // }
-
+*/
