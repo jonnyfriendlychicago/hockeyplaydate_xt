@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import validator from 'validator'; // npm install --save-dev @types/validator
+import { givenNameField, familyNameField } from './fields/nameValidators';
 import leoProfanity from 'leo-profanity'; // npm install leo-profanity
 // 101: leo-profanity only matches exact words by default. so the F-word will be caught, but "[F-word]that" will sail thru.  
 // This is intentional design in leo-profanity to avoid false positives (e.g. “Scunthorpe problem”). This also makes it useless for altEmail validation: "[F-word]@[F-word].com" sails thru.
@@ -84,36 +85,40 @@ export const userProfileValSchema = z.object({
     )
   ),
   
-  familyName: 
-  z.preprocess(
-    (val) => (typeof val === 'string' ? val.trim() : val),
-  z.string()
-  .min(1, 'Last name is required')
-  .max(25, 'Last name is too long. 25 characters max.')
-  .refine(
-    (val) => englishyRegex.test(val),
-    { message: 'Entered name contains prohibited characters.' }
-  )
-  .refine((val) => !leoProfanity.check(val), {
-    message: 'Inappropriate content detected. Please use a different name.'})
-  )
-  , 
+  givenName: givenNameField,
+  familyName: familyNameField,
+  // above relaces the entire name validation originally below and now moved to lib/validation/fields/nameValidators.ts
 
-  givenName: 
-  z.preprocess(
-    (val) => (typeof val === 'string' ? val.trim() : val),
-    z.string()
-    .min(1, 'First name is required')
-    .max(25, 'First name is too long. 25 characters max.')
-    .refine(
-      (val) => englishyRegex.test(val),
-      { message: 'Entered name contains prohibited characters.' }
-    )
-    .refine((val) => !leoProfanity.check(val), {
-      message: 'Inappropriate content detected. Please use a different name.'}
-    ) 
-  )
-  , 
+  // familyName: 
+  // z.preprocess(
+  //   (val) => (typeof val === 'string' ? val.trim() : val),
+  // z.string()
+  // .min(1, 'Last name is required')
+  // .max(25, 'Last name is too long. 25 characters max.')
+  // .refine(
+  //   (val) => englishyRegex.test(val),
+  //   { message: 'Entered name contains prohibited characters.' }
+  // )
+  // .refine((val) => !leoProfanity.check(val), {
+  //   message: 'Inappropriate content detected. Please use a different name.'})
+  // )
+  // , 
+
+  // givenName: 
+  // z.preprocess(
+  //   (val) => (typeof val === 'string' ? val.trim() : val),
+  //   z.string()
+  //   .min(1, 'First name is required')
+  //   .max(25, 'First name is too long. 25 characters max.')
+  //   .refine(
+  //     (val) => englishyRegex.test(val),
+  //     { message: 'Entered name contains prohibited characters.' }
+  //   )
+  //   .refine((val) => !leoProfanity.check(val), {
+  //     message: 'Inappropriate content detected. Please use a different name.'}
+  //   ) 
+  // )
+  // , 
   
   altEmail: z.preprocess(
     // (val) => val === '' ? null : val,
