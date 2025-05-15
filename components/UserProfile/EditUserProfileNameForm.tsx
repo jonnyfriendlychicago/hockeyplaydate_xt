@@ -20,10 +20,10 @@ import { UserProfileNameFormType } from '@/app/types/forms/userProfileNameFormTy
 // import { useToast } from '@/components/ui/use-toast'; 
 // import { useToast } from "@/hooks/use-toast" // // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
 
-type FormData = {
-  givenName: string;
-  familyName: string;
-};
+// type FormData = {
+//   givenName: string;
+//   familyName: string;
+// };
 
 type Props = {
   givenName: string | null | undefined;
@@ -45,13 +45,18 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
 
   // const { toast } = useToast(); // put this inside your component function
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: UserProfileNameFormType) => {
+  // const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
+      // Defensive re-parse to ensure trimming and validation are enforced
+      const payload = userProfileNameValSchema.parse(data);
+
       const res = await fetch('/api/user-profile/update-name', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        // body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -93,6 +98,7 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
                   <Input 
                   placeholder="Your first name" 
                   {...field} 
+                  value={(field.value ?? '') as string}
                   disabled={loading}/>
                 </FormControl>
                 <FormMessage />
@@ -110,6 +116,7 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
                   <Input 
                   placeholder="Your last name" 
                   {...field} 
+                  value={(field.value ?? '') as string}
                   disabled={loading}/>
                 </FormControl>
                 <FormMessage />
