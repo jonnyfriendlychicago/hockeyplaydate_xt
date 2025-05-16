@@ -1,4 +1,7 @@
 // app/(root)/member/edit-backend-test/page.tsx
+
+// 2025may16: note for future self: we should enhance this to use a function from lib/enhancedAuthentication/authUserVerification.ts 
+
 // this entire file purely for testing backend api; it is not intended for production use by real-life end users
 // 2025may13: after more than 10 tries, we cannot seem to get the conditional redirect to work in a deployed environment.  No idea why, works fine in local dev under all scenarios; failure in deployed env doesn't make any sense.  
 // cont'd: we moved that env-based redirect line up/down this file multiple places, but it doesn't work reliably regardless. Abandoning env-based rendering with redirect. 

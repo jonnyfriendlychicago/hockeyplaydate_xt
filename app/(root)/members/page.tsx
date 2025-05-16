@@ -1,4 +1,8 @@
 // app/(root)/members/page.tsx
+// 2025may16: note for future self: 
+// (1) we should enhance this to use a function from lib/enhancedAuthentication/authUserVerification.ts and 
+// (2) this entire file needs to be updated: only display those users who are fellow members of authenticated users groups
+
 'use client';
 
 import { useEffect, useState } from 'react';

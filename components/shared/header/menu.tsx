@@ -1,5 +1,6 @@
 // components/shared/header/menu.tsx
 // everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive Additional documentation: https://github.com/auth0/nextjs-auth0
+// 2025may16: when ready, enhance below to import/use the newly created lib/enhancedAuthentication/authUserVerification.ts
 
 import { Button } from '@/components/ui/button';
 import {
