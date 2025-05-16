@@ -44,6 +44,11 @@ let parsed;
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
   
+ // Remove altEmail if it's the same as login email
+ if (parsed.altEmail && parsed.altEmail.toLowerCase() === dbUser.email.toLowerCase()) {
+  parsed.altEmail = null;
+}
+
   // Sanitize nullable fields
   const payload = {
     ...parsed,
