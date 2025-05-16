@@ -79,6 +79,7 @@ export default async function RootLayout({
         <UserProfileNameGate
           givenName={userProfile?.givenName}
           familyName={userProfile?.familyName}
+          authUserEmail={authSessionUser?.email ?? 'friend'}
         />
       )}
 

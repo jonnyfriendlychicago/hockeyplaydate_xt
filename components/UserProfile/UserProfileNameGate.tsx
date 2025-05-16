@@ -1,3 +1,5 @@
+// components/UserProfile/UserProfileNameGate.tsx
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -6,9 +8,10 @@ import { EditUserProfileNameForm } from './EditUserProfileNameForm';
 type Props = {
   givenName: string | null | undefined;
   familyName: string | null | undefined;
+  authUserEmail: string;
 };
 
-export function UserProfileNameGate({ givenName, familyName }: Props) {
+export function UserProfileNameGate({ givenName, familyName , authUserEmail}: Props) {
   const pathname = usePathname();
 
   const suppress =
@@ -21,6 +24,8 @@ export function UserProfileNameGate({ givenName, familyName }: Props) {
     <EditUserProfileNameForm
       givenName={givenName}
       familyName={familyName}
+      authUserEmail={authUserEmail}
+      
     />
   );
 }
