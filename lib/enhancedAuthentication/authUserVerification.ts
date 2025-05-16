@@ -18,14 +18,17 @@ type FullUserProfile = UserProfile & {
   };
 
 export async function getAuthUserOrRedirect(): Promise<FullUserProfile> {
-//  export async function getAuthUserOrRedirect() {
   const session = await auth0.getSession();
   const sessionUser = session?.user;
 
+  // if not authenticated, must do so
   if (!sessionUser) {
     redirect('/auth/login');
   }
 
+  // authUser record is created for user upon very first authentication/login, and repeated/synced for each subsequent login.  
+  // no scenario wheren authUser record should not exist for this user; 
+  // below this is a safe guard / double check
   const dbUser = await prisma.authUser.findUnique({
     where: { auth0Id: sessionUser.sub },
   });
@@ -41,11 +44,21 @@ export async function getAuthUserOrRedirect(): Promise<FullUserProfile> {
     },
   });
 
+  // userProfile record is created / double-checked for existence upon first and all subsequent logins
+  // below this is a safe guard / double check
   if (!userProfile) {
     redirect('/');
   }
-
+  // below means userProfile is fully accessible by the importing page/component
   return userProfile;
+}
+
+/**
+ * Placeholder: Extend this to verify the authenticated user is an organizer.
+ * If not an organizer, redirect to login or access-denied page.
+ */
+export async function getAuthOrganizerOrRedirect() {
+  throw new Error('getAuthOrganizerOrRedirect not yet implemented');
 }
 
 /**
@@ -56,10 +69,3 @@ export async function getAuthAdminOrRedirect() {
   throw new Error('getAuthAdminOrRedirect not yet implemented');
 }
 
-/**
- * Placeholder: Extend this to verify the authenticated user is an organizer.
- * If not an organizer, redirect to login or access-denied page.
- */
-export async function getAuthOrganizerOrRedirect() {
-  throw new Error('getAuthOrganizerOrRedirect not yet implemented');
-}
