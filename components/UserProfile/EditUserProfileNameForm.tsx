@@ -1,4 +1,4 @@
-// components/UserProfile/EdiUserProfileNameForm.tsx
+// components/UserProfile/EditUserProfileNameForm.tsx
 'use client';
 
 import { useState } from 'react';
