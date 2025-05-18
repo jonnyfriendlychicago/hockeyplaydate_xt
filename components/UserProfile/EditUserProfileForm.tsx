@@ -109,8 +109,6 @@ export default function EditUserProfileForm({ initialValues , defaultSluggy, aut
       handleFieldErrorsFromServer(form, data);
     }
 
-      
-
       } catch (err) {
         console.error('Unexpected error:', err);
       } finally {
