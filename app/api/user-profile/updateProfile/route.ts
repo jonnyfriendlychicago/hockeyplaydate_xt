@@ -44,9 +44,67 @@ let parsed;
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
   
- // Remove altEmail if it's the same as login email
+ // set altEmail to null if value incoming from form is the same as login email
  if (parsed.altEmail && parsed.altEmail.toLowerCase() === dbUser.email.toLowerCase()) {
   parsed.altEmail = null;
+}
+
+// make sure altEmail unique among auth_user.id (i.e. email) as well as unique among user_profile.altEmail
+if (parsed.altEmail) {
+  const alt = parsed.altEmail.toLowerCase();
+
+  // Rule (a): Must not match altEmail of any other user_profile
+  const altMatchInProfile = await prisma.userProfile.findFirst({
+    where: {
+      altEmail: alt,
+      NOT: {
+        userId: dbUser.id,
+      },
+    },
+  });
+
+  if (altMatchInProfile) {
+    return NextResponse.json(
+      {
+        error: 'Validation failed',
+        issues: [
+          {
+            field: 'altEmail',
+            message: 'That email address is already in use. UP',
+          },
+        ],
+      },
+      { status: 400 }
+    );
+  }
+
+  // Rule (b): Must not match login email of any auth_user
+  const altMatchInAuth = await prisma.authUser.findFirst({
+    where: {
+      email: alt,
+      NOT: {
+        id: dbUser.id,
+      },
+    },
+  });
+
+  if (altMatchInAuth) {
+    return NextResponse.json(
+      {
+        error: 'Validation failed',
+        issues: [
+          {
+            field: 'altEmail',
+            message: 'That email address is already in use. AU',
+          },
+        ],
+      },
+      { status: 400 }
+    );
+  }
+
+  // Normalize casing if valid
+  parsed.altEmail = alt;
 }
 
   // Sanitize nullable fields

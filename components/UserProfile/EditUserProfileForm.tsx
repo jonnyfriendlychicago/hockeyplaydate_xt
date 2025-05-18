@@ -81,9 +81,27 @@ export default function EditUserProfileForm({ initialValues , defaultSluggy, aut
           const updatedProfile = await res.json();
           const sluggy = updatedProfile.slugVanity || updatedProfile.slugDefault;
           safeRedirect(`/member/${sluggy}`);
+
+        // } else {
+        //   console.error('Update failed');
+        // }
+
+        // 2025may18: above replaced by below, to show backend error messages
+      } else {
+        const data = await res.json();
+      
+        if (data?.issues && Array.isArray(data.issues)) {
+          data.issues.forEach((issue: { field: string; message: string }) => {
+            form.setError(issue.field as keyof UserProfileFormType, {
+              type: 'server',
+              message: issue.message,
+            });
+          });
         } else {
-          console.error('Update failed');
+          console.error('Unexpected server response:', data);
         }
+      }
+
       } catch (err) {
         console.error('Unexpected error:', err);
       } finally {
