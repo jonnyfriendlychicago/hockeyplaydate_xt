@@ -22,6 +22,7 @@ import InputMask from 'react-input-mask'; // npm install --save-dev @types/react
 // Note: 'npm install react-input-mask' for above won't work: react-input-mask is written in JavaScript and doesn't ship its own TypeScript types by default.
 // import { UseFormReturn } from 'react-hook-form';
 import { normalizeNullable } from '@/lib/helpers/normalize';
+import { handleFieldErrorsFromServer } from '@/lib/helpers/handleFieldErrorsFromServer';
 
 type Props = {
   // userProfile: UserProfileFormType;
@@ -87,20 +88,28 @@ export default function EditUserProfileForm({ initialValues , defaultSluggy, aut
         // }
 
         // 2025may18: above replaced by below, to show backend error messages
-      } else {
-        const data = await res.json();
+      // } else {
+      //   const data = await res.json();
       
-        if (data?.issues && Array.isArray(data.issues)) {
-          data.issues.forEach((issue: { field: string; message: string }) => {
-            form.setError(issue.field as keyof UserProfileFormType, {
-              type: 'server',
-              message: issue.message,
-            });
-          });
-        } else {
-          console.error('Unexpected server response:', data);
-        }
-      }
+      //   if (data?.issues && Array.isArray(data.issues)) {
+      //     data.issues.forEach((issue: { field: string; message: string }) => {
+      //       form.setError(issue.field as keyof UserProfileFormType, {
+      //         type: 'server',
+      //         message: issue.message,
+      //       });
+      //     });
+      //   } else {
+      //     console.error('Unexpected server response:', data);
+      //   }
+      // }
+
+      // 2025may18, part 2: above replaced by below, to use shared helper function
+    } else {
+      const data = await res.json();
+      handleFieldErrorsFromServer(form, data);
+    }
+
+      
 
       } catch (err) {
         console.error('Unexpected error:', err);
