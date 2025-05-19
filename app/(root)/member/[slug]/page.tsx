@@ -1,5 +1,9 @@
 // app/(root)/member/[slug]/page.tsx
 
+// 2025may16: note for future self: 
+// (1) we should enhance this to use a function from lib/enhancedAuthentication/authUserVerification.ts and 
+// (2) this entire file needs to be updated: only display those users who are fellow members of authenticated users groups
+
 export const dynamic = 'force-dynamic';
 // 101: This server-side page, by default, doesn't refresh data when its been visited just recently.  
 // Result is that upon routing here from edit form, the page will display with cached (and now stale) data.

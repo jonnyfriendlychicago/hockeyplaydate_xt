@@ -1,38 +1,19 @@
 // app/(root)/member/edit/page.tsx
 
-import { auth0 } from '@/lib/auth0';
-import { prisma } from '@/lib/prisma';
 import EditUserProfileForm from '@/components/UserProfile/EditUserProfileForm';
-import { redirect } from 'next/navigation';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
+import { getAuthUserOrRedirect } from '@/lib/enhancedAuthentication/authUserVerification';
 
 export default async function EditProfilePage() {
-  // (0) authentication / security
-  const session = await auth0.getSession();
-  const sessionUser = session?.user;
-  if (!sessionUser) redirect('/auth/login');
-  const dbUser = await prisma.authUser.findUnique({
-    where: { auth0Id: sessionUser.sub },
-  });
-  if (!dbUser) redirect('/auth/login');
+  const  userProfile = await getAuthUserOrRedirect();
 
   // (1) essential variables
-  const userProfile = await prisma.userProfile.findUnique({ // get as-is user profile (for downstream use in form)
-    where: { userId: dbUser.id },
-    // adding below to get sibling authuser object
-    include: { // this include here means: get sibling authUser object? yes! 2025may08
-      authUser: true, 
-    },
-  });
-  // (1.1) abandon if path failure encountered
-  if (!userProfile) redirect('/'); // this scenario should never be reached, b/c every authUser record will have an associated userProfile record, unless Auth0 or core HPD usermgmt code went berzerk at login
-
   const displayName = // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
-  `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email 
+  `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || userProfile.authUser.email 
   || 'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
   
   const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
@@ -81,7 +62,8 @@ export default async function EditProfilePage() {
         {/* Left: Avatar */}
         <div className="col-span-2 flex flex-col items-center justify-center gap-4">
           <UserAvatar
-            src={dbUser.picture}
+            // src={dbUser.picture}
+            src={userProfile.authUser.picture}
             fallback="A"
             size="xl"
             className="ring-2 ring-gray-400 shadow-lg"

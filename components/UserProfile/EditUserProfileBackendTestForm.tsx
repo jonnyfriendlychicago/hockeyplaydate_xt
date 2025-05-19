@@ -1,5 +1,5 @@
 // components/UserProfile/EditUserProfileBackendTestForm.tsx
-// this entire file purely for testing backend api; it is not intended for production use
+// this entire file purely for testing backend api; it is not intended for production use by real-life end users
 
 'use client';
 
@@ -7,10 +7,8 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-// import InputMask from 'react-input-mask';
 import { useSafeRedirect } from '@/lib/navigation';
 import { RawUserProfileInputType } from '@/app/types/forms/rawUserProfileInputType';
-
 
 type Props = {
   initialValues: RawUserProfileInputType;
@@ -23,7 +21,6 @@ export default function EditUserProfileBackendTestForm({ initialValues, defaultS
   const [loading, setLoading] = useState(false);
   const [errorOutput, setErrorOutput] = useState('');
   const [formValues, setFormValues] = 
-//   useState({...initialValues,});
   useState<RawUserProfileInputType>(initialValues);
 
   const handleChange = (field: string, value: string) => {
@@ -50,13 +47,6 @@ export default function EditUserProfileBackendTestForm({ initialValues, defaultS
       } else {
         setErrorOutput(JSON.stringify(result, null, 2));
       }
-//     } catch (err: any) {
-//       setErrorOutput(err.message || 'Unexpected error');
-      
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 
         } catch (err) {
             if (err instanceof Error) {
@@ -71,7 +61,7 @@ export default function EditUserProfileBackendTestForm({ initialValues, defaultS
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Custom URL */}
+
       <div>
         <label className="block text-sm font-medium">Custom Profile URL</label>
         <div className="flex items-center rounded-md border px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-ring">
@@ -138,17 +128,6 @@ export default function EditUserProfileBackendTestForm({ initialValues, defaultS
 
       <div>
         <label className="block text-sm font-medium">Phone Number</label>
-        {/* <InputMask
-          mask="999.999.9999"
-          placeholder="123.456.7890"
-          maskChar=""
-          value={formValues.phone ?? ''}
-          onChange={(e) => handleChange('phone', e.target.value.replace(/\D/g, ''))}
-          disabled={loading}
-        >
-          {(inputProps) => <Input {...inputProps} />}
-        </InputMask> */}
-
         <Input
         placeholder="1234567890 or any string"
         value={formValues.phone ?? ''}

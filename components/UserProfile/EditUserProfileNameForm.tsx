@@ -1,4 +1,5 @@
-// components/UserProfile/EdiUserProfileNameForm.tsx
+// components/UserProfile/EditUserProfileNameForm.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -17,20 +18,22 @@ import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userProfileNameValSchema } from '@/lib/validation/userProfileNameValSchema';
 import { UserProfileNameFormType } from '@/app/types/forms/userProfileNameFormType';
+import Link from 'next/link';
 // import { useToast } from '@/components/ui/use-toast'; 
 // import { useToast } from "@/hooks/use-toast" // // npx shadcn@latest add toast // ALSO: toast is more complex than many other simple shadCN components, read more: https://ui.shadcn.com/docs/components/toast
 
-type FormData = {
-  givenName: string;
-  familyName: string;
-};
+// type FormData = {
+//   givenName: string;
+//   familyName: string;
+// };
 
 type Props = {
   givenName: string | null | undefined;
   familyName: string | null | undefined;
+  authUserEmail: string;
 };
 
-export function EditUserProfileNameForm({ givenName, familyName }: Props) {
+export function EditUserProfileNameForm({ givenName, familyName, authUserEmail }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   // const [submitted, setSubmitted] = useState(false);
@@ -45,13 +48,18 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
 
   // const { toast } = useToast(); // put this inside your component function
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: UserProfileNameFormType) => {
+  // const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
+      // Defensive re-parse to ensure trimming and validation are enforced
+      const payload = userProfileNameValSchema.parse(data);
+
       const res = await fetch('/api/user-profile/update-name', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        // body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -73,10 +81,14 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
   };
 
   return (
-    <div className="bg-yellow-50 border border-yellow-300 p-4 my-4 rounded-md max-w-2xl mx-auto">
-      <h2 className="text-lg font-semibold mb-2">
-        Let’s finish setting up your profile so others know who you are.
-      </h2>
+    // <div className="bg-yellow-50 border border-yellow-300 p-4 my-4 rounded-md max-w-2xl mx-auto">
+    // <div className="bg-slate-100 border border-slate-300  p-4 my-4 rounded-md w-full max-w-4xl  ">
+      <div className="w-full max-w-4xl mx-auto bg-blue-50 border border-r-4 border-b-4 border-blue-500  p-6 my-6 rounded-lg">
+
+      <h2 className="text-lg font-semibold mb-2">Welcome to Hockey Playdate, {authUserEmail}!</h2>
+      <p className="mb-2 text-sm text-muted-foreground">
+        Please provide your name below to continue. You can also go a step further and <Link href="/member/edit" className="underline text-blue-600 hover:text-blue-800">complete your full profile</Link>.
+      </p>
 
       <Form {...form}>
         <form 
@@ -93,6 +105,7 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
                   <Input 
                   placeholder="Your first name" 
                   {...field} 
+                  value={(field.value ?? '') as string}
                   disabled={loading}/>
                 </FormControl>
                 <FormMessage />
@@ -110,6 +123,7 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
                   <Input 
                   placeholder="Your last name" 
                   {...field} 
+                  value={(field.value ?? '') as string}
                   disabled={loading}/>
                 </FormControl>
                 <FormMessage />
@@ -122,7 +136,7 @@ export function EditUserProfileNameForm({ givenName, familyName }: Props) {
             className={loading ? 'opacity-50 cursor-not-allowed' : ''}
             disabled={loading}
             > 
-            {loading ? 'Saving...' : 'Save and Continue'}
+            {loading ? 'Saving...' : 'Save and Close'}
           </Button>
         </form>
       </Form>
