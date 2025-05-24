@@ -18,7 +18,6 @@ export default async function Home() {
   }
 
   // If session ... 
-  // console.log(session.user) // for development/testing: log all fields being delivered by Auth0
   return ( 
     <main>
       <h1>Welcome, {session.user.name}!</h1>
