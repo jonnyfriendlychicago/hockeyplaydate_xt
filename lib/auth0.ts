@@ -22,7 +22,7 @@ export const auth0 = new Auth0Client({
     if (!baseUrl) throw new Error("APP_BASE_URL is not defined");
 
     if (error) {
-      if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.error("Auth0 login error:", error);
+      if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.error("auth0.ts >> Auth0 login error:", error);
 
       let errorCode = "unknown_error";
       let emailParam = "";
