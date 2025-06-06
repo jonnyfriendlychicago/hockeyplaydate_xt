@@ -37,6 +37,7 @@
 
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
 import { NextResponse } from "next/server";
+
   type OAuth2Error = {
     name?: string;
     code?: string;
@@ -45,7 +46,6 @@ import { NextResponse } from "next/server";
   
 export const auth0 = new Auth0Client({
 
-    
 async onCallback(error) {
 
     const baseUrl = process.env.APP_BASE_URL;
@@ -55,6 +55,8 @@ async onCallback(error) {
     console.error("Auth0 login error:", error);
 
     let errorCode = "unknown_error";
+    let emailParam = "";
+    let userIdParam = "";
 
     const errorCause = error.cause as OAuth2Error | undefined;
     const errorCauseMsg = errorCause?.message || "";
@@ -64,15 +66,35 @@ async onCallback(error) {
         errorCauseMsg.startsWith("email_verified:false")
     ) {
         errorCode = "unverified_email";
+        const emailMatch = errorCauseMsg.match(/email:([^|]+)/);
+        // const userIdMatch = errorCauseMsg.match(/user_id:([^|]+)/); // next line allows for the fact that auth0 uses the pipe characters
+        const userIdMatch = errorCauseMsg.match(/user_id:(.+)$/);
+        
+        emailParam = emailMatch?.[1] || "";
+        userIdParam = userIdMatch?.[1] || "";
+
     } else {
         errorCode = errorCause?.code || error.code || "unknown_error";
     }
 
-    // 101: below uses NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below is
-    return NextResponse.redirect(
-        new URL(`/login_error?error=${encodeURIComponent(errorCode)}`, baseUrl)
-    );
+    const redirectUrl = new URL(`/login_error`, baseUrl);
+    redirectUrl.searchParams.set("error", errorCode);
+    if (emailParam) redirectUrl.searchParams.set("email", emailParam);
+    if (userIdParam) redirectUrl.searchParams.set("user_id", userIdParam);
+
+    return NextResponse.redirect(redirectUrl);
+
+    // // 101: below uses NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below is
+    // return NextResponse.redirect(
+    //     // new URL(`/login_error?error=${encodeURIComponent(errorCode)}`, baseUrl) // this line replaced by below, which includes essential user values
+    //     new URL(
+    //       `/login_error?error=${encodeURIComponent(errorCode)}&email=${encodeURIComponent(emailParam)}&user_id=${encodeURIComponent(userIdParam)}`,
+    //       baseUrl
+    //     )
+    // );
+    
     }
+
     // below: if NO error.... 
     return NextResponse.redirect(
     // context.returnTo || "/"
