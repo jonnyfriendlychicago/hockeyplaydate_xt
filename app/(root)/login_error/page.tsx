@@ -41,7 +41,7 @@ export default function LoginErrorPage({ searchParams }: Params) {
               <strong>User ID:</strong> {safeUserId || "Unknown"}
             </p>
             <p className="text-sm text-muted-foreground">
-              Can't find the email? This page will soon include a “Resend Verification Email” button.
+            Can&apos;t find the email? This page will soon include a “Resend Verification Email” button.
             </p>
           </AlertDescription>
         </Alert>
