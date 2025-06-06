@@ -2,7 +2,68 @@
 // this file created per Auth0 documentation: https://auth0.com/docs/quickstart/webapp/nextjs/interactive
 // additional documentation: https://github.com/auth0/nextjs-auth0
 
+// below is updated draft to catch authentication error, using CG dialogue
 
+import { Auth0Client } from "@auth0/nextjs-auth0/server";
+import { NextResponse } from "next/server";
+
+type OAuth2Error = {
+  name?: string;
+  code?: string;
+  message?: string;
+};
+  
+export const auth0 = new Auth0Client({
+
+  async onCallback(error) {
+
+    // 101: sections below use NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below we begin building the URLs we'll redirect to.
+    const baseUrl = process.env.APP_BASE_URL;
+    if (!baseUrl) throw new Error("APP_BASE_URL is not defined");
+
+    if (error) {
+      if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.error("Auth0 login error:", error);
+
+      let errorCode = "unknown_error";
+      let emailParam = "";
+      let userIdParam = "";
+
+      const errorCause = error.cause as OAuth2Error | undefined;
+      const errorCauseMsg = errorCause?.message || "";
+
+      if (
+          errorCause?.code === "access_denied" &&
+          errorCauseMsg.startsWith("email_verified:false")
+      ) {
+          errorCode = "unverified_email";
+          const emailMatch = errorCauseMsg.match(/email:([^|]+)/);
+          // const userIdMatch = errorCauseMsg.match(/user_id:([^|]+)/); // next line allows for the fact that auth0 uses the pipe characters
+          const userIdMatch = errorCauseMsg.match(/user_id:(.+)$/);
+          
+          emailParam = emailMatch?.[1] || "";
+          userIdParam = userIdMatch?.[1] || "";
+
+      } else {
+          errorCode = errorCause?.code || error.code || "unknown_error";
+      }
+
+      const redirectUrl = new URL(`/login_error`, baseUrl);
+      redirectUrl.searchParams.set("error", errorCode);
+      if (emailParam) redirectUrl.searchParams.set("email", emailParam);
+      if (userIdParam) redirectUrl.searchParams.set("user_id", userIdParam);
+
+      return NextResponse.redirect(redirectUrl);
+
+    }
+
+    // below: if NO error.... 
+    return NextResponse.redirect(
+      new URL("/", baseUrl)
+    );
+  },
+});
+  
+  
 // 2025may29: below is original from Auth0 documentation: https://auth0.com/docs/quickstart/webapp/nextjs/interactive; 
             // import { Auth0Client } from "@auth0/nextjs-auth0/server";
             // // import { NextResponse } from "next/server";            
@@ -33,76 +94,6 @@
             //     },
             //   })
 
-  // below is updated draft to catch authentication error, using CG dialogue
-
-import { Auth0Client } from "@auth0/nextjs-auth0/server";
-import { NextResponse } from "next/server";
-
-  type OAuth2Error = {
-    name?: string;
-    code?: string;
-    message?: string;
-  };
-  
-export const auth0 = new Auth0Client({
-
-async onCallback(error) {
-
-    const baseUrl = process.env.APP_BASE_URL;
-    if (!baseUrl) throw new Error("APP_BASE_URL is not defined");
-
-    if (error) {
-    console.error("Auth0 login error:", error);
-
-    let errorCode = "unknown_error";
-    let emailParam = "";
-    let userIdParam = "";
-
-    const errorCause = error.cause as OAuth2Error | undefined;
-    const errorCauseMsg = errorCause?.message || "";
-
-    if (
-        errorCause?.code === "access_denied" &&
-        errorCauseMsg.startsWith("email_verified:false")
-    ) {
-        errorCode = "unverified_email";
-        const emailMatch = errorCauseMsg.match(/email:([^|]+)/);
-        // const userIdMatch = errorCauseMsg.match(/user_id:([^|]+)/); // next line allows for the fact that auth0 uses the pipe characters
-        const userIdMatch = errorCauseMsg.match(/user_id:(.+)$/);
-        
-        emailParam = emailMatch?.[1] || "";
-        userIdParam = userIdMatch?.[1] || "";
-
-    } else {
-        errorCode = errorCause?.code || error.code || "unknown_error";
-    }
-
-    const redirectUrl = new URL(`/login_error`, baseUrl);
-    redirectUrl.searchParams.set("error", errorCode);
-    if (emailParam) redirectUrl.searchParams.set("email", emailParam);
-    if (userIdParam) redirectUrl.searchParams.set("user_id", userIdParam);
-
-    return NextResponse.redirect(redirectUrl);
-
-    // // 101: below uses NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below is
-    // return NextResponse.redirect(
-    //     // new URL(`/login_error?error=${encodeURIComponent(errorCode)}`, baseUrl) // this line replaced by below, which includes essential user values
-    //     new URL(
-    //       `/login_error?error=${encodeURIComponent(errorCode)}&email=${encodeURIComponent(emailParam)}&user_id=${encodeURIComponent(userIdParam)}`,
-    //       baseUrl
-    //     )
-    // );
-    
-    }
-
-    // below: if NO error.... 
-    return NextResponse.redirect(
-    // context.returnTo || "/"
-    new URL("/", baseUrl)
-    );
-},
-});
-  
   
 
 
