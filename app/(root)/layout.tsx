@@ -45,9 +45,9 @@ export default async function RootLayout({
   // set current user variables 
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user; //  formerly: const auth0User = session?.user; ... and this was easily confused with actual entity authUser / auth_user; 
-  if (process.env.CONSOLE_LOG_CURRENT_USER == 'true') console.log(authSessionUser); // for development/testing: log all fields being delivered by Auth0
+  if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.log(authSessionUser); // for development/testing: log all fields being delivered by Auth0
 
-  const userProfile = authSessionUser? await syncUserFromAuth0(authSessionUser) : null; // runs the sync every login, AND get user profile from sync
+  const userProfile = authSessionUser? await syncUserFromAuth0(authSessionUser) : null; // runs the sync every login, AND gets the user profile that results from the sync
   // 101: above ternary could also be written as traditional 'if' syntax: 
   // let userProfile = null; if (auth0User) {userProfile = await syncUserFromAuth0(auth0User);}
   
@@ -62,8 +62,8 @@ export default async function RootLayout({
   // const currentPath = headers().get('x-invoke-path') || ''; 
   // const suppressNameForm = currentPath.includes('/member/edit') || currentPath.includes('/member/edit-backend-test'); 
   
-  const authUserEmailNotVerified = !!authSessionUser && !authSessionUser.email_verified; // determine if the users profile has been verified
-  // console.log("authUserEmailNotVerified: " + authUserEmailNotVerified)
+  // 2025jun06: below (and its use downstream in the return) hereby deprecated: in new design, for a user who doesn't have a verfied email, Auth0 will send error obj, not authenticated user obj.
+  // const authUserEmailNotVerified = !!authSessionUser && !authSessionUser.email_verified; // determine if the users profile has been verified
 
   return (
     <div className='flex h-screen flex-col'>
@@ -87,11 +87,11 @@ export default async function RootLayout({
         />
       )}
 
-      {authUserEmailNotVerified && (
+      {/* {authUserEmailNotVerified && (
         <>
         <h1>hey dude, verify your email already. [placeholder for button: resend verification email] [placeholder for button: logout ] </h1>
         </>
-      )}
+      )} */}
       
       <main className='flex-1 wrapper'>{children}</main>
       <Footer/>
