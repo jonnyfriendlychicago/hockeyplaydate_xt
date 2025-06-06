@@ -62,6 +62,9 @@ export default async function RootLayout({
   // const currentPath = headers().get('x-invoke-path') || ''; 
   // const suppressNameForm = currentPath.includes('/member/edit') || currentPath.includes('/member/edit-backend-test'); 
   
+  const authUserEmailNotVerified = !!authSessionUser && !authSessionUser.email_verified; // determine if the users profile has been verified
+  // console.log("authUserEmailNotVerified: " + authUserEmailNotVerified)
+
   return (
     <div className='flex h-screen flex-col'>
       <Header />
@@ -84,6 +87,12 @@ export default async function RootLayout({
         />
       )}
 
+      {authUserEmailNotVerified && (
+        <>
+        <h1>hey dude, verify your email already. [placeholder for button: resend verification email] [placeholder for button: logout ] </h1>
+        </>
+      )}
+      
       <main className='flex-1 wrapper'>{children}</main>
       <Footer/>
       {/* <Toaster /> */}
