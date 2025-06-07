@@ -63,6 +63,22 @@ export default function MembersPage() {
 
   }, []);
 
+  // 2025ju06: below added to prevent members (even tho no one started using yet) from being displayed cold to public unprotected page.  
+  if (process.env.APP_BASE_URL == 'https://hockeyplaydate.com') 
+    return ( 
+      <main>
+        <h1>Members Page (Placeholder)</h1>
+        <p>
+          This is a placeholder page for what eventually will be the production members page. <br/>
+          Non-authenticated users will see an about members info blurb, with some examples of what authenticated users will see. <br/>
+          Authenticated users will see an expandable minimized version of that info blurb, PLUS: 
+          a card array of all hockey playdate members which are members of the same group as the logged in user.<br/>
+          Anticipated features will include search/filtering, etc. 
+          </p>
+      </main>
+    );
+
+  // 2025jun06: note major updated needed to below: once groups have been built, we can enhanced below to display cars for only those members which are members of the same group as the logged in user.
   return (
     <section className="max-w-5xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">All Members</h1>
