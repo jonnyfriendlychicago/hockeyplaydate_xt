@@ -63,8 +63,10 @@ export default function MembersPage() {
 
   }, []);
 
+  const showTempPage = process.env.NEXT_PUBLIC_SHOW_TEMP_PAGE_MEMBERS?.toLowerCase() === 'true'; // make doubly sure variable exists and value read correctly
+
   // 2025ju06: below added to prevent members (even tho no one started using yet) from being displayed cold to public unprotected page.  
-  if (process.env.APP_BASE_URL == 'https://hockeyplaydate.com') 
+  if (showTempPage) // 101: NEXT_PUBLIC_* variables will be read as boolean, hence no "equals..." functionality here. 
     return ( 
       <main>
         <h1>Members Page (Placeholder)</h1>
