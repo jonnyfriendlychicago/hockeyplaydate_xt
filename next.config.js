@@ -43,6 +43,12 @@ const nextConfig = {
   //   serverActions: true, // and other options you're using
   // }, 
 
+  env: {
+    APP_BASE_URL: process.env.APP_BASE_URL,
+  }, 
+  // 2025june5: above env thing added to accompodate physical explicity redirect
+
+  
   images: {
 
     // domains: [
