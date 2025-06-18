@@ -47,3 +47,14 @@ model UserProfile {
   @@map("user_profile")
 }
 
+model LoginFailure {
+  id            Int      @id @default(autoincrement()) @map("id")
+  presentableId String   @unique                      @map("presentable_id")
+  createdAt     DateTime @default(now())              @map("created_at")
+  errorCode     String?                               @map("error_code")
+  email         String?                               @map("email")
+  auth0Id       String?                               @map("auth0_id")
+
+  @@map("login_error")
+}
+
