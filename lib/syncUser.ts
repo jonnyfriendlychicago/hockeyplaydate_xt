@@ -3,6 +3,7 @@ import { prisma } from './prisma';
 import { customAlphabet } from 'nanoid'; // 2025apr10: used to remove possiblity of spelling unsavory words in defaultSlug generation
 import slugify from 'slugify'; // npm install slugify
 import leoProfanity from 'leo-profanity'; // npm install leo-profanity
+import { nanoidAlphaNumeric8char } from '@/lib/idGenerators/alphanumeric8char';
 
 type Auth0User = {
   sub: string;
@@ -17,14 +18,14 @@ type Auth0User = {
 
 // BEGIN: referenced functions
 // 101: below are are functions, but more specifically, each is executing a factory that returns a function; this is a utility constant.  That  why each is written as a "const"
-const nanoidAlphaNumeric = customAlphabet('bcdfghjklmnpqrstvwxyz0123456789', 8); // Safe characters only: consonants + digits (no vowels to avoid accidental words)
 const nanoidDigitsFour = customAlphabet('2345789', 4); // missing 1 and 6, for clarity and avoiding awkward numbers
 const nanoidDigitsTwo = customAlphabet('2345789', 2); // missing 1 and 6, for clarity and avoiding awkward numbers
 // 101: Below are custom functions built in this file, and as such, the code types/arranges better to write starting with keyword "function" (or, "async function", etc.)
 
 async function generateDefaultSlugFunc(): Promise<string> {
   do {
-    const attemptedDefaultSlug = nanoidAlphaNumeric(); 
+
+    const attemptedDefaultSlug = nanoidAlphaNumeric8char(); 
 
     const existing = await prisma.userProfile.findFirst({
       where: {
