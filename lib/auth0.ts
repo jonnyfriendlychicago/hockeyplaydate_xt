@@ -16,9 +16,9 @@ type OAuth2Error = {
 export const auth0 = new Auth0Client({
   async onCallback(error) {
     // 101: sections below use NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below we begin building the URLs we'll redirect to.
+    // 0 - establish base url and blow up  whole app flow blow up if env variable not available. 
     const baseUrl = process.env.APP_BASE_URL;
-    if (!baseUrl) throw new Error("APP_BASE_URL is not defined"); // this bit makes whole app flow blow up if env variable not available. 
-    
+    if (!baseUrl) throw new Error("APP_BASE_URL is not defined"); 
     // case 1: hit error
     if (error) {
       // 1 - log this thing so we see what's up
@@ -43,12 +43,10 @@ export const auth0 = new Auth0Client({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ errorCode, email, auth0Id }),
       });
-      
       const data = await response.json();
       // 5 - Redirect using the presentableId (safe for URL)
       const redirectUrl = new URL(`/login-error/${data.presentableId}`, baseUrl);
       return NextResponse.redirect(redirectUrl);
-
       } 
 
     // case 2: No error (success!)
