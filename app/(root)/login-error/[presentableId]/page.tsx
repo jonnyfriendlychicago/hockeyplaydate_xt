@@ -22,6 +22,31 @@ const record = await prisma.loginFailure.findUnique({
 if (!record) return notFound();
 // 3 - establish essential vars extracted from the returned object
 const { errorCode, email , auth0Id } = record; 
+
+  // here is function that the button calls the sdk, see email from A0
+
+//   const management = new ManagementClient({
+//     domain: AUTH0_DOMAIN,
+//     clientId: AUTH0_CLIENT_ID,
+//     clientSecret: AUTH0_CLIENT_SECRET,
+//   });
+
+//   // somehow... someway... need a way to make sure that the button logic can't be abused. look for npm solutions on rate limite, ip limit, etc. 
+
+// // below probably not ready to run, but build with it
+// try {
+//   // Call the verifyEmail method from the Auth0 SDK
+//   const job = await management.jobs.verifyEmail(params);
+//   console.log('Successfully created verification email job in Auth0.');
+//   return job.data;
+// } catch (error) {
+//   console.error('Auth0 API Error:', error.message);
+//   // Re-throw the error so the calling function (e.g., an API route)
+//   // can catch it and send an appropriate HTTP response.
+//   throw error;
+// }
+// }
+
 // 4 - set up variable content
 const renderContent = () => {
     switch (errorCode) {
