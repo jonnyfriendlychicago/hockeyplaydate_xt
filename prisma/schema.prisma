@@ -13,11 +13,11 @@ datasource db {
 
 model AuthUser {
   id             Int       @id @default(autoincrement())
-  // auth0Id        String    @unique         @map("auth0_id") 
-  auth0Id        String   @map("auth0_id") // 101: this @map specifies the exact name of the field to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
-  email          String    @unique                          // 101: no @map needed here, b/c it's a single world all lower case.  Prisma will create it simply as-is in psql. 
+  auth0Id        String    @unique         @map("auth0_id") // 101: this @map specifies the exact name of the field to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
+  // email          String    @unique  
+  email          String    // 2025jun21: removed unique constraint on email, b/c we will accept (then manage) "identity collision" being sent to us from auth0
   emailVerified  Boolean   @default(false) @map("email_verified")
-  name           String?
+  name           String?    // 101: no @map needed here, b/c it's a single world all lower case.  Prisma will create it simply as-is in psql. 
   givenName      String?   @map("given_name")
   familyName     String?   @map("family_name")
   nickname       String?

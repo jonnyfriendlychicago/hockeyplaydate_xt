@@ -153,32 +153,83 @@ function generateAltNicknameFunc( // proactively set userProfile.altNickname, e.
 // END: referenced functions
 
 export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
+  // 0 - abort if essential fields somehow missing
   if (!receivedA0userObj?.sub || !receivedA0userObj.email) return;
 
-  const dbAuthUser = await prisma.authUser.upsert({
-    where: { auth0Id: receivedA0userObj.sub },
-    update: {
-      email: receivedA0userObj.email,
-      emailVerified: receivedA0userObj.email_verified ?? false, // 101: The ?? operator is the nullish coalescing operator. It returns the right-hand value only if the left-hand value is null or undefined.
-      name: receivedA0userObj.name ?? null,
-      givenName: receivedA0userObj.given_name ?? null,
-      familyName: receivedA0userObj.family_name ?? null,
-      nickname: receivedA0userObj.nickname ?? null,
-      picture: receivedA0userObj.picture ?? null,
-    },
-    create: {
-      auth0Id: receivedA0userObj.sub,
-      email: receivedA0userObj.email,
-      emailVerified: receivedA0userObj.email_verified ?? false,
-      name: receivedA0userObj.name ?? null,
-      givenName: receivedA0userObj.given_name ?? null,
-      familyName: receivedA0userObj.family_name ?? null,
-      nickname: receivedA0userObj.nickname ?? null,
-      picture: receivedA0userObj.picture ?? null,
-    },
-  });
+  // 101: no longer using the Prisma upsert() method; it only only allows you to: Match on a unique field (auth0Id in this case) And perform an atomic update or create. 
+  // but! it can't (1) inspect the database first to detect duplicateOfId (2) dynamically set part of the create data based on other records
+  // so, not a fit anymore
+  
 
-  // check: does userProfile record exist for this authUser record?  (if returning login, it surely does; if first-time login, it doesn't)
+            // const dbAuthUser = await prisma.authUser.upsert({
+            //   where: { auth0Id: receivedA0userObj.sub },
+            //   update: {
+            //     email: receivedA0userObj.email,
+            //     emailVerified: receivedA0userObj.email_verified ?? false, // 101: The ?? operator is the nullish coalescing operator. It returns the right-hand value only if the left-hand value is null or undefined.
+            //     name: receivedA0userObj.name ?? null,
+            //     givenName: receivedA0userObj.given_name ?? null,
+            //     familyName: receivedA0userObj.family_name ?? null,
+            //     nickname: receivedA0userObj.nickname ?? null,
+            //     picture: receivedA0userObj.picture ?? null,
+            //   },
+            //   create: {
+            //     auth0Id: receivedA0userObj.sub,
+            //     email: receivedA0userObj.email,
+            //     emailVerified: receivedA0userObj.email_verified ?? false,
+            //     name: receivedA0userObj.name ?? null,
+            //     givenName: receivedA0userObj.given_name ?? null,
+            //     familyName: receivedA0userObj.family_name ?? null,
+            //     nickname: receivedA0userObj.nickname ?? null,
+            //     picture: receivedA0userObj.picture ?? null,
+            //   },
+            // });
+
+  // 1 - manage auth_user record 
+  // 1.1: check: does auth_user record exist for incoming authoid? 
+  let dbAuthUser = await prisma.authUser.findUnique({
+    where: { auth0Id: receivedA0userObj.sub },
+  });
+  // 1.2a: If user exists, update it (DO NOT touch duplicateOfId)
+  if (dbAuthUser) {
+    dbAuthUser = await prisma.authUser.update({
+      where: { auth0Id: receivedA0userObj.sub },
+      data: {
+        email: receivedA0userObj.email,
+        emailVerified: receivedA0userObj.email_verified ?? false,
+        name: receivedA0userObj.name ?? null,
+        givenName: receivedA0userObj.given_name ?? null,
+        familyName: receivedA0userObj.family_name ?? null,
+        nickname: receivedA0userObj.nickname ?? null,
+        picture: receivedA0userObj.picture ?? null,
+      },
+    });
+  } else {
+    // 1.2b: no exist, so go create
+    // Check if any existing user has the same email (but different auth0Id)
+    const existingWithSameEmail = await prisma.authUser.findFirst({
+      where: {
+        email: receivedA0userObj.email,
+        auth0Id: { not: receivedA0userObj.sub },
+      },
+      select: { id: true },
+    });
+    // Create a new auth user (and flag if it's a duplicate, per above)
+    dbAuthUser = await prisma.authUser.create({
+      data: {
+        auth0Id: receivedA0userObj.sub,
+        email: receivedA0userObj.email,
+        emailVerified: receivedA0userObj.email_verified ?? false,
+        name: receivedA0userObj.name ?? null,
+        givenName: receivedA0userObj.given_name ?? null,
+        familyName: receivedA0userObj.family_name ?? null,
+        nickname: receivedA0userObj.nickname ?? null,
+        picture: receivedA0userObj.picture ?? null,
+        duplicateOfId: existingWithSameEmail?.id ?? null,
+      },
+    });
+  }
+  // 2 - manage linked user_profile
+  // 2.1: check: does userProfile record exist for this authUser record?  (if returning login, it surely does; if first-time login, it doesn't)
   const existingProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
   });
