@@ -1,4 +1,5 @@
 // components/UserProfile/UserProfileNameGate.tsx
+// if criteria met,  the EditUserProfileNameForm would appear  omnipresent on all pages. This component prevents that from occurring (suppress!) for certain pages
 
 'use client';
 
