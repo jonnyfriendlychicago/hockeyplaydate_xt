@@ -22,15 +22,34 @@ export default async function RootLayout({
   // 101: above ternary could also be written as traditional 'if' syntax: let userProfile = null; if (auth0User) {userProfile = await syncUserFromAuth0(auth0User);}
   console.log("userProfile.authUser: ")
   console.log(userProfile?.authUser)
-  const profileMinimallyInsufficient = !!authSessionUser && (!userProfile?.givenName || !userProfile?.familyName); // determine if the users profile doesn't meet minimal biz goals
+  const dupeEmailAuthUser = userProfile?.authUser?.duplicateOfId; // basically, if there's a value for dueplicateOfId, then dupeEmailAuthUser = true / truthy
+  const showDupeEmailAccountBanner = userProfile?.authUser?.duplicateOfId; 
+  const showNameOnboardingForm = !dupeEmailAuthUser && !!authSessionUser && (!userProfile?.givenName || !userProfile?.familyName); // determine if the users profile doesn't meet minimal biz goals; 
   // 101: The !! (double bang) above is a JavaScript trick to coerce any value into a boolean: The first ! negates the value (e.g. turns truthy → false, or falsy → true), and the second ! negates it again, flipping it back — but now it's guaranteed to be a boolean (true or false)
+
+  const dupeEmailAuthUserNameString =
+  userProfile?.givenName && userProfile?.familyName
+    ? `${userProfile.givenName} ${userProfile.familyName}`
+    : userProfile?.givenName
+    ? userProfile.givenName
+    : userProfile?.familyName
+
+
+  const dupeEmailAuthUserAccountType =
+  userProfile?.authUser?.auth0Id?.startsWith('auth0|')
+    ? 'emailPassword'
+    : userProfile?.authUser?.auth0Id?.startsWith('google')
+    ? 'googleSocial'
+    : 'unknown';
+
+  
 
   // 1 - return baby
   return (
     <div className='flex h-screen flex-col'>
       <Header />
 
-      {profileMinimallyInsufficient && (
+      {showNameOnboardingForm && (
         <UserProfileNameGate
           givenName={userProfile?.givenName}
           familyName={userProfile?.familyName}
@@ -38,8 +57,12 @@ export default async function RootLayout({
         />
       )}
 
-      {userProfile?.authUser?.duplicateOfId && (
-        <DupeEmailAccountBanner email={userProfile.authUser.email} />
+      {showDupeEmailAccountBanner && (
+        <DupeEmailAccountBanner 
+          email={userProfile.authUser.email} 
+          nameString = {dupeEmailAuthUserNameString ?? userProfile.authUser.email} 
+          accountType = {dupeEmailAuthUserAccountType}
+          />
       )}
       
       <main className='flex-1 wrapper'>{children}</main>
