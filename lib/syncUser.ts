@@ -233,8 +233,8 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
   const existingProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
   });
-
-  let dbUserProfile;
+  // 2.1a: if not, create it!
+  // let dbUserProfile;
   
   if (!existingProfile) { // if not, proceed to create it
 
@@ -249,7 +249,8 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
     // create value to populate userProfile.altNickname
     const altyNickname = generateAltNicknameFunc(cleanFamilyName); 
 
-    dbUserProfile = await prisma.userProfile.create({
+    // dbUserProfile = await prisma.userProfile.create({
+      await prisma.userProfile.create({
       data: {
         userId: dbAuthUser.id,
         slugDefault: sluggyDefault, 
@@ -259,10 +260,19 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
         altNickname: altyNickname 
       },
     });
-  } else { 
-    dbUserProfile = existingProfile;
-  }
+  } 
+  // else { 
+  //   dbUserProfile = existingProfile;
+  // }
 
   // return dbAuthUser; 
-  return dbUserProfile; 
+  // return dbUserProfile; 
+
+  // Now always fetch full userProfile with related authUser
+const dbUserProfileWithAuthUser = await prisma.userProfile.findUnique({
+  where: { userId: dbAuthUser.id },
+  include: { authUser: true },
+});
+
+return dbUserProfileWithAuthUser;
 }
