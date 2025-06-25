@@ -12,6 +12,8 @@ datasource db {
 }
 
 model AuthUser {
+  // maintains data delivered continually from the auth0-based authentication method in a synch fashion.  
+  // auth0Id (called 'sub' in the incoming auth0 object) is a string that is the the unique Id from Auth0
   id             Int       @id @default(autoincrement())
   auth0Id        String    @unique         @map("auth0_id") // 101: this @map specifies the exact name of the field to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
   // email          String    @unique  
@@ -35,6 +37,10 @@ model AuthUser {
 }
 
 model UserProfile {
+  // 1:1 relationship to an authUser record. 
+  // records herein created once by auth0 sync process; after initial record creation, data does not again get written from authUser record. 
+  // maintains data about the end user; 
+  // this record the true "end user" account to which all down-stream activity is linked, such as groups, rsvps, etc.  
   id           Int      @id @default(autoincrement())
   userId       Int      @unique         @map("user_id")
   altEmail     String?  @map("alt_email")     
@@ -53,6 +59,7 @@ model UserProfile {
 }
 
 model LoginFailure {
+  // 
   id            Int      @id @default(autoincrement()) @map("id")
   presentableId String   @unique                      @map("presentable_id")
   createdAt     DateTime @default(now())              @map("created_at")
@@ -61,5 +68,46 @@ model LoginFailure {
   auth0Id       String?                               @map("auth0_id")
 
   @@map("login_error")
+}
+
+model AuthUserUserProfileSwapAudit {
+  // captures all records (by id) affected by a authUser-userProfile swap, as well as those fields which are affected by that process.
+
+  // below is the unique ID for this swap action/audit record
+  id                                         Int      @id @default(autoincrement()) @map("id")
+  // below field collection represents the authUser record that was primary/usable, which is getting DEMOTED to dupe/notUsable status
+  demotedAuthUserDotAuth0Id                  String?   @map("demoted_authuser_auth0_id")     // SOURCE_TABLE.FIELD: auth_user.auth0_id 
+  // NOTE: above field is extraneous from strict audit perspective, but aids human review/validation of audit
+  demotedAuthUserDotId                       Int?      @map("demoted_authuser_id")           // SOURCE_TABLE.FIELD: auth_user.id 
+  demotedAuthUserDotduplicateOfIdInitial     Int?      @map("demoted_authuser_duplicateof_id_initial") // SOURCE_TABLE.FIELD: auth_user.duplicateof_id 
+  // NOTE: above field will be NULL, b/c the intial value is null: this *was* the primary authUser record
+  demotedAuthUserDotduplicateOfIdPost        Int?      @map("demoted_authuser_duplicateof_id_post")    // SOURCE_TABLE.FIELD: auth_user.duplicateof_id 
+  // NOTE: above field will have a value, b/c this authUser record is being demoted / set as dupe. 
+
+  // below field collection represents the userProfile record that was primary/usable, ***which is being maintained*** for primary continued use: 
+  // the swap activity (being captured in this audit table) will switch this userProfile record FROM pair to the newly-demoted authUser record TO pair to the newly-promoted authUser record (see further fields). 
+  maintainedUserProfileDotId                 Int?      @map("maintained_userprofile_id")           
+  maintainedUserProfileDotUserIdInitial      Int?      @map("maintained_userprofile_userid_initial")           
+  maintainedUserProfileDotUserIdInitialPost  Int?      @map("maintained_userprofile_userid_post")           
+
+  // below field collection represents the authUser record that was in dupe/notUsable status, which is getting PROMOTED to primary/usable status
+  promotedAuthUserDotAuth0Id                  String?   @map("promoted_authuser_auth0_id")     // SOURCE_TABLE.FIELD: auth_user.auth0_id 
+  promotedAuthUserDotId                       Int?      @map("promoted_authuser_id")           // SOURCE_TABLE.FIELD: auth_user.id 
+  promotedAuthUserDotduplicateOfIdInitial     Int?      @map("promoted_authuser_duplicateof_id_initial") // SOURCE_TABLE.FIELD: auth_user.duplicateof_id 
+  // NOTE: above field will have a value, b/c this authUser record was the dupe before 
+  promotedAuthUserDotduplicateOfIdPost        Int?      @map("promoted_authuser_duplicateof_id_post")    // SOURCE_TABLE.FIELD: auth_user.duplicateof_id 
+  // NOTE: above field will be NULL, b/c the swap activity is making this authUser record into the primary record
+
+  // below field collection represents the userProfile record that was unuseable ("inanimate") prior to swap (b/c it was paired to a dupe/notUserable authUser record). 
+  // the swap activity (being captured in this audit table) will switch this inanimate userProfile record FROM pair to the newly-promoted authUser record TO pair to the newly-demoted authUser record. 
+  // put differently: before the swap activty, this userProfile record was useless (b/c it was tied to a dupe authUser record), 
+  // ... and after the swap activity, this userProfile record will again be usesless, but now it will be tied to the newly demoted dupe authUser record.
+  inanimateUserProfileDotId                   Int?     @map("inanimate_userprofile_id")           
+  inanimateUserProfileDotUserIdInitial        Int?     @map("inanimate_userprofile_userid_initial")     
+  inanimateUserProfileDotUserIdInitialPost    Int?     @map("inanimate_userprofile_userid_post")  
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("authuser_userprofile_swap_audit")
 }
 
