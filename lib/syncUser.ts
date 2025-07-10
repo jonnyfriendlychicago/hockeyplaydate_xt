@@ -3,6 +3,7 @@ import { prisma } from './prisma';
 import { customAlphabet } from 'nanoid'; // 2025apr10: used to remove possiblity of spelling unsavory words in defaultSlug generation
 import slugify from 'slugify'; // npm install slugify
 import leoProfanity from 'leo-profanity'; // npm install leo-profanity
+import { nanoidAlphaNumeric8char } from '@/lib/idGenerators/alphanumeric8char';
 
 type Auth0User = {
   sub: string;
@@ -17,14 +18,14 @@ type Auth0User = {
 
 // BEGIN: referenced functions
 // 101: below are are functions, but more specifically, each is executing a factory that returns a function; this is a utility constant.  That  why each is written as a "const"
-const nanoidAlphaNumeric = customAlphabet('bcdfghjklmnpqrstvwxyz0123456789', 8); // Safe characters only: consonants + digits (no vowels to avoid accidental words)
 const nanoidDigitsFour = customAlphabet('2345789', 4); // missing 1 and 6, for clarity and avoiding awkward numbers
 const nanoidDigitsTwo = customAlphabet('2345789', 2); // missing 1 and 6, for clarity and avoiding awkward numbers
 // 101: Below are custom functions built in this file, and as such, the code types/arranges better to write starting with keyword "function" (or, "async function", etc.)
 
 async function generateDefaultSlugFunc(): Promise<string> {
   do {
-    const attemptedDefaultSlug = nanoidAlphaNumeric(); 
+
+    const attemptedDefaultSlug = nanoidAlphaNumeric8char(); 
 
     const existing = await prisma.userProfile.findFirst({
       where: {
@@ -152,37 +153,88 @@ function generateAltNicknameFunc( // proactively set userProfile.altNickname, e.
 // END: referenced functions
 
 export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
+  // 0 - abort if essential fields somehow missing
   if (!receivedA0userObj?.sub || !receivedA0userObj.email) return;
 
-  const dbAuthUser = await prisma.authUser.upsert({
-    where: { auth0Id: receivedA0userObj.sub },
-    update: {
-      email: receivedA0userObj.email,
-      emailVerified: receivedA0userObj.email_verified ?? false, // 101: The ?? operator is the nullish coalescing operator. It returns the right-hand value only if the left-hand value is null or undefined.
-      name: receivedA0userObj.name ?? null,
-      givenName: receivedA0userObj.given_name ?? null,
-      familyName: receivedA0userObj.family_name ?? null,
-      nickname: receivedA0userObj.nickname ?? null,
-      picture: receivedA0userObj.picture ?? null,
-    },
-    create: {
-      auth0Id: receivedA0userObj.sub,
-      email: receivedA0userObj.email,
-      emailVerified: receivedA0userObj.email_verified ?? false,
-      name: receivedA0userObj.name ?? null,
-      givenName: receivedA0userObj.given_name ?? null,
-      familyName: receivedA0userObj.family_name ?? null,
-      nickname: receivedA0userObj.nickname ?? null,
-      picture: receivedA0userObj.picture ?? null,
-    },
-  });
+  // 101: no longer using the Prisma upsert() method; it only only allows you to: Match on a unique field (auth0Id in this case) And perform an atomic update or create. 
+  // but! it can't (1) inspect the database first to detect duplicateOfId (2) dynamically set part of the create data based on other records
+  // so, not a fit anymore
+  
 
-  // check: does userProfile record exist for this authUser record?  (if returning login, it surely does; if first-time login, it doesn't)
+            // const dbAuthUser = await prisma.authUser.upsert({
+            //   where: { auth0Id: receivedA0userObj.sub },
+            //   update: {
+            //     email: receivedA0userObj.email,
+            //     emailVerified: receivedA0userObj.email_verified ?? false, // 101: The ?? operator is the nullish coalescing operator. It returns the right-hand value only if the left-hand value is null or undefined.
+            //     name: receivedA0userObj.name ?? null,
+            //     givenName: receivedA0userObj.given_name ?? null,
+            //     familyName: receivedA0userObj.family_name ?? null,
+            //     nickname: receivedA0userObj.nickname ?? null,
+            //     picture: receivedA0userObj.picture ?? null,
+            //   },
+            //   create: {
+            //     auth0Id: receivedA0userObj.sub,
+            //     email: receivedA0userObj.email,
+            //     emailVerified: receivedA0userObj.email_verified ?? false,
+            //     name: receivedA0userObj.name ?? null,
+            //     givenName: receivedA0userObj.given_name ?? null,
+            //     familyName: receivedA0userObj.family_name ?? null,
+            //     nickname: receivedA0userObj.nickname ?? null,
+            //     picture: receivedA0userObj.picture ?? null,
+            //   },
+            // });
+
+  // 1 - manage auth_user record 
+  // 1.1: check: does auth_user record exist for incoming authoid? 
+  let dbAuthUser = await prisma.authUser.findUnique({
+    where: { auth0Id: receivedA0userObj.sub },
+  });
+  // 1.2a: If user exists, update it (DO NOT touch duplicateOfId)
+  if (dbAuthUser) {
+    dbAuthUser = await prisma.authUser.update({
+      where: { auth0Id: receivedA0userObj.sub },
+      data: {
+        email: receivedA0userObj.email,
+        emailVerified: receivedA0userObj.email_verified ?? false,
+        name: receivedA0userObj.name ?? null,
+        givenName: receivedA0userObj.given_name ?? null,
+        familyName: receivedA0userObj.family_name ?? null,
+        nickname: receivedA0userObj.nickname ?? null,
+        picture: receivedA0userObj.picture ?? null,
+      },
+    });
+  } else {
+    // 1.2b: no exist, so go create
+    // Check if any existing user has the same email (but different auth0Id)
+    const existingWithSameEmail = await prisma.authUser.findFirst({
+      where: {
+        email: receivedA0userObj.email,
+        auth0Id: { not: receivedA0userObj.sub },
+      },
+      select: { id: true },
+    });
+    // Create a new auth user (and flag if it's a duplicate, per above)
+    dbAuthUser = await prisma.authUser.create({
+      data: {
+        auth0Id: receivedA0userObj.sub,
+        email: receivedA0userObj.email,
+        emailVerified: receivedA0userObj.email_verified ?? false,
+        name: receivedA0userObj.name ?? null,
+        givenName: receivedA0userObj.given_name ?? null,
+        familyName: receivedA0userObj.family_name ?? null,
+        nickname: receivedA0userObj.nickname ?? null,
+        picture: receivedA0userObj.picture ?? null,
+        duplicateOfId: existingWithSameEmail?.id ?? null,
+      },
+    });
+  }
+  // 2 - manage linked user_profile
+  // 2.1: check: does userProfile record exist for this authUser record?  (if returning login, it surely does; if first-time login, it doesn't)
   const existingProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
   });
-
-  let dbUserProfile;
+  // 2.1a: if not, create it!
+  // let dbUserProfile;
   
   if (!existingProfile) { // if not, proceed to create it
 
@@ -197,7 +249,8 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
     // create value to populate userProfile.altNickname
     const altyNickname = generateAltNicknameFunc(cleanFamilyName); 
 
-    dbUserProfile = await prisma.userProfile.create({
+    // dbUserProfile = await prisma.userProfile.create({
+      await prisma.userProfile.create({
       data: {
         userId: dbAuthUser.id,
         slugDefault: sluggyDefault, 
@@ -207,10 +260,19 @@ export async function syncUserFromAuth0(receivedA0userObj: Auth0User) {
         altNickname: altyNickname 
       },
     });
-  } else { 
-    dbUserProfile = existingProfile;
-  }
+  } 
+  // else { 
+  //   dbUserProfile = existingProfile;
+  // }
 
   // return dbAuthUser; 
-  return dbUserProfile; 
+  // return dbUserProfile; 
+
+  // Now always fetch full userProfile with related authUser
+const dbUserProfileWithAuthUser = await prisma.userProfile.findUnique({
+  where: { userId: dbAuthUser.id },
+  include: { authUser: true },
+});
+
+return dbUserProfileWithAuthUser;
 }

@@ -81,8 +81,6 @@ export function EditUserProfileNameForm({ givenName, familyName, authUserEmail }
   };
 
   return (
-    // <div className="bg-yellow-50 border border-yellow-300 p-4 my-4 rounded-md max-w-2xl mx-auto">
-    // <div className="bg-slate-100 border border-slate-300  p-4 my-4 rounded-md w-full max-w-4xl  ">
       <div className="w-full max-w-4xl mx-auto bg-blue-50 border border-r-4 border-b-4 border-blue-500  p-6 my-6 rounded-lg">
 
       <h2 className="text-lg font-semibold mb-2">Welcome to Hockey Playdate, {authUserEmail}!</h2>
