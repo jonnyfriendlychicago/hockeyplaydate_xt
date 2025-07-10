@@ -61,6 +61,7 @@ import { CircleX } from 'lucide-react';
   
   // (1.1) abandon if path failure encountered
   if (!userProfile) return redirect('/'); 
+  if (!userProfile?.authUser) return redirect('/'); // no such thing as a valid profile without a linked authUser.  This line resolves typescript errors. 
   
   const displayName = 
   `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || dbUser.email 

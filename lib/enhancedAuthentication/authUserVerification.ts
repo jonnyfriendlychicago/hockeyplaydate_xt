@@ -46,11 +46,14 @@ export async function getAuthUserOrRedirect(): Promise<FullUserProfile> {
 
   // userProfile record is created / double-checked for existence upon first and all subsequent logins
   // below this is a safe guard / double check
-  if (!userProfile) {
-    redirect('/');
-  }
+  if (!userProfile) {redirect('/');}
+  if (!userProfile.authUser) {redirect('/');} // added 2025jul09 to avert newfound Ts issue with nullable userProfile.authUser
+  
+
   // below means userProfile is fully accessible by the importing page/component
-  return userProfile;
+  // return userProfile;
+  return userProfile as FullUserProfile; // 2025jul09: replaces above to avert newfound Ts issue with nullable userProfile.authUser
+
 }
 
 /**
