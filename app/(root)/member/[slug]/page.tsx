@@ -41,6 +41,8 @@ export default async function MemberPage({ params }: { params: { slug: string } 
   });
   // (1.1) abandon if path failure encountered
   if (!profile) notFound(); // this is essential, b/c profile record comes from slug, which comes from URL param, which could be junk, ergo: display notfound page
+  if (!profile?.authUser) notFound(); // no such thing as a valid profile without a linked authUser.  This line resolves typescript errors. 
+
 
   const { authUser, altEmail, phone } = profile; // Extract common fields from profile for easier reference below
   // 101 on above: this is object destructuring to cleanly extract values from the profile object. It’s equivalent to this:
@@ -49,8 +51,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
   // const phone = profile.phone;
 
   const displayName =
-    `${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || authUser.email 
-    ||'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
+    `${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || authUser.email ||'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
 
   const isSessionUserProfile = sessionUser?.sub === authUser.auth0Id;
 
@@ -85,7 +86,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             [PLACEHOLDER FOR YOUR FAMILY BRAND!]
           </h1>
-          <p className="text-sm text-muted-foreground">Only you are seeing above placeholder.  Click 'Edit', then enter/save your Family Brand Name, then that will appear to users in the space above. </p>
+          <p className="text-sm text-muted-foreground">Only you are seeing above placeholder.  Click &lsquo;Edit&lsquo;, then enter/save your Family Brand Name, then that will appear to users in the space above. </p>
         </div>
       )}
 
