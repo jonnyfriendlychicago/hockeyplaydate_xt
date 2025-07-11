@@ -61,11 +61,21 @@ export const auth0 = new Auth0Client({
           body: JSON.stringify({ errorCode, email, auth0Id }),
         });
 
-        const data = await response.json();
-
-        if (!response.ok || !data.presentableId) {
-          throw new Error("login-error API call failed");
+        // try 3.1, below possible source of continued errors, relaced by below
+        // const data = await response.json();
+        // if (!response.ok || !data.presentableId) {
+        //   throw new Error("login-error API call failed");
+        // }
+        // try 3.1: begin new code
+        if (!response.ok) {
+          const text = await response.text(); // helpful for debugging
+          throw new Error(`login-error API failed: ${response.status} - ${text}`);
         }
+        
+        const data = await response.json();
+        
+        if (!data.presentableId) {throw new Error("Missing presentableId in API response");}
+        // try 3.1: end new code
 
         return NextResponse.redirect(
           new URL(`/login-error/${data.presentableId}`, baseUrl)
