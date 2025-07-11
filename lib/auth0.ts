@@ -36,18 +36,47 @@ export const auth0 = new Auth0Client({
       ) {
           errorCode = "unverified_email";
       }
-      // 4 -  Save login failure to DB (using API route)
-      // here, we were trying to access a lib file, but that broke next rules, so nevermind: const record = await saveLoginFailure({ errorCode, email, auth0Id });
-      const response = await fetch(`${baseUrl}/api/login-error`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ errorCode, email, auth0Id }),
-      });
-      const data = await response.json();
-      // 5 - Redirect using the presentableId (safe for URL)
-      const redirectUrl = new URL(`/login-error/${data.presentableId}`, baseUrl);
-      return NextResponse.redirect(redirectUrl);
-      } 
+      // 4 & 5 -  Save login failure to DB (using API route), then Redirect using the presentableId (safe for URL)
+      // try 1: we were trying to access a lib file, but that broke next rules, so nevermind: 
+      // const record = await saveLoginFailure({ errorCode, email, auth0Id });
+      
+      // try 2: below worked great in dev, but might be source of explosion errors in prod
+
+      // const response = await fetch(`${baseUrl}/api/login-error`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ errorCode, email, auth0Id }),
+      // });
+      // const data = await response.json();
+      
+      // const redirectUrl = new URL(`/login-error/${data.presentableId}`, baseUrl);
+      // return NextResponse.redirect(redirectUrl);
+      // } 
+
+      // try 3: CG says try this to resolve production explosion
+      try {
+        const response = await fetch(`${baseUrl}/api/login-error`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ errorCode, email, auth0Id }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.presentableId) {
+          throw new Error("login-error API call failed");
+        }
+
+        return NextResponse.redirect(
+          new URL(`/login-error/${data.presentableId}`, baseUrl)
+        );
+      } catch (e) {
+        console.error("Failed to save login error to DB:", e);
+        // fallback to generic error page
+        const fallbackUrl = new URL(`/login_error?code=${errorCode}`, baseUrl);
+        return NextResponse.redirect(fallbackUrl);
+      }
+    }
 
     // case 2: No error (success!)
     return NextResponse.redirect(new URL("/", baseUrl)); // this is place to indicate: redirect authenticated users to the /dashboard or other.  right now, / just sends auth'ed user to homepage
