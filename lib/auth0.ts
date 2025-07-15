@@ -54,40 +54,119 @@ export const auth0 = new Auth0Client({
       // } 
 
       // try 3: CG says try this to resolve production explosion
-      try {
-        const response = await fetch(`${baseUrl}/api/login-error`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ errorCode, email, auth0Id }),
-        });
+    //   try {
+    //     const response = await fetch(`${baseUrl}/api/login-error`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ errorCode, email, auth0Id }),
+    //     });
 
-        // try 3.1, below possible source of continued errors, relaced by below
-        // const data = await response.json();
-        // if (!response.ok || !data.presentableId) {
-        //   throw new Error("login-error API call failed");
-        // }
-        // try 3.1: begin new code
-        if (!response.ok) {
-          const text = await response.text(); // helpful for debugging
-          throw new Error(`login-error API failed: ${response.status} - ${text}`);
-        }
+    //     // try 3.1, below possible source of continued errors, relaced by below
+    //     // const data = await response.json();
+    //     // if (!response.ok || !data.presentableId) {
+    //     //   throw new Error("login-error API call failed");
+    //     // }
+    //     // try 3.1: begin new code
+    //     if (!response.ok) {
+    //       const text = await response.text(); // helpful for debugging
+    //       throw new Error(`login-error API failed: ${response.status} - ${text}`);
+    //     }
         
-        const data = await response.json();
+    //     const data = await response.json();
         
-        if (!data.presentableId) {throw new Error("Missing presentableId in API response");}
-        // try 3.1: end new code
+    //     if (!data.presentableId) {throw new Error("Missing presentableId in API response");}
+    //     // try 3.1: end new code
 
-        return NextResponse.redirect(
-          new URL(`/login-error/${data.presentableId}`, baseUrl)
-        );
-      } catch (e) {
-        console.error("Failed to save login error to DB:", e);
-        // fallback to generic error page
-        const fallbackUrl = new URL(`/login_error?code=${errorCode}`, baseUrl);
-        return NextResponse.redirect(fallbackUrl);
-      }
+    //     return NextResponse.redirect(
+    //       new URL(`/login-error/${data.presentableId}`, baseUrl)
+    //     );
+    //   } catch (e) {
+    //     console.error("Failed to save login error to DB:", e);
+    //     // fallback to generic error page
+    //     const fallbackUrl = new URL(`/login_error?code=${errorCode}`, baseUrl);
+    //     return NextResponse.redirect(fallbackUrl);
+    //   }
+    // }
+
+    // try 4: claude says do this instead: forget the api file, just do it all here, but now we see: 
+    // Auth0 callback is running in a client-side/browser context, not server-side where Prisma can run... so this won't work at all.  need to go back to fetch and debug it.
+
+    // Direct database operation instead of API call
+      //   try {
+      //     const { prisma } = await import('@/lib/prisma');
+      //     const { nanoidAlphaNumeric8char } = await import('@/lib/idGenerators/alphanumeric8char');
+          
+      //     // Generate unique presentableId
+      //     let presentableId: string;
+      //     while (true) {
+      //       const candidate = nanoidAlphaNumeric8char();
+      //       const existing = await prisma.loginFailure.findUnique({
+      //         where: { presentableId: candidate },
+      //       });
+      //       if (!existing) {
+      //         presentableId = candidate;
+      //         break;
+      //       }
+      //     }
+
+      //     const record = await prisma.loginFailure.create({
+      //       data: {
+      //         presentableId,
+      //         errorCode,
+      //         email,
+      //         auth0Id,
+      //       },
+      //     });
+
+      //     return NextResponse.redirect(
+      //       new URL(`/login-error/${record.presentableId}`, baseUrl)
+      //     );
+      //   } catch (e) {
+      //     console.error("Failed to save login error to DB:", e);
+      //     const fallbackUrl = new URL(`/login_error?code=${errorCode}`, baseUrl);
+      //     return NextResponse.redirect(fallbackUrl);
+      //   }
+      // }
+
+    // try 5: going back to fetch per claude, but with better logging and hopefully a determinable resolution:
+    try {
+    console.log("About to call login-error API with baseUrl:", baseUrl); // Debug log
+    
+    const response = await fetch(`${baseUrl}/api/login-error`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ errorCode, email, auth0Id }),
+    });
+
+    console.log("API response status:", response.status); // Debug log
+    
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("API response error:", text); // Debug log
+      throw new Error(`login-error API failed: ${response.status} - ${text}`);
+    }
+    
+    const data = await response.json();
+    console.log("API response data:", data); // Debug log
+    
+    if (!data.presentableId) {
+      throw new Error("Missing presentableId in API response");
     }
 
+    const redirectUrl = new URL(`/login-error/${data.presentableId}`, baseUrl);
+    console.log("Redirecting to:", redirectUrl.toString()); // Debug log
+    return NextResponse.redirect(redirectUrl);
+    
+  } catch (e) {
+    console.error("Failed to save login error to DB:", e);
+    // fallback to generic error page
+    // const fallbackUrl = new URL(`/login_error?code=${errorCode}`, baseUrl);
+    // below replaced above, used new folder/page, so not so confusing.
+    const fallbackUrl = new URL(`/login-exception?code=${errorCode}`, baseUrl);
+    return NextResponse.redirect(fallbackUrl);
+  }
+}
+    
     // case 2: No error (success!)
     return NextResponse.redirect(new URL("/", baseUrl)); // this is place to indicate: redirect authenticated users to the /dashboard or other.  right now, / just sends auth'ed user to homepage
   },
