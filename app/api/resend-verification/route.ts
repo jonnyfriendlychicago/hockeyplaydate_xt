@@ -1,7 +1,7 @@
 // app/api/resend-verification/route.ts
 
 import { NextResponse } from 'next/server';
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from 'auth0'; // npm install auth0
 
 export async function POST(req: Request) {
   try {
