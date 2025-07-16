@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // 
 import { notFound } from "next/navigation";
 import { prisma } from '@/lib/prisma';
 import { Metadata } from "next"; 
+import { ResendVerificationButton } from "@/components/resend-verification-button";
 
 export const metadata: Metadata = {title: "Login Error",}; // 101: this will add a prefix to tab/page title displayed on EU broswer
 
@@ -67,6 +68,12 @@ const renderContent = () => {
             </p>
 
             {/* here actually create button, and have button have link/ref to cal the function */}
+            <div className="pt-2">
+              <ResendVerificationButton 
+                email={email || ""} 
+                auth0Id={auth0Id || ""} 
+              />
+            </div>
 
           </AlertDescription>  
           </>
