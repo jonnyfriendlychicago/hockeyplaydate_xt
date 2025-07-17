@@ -1,7 +1,8 @@
 // app/(root)/login-error/[presentableId]/page.tsx
 
-import { AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // npx shadcn@latest add alert
+import { Mail, HelpCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDescription, AlertTitle } from "@/components/ui/alert"; // npx shadcn@latest add alert
 import { notFound } from "next/navigation";
 import { prisma } from '@/lib/prisma';
 import { Metadata } from "next"; 
@@ -19,64 +20,84 @@ const { presentableId } = params;
 const record = await prisma.loginFailure.findUnique({
     where: { presentableId },
   });
+
 // 2 - if somehow not found: 
 if (!record) return notFound();
+
 // 3 - establish essential vars extracted from the returned object
 const { errorCode, email , auth0Id } = record; 
-
-  // here is function that the button calls the sdk, see email from A0
-
-//   const management = new ManagementClient({
-//     domain: AUTH0_DOMAIN,
-//     clientId: AUTH0_CLIENT_ID,
-//     clientSecret: AUTH0_CLIENT_SECRET,
-//   });
-
-//   // somehow... someway... need a way to make sure that the button logic can't be abused. look for npm solutions on rate limite, ip limit, etc. 
-
-// // below probably not ready to run, but build with it
-// try {
-//   // Call the verifyEmail method from the Auth0 SDK
-//   const job = await management.jobs.verifyEmail(params);
-//   console.log('Successfully created verification email job in Auth0.');
-//   return job.data;
-// } catch (error) {
-//   console.error('Auth0 API Error:', error.message);
-//   // Re-throw the error so the calling function (e.g., an API route)
-//   // can catch it and send an appropriate HTTP response.
-//   throw error;
-// }
-// }
 
 // 4 - set up variable content
 const renderContent = () => {
     switch (errorCode) {
       case "unverified_email":
         return (
-          <>
-          <AlertTitle>Email Verification Required</AlertTitle>
-          <AlertDescription className="mt-2 space-y-4">
-            <p>
-              Your account was created, but your email has not yet been verified. Please check your inbox for an email with verification link.
-            </p>
-            <p>
-              <strong>Email:</strong> {email || "Unknown"}<br />
-              <strong>User ID:</strong> {auth0Id || "Unknown"}
-            </p>
-            <p className="text-sm text-muted-foreground">
-            Can&apos;t find the email? This page will soon include a “Resend Verification Email” button.
-            </p>
+          <Card className="w-full max-w-md mx-auto">
+            <CardHeader className="text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Mail className="h-6 w-6 text-blue-600" />
+              </div>
+              <CardTitle className="text-xl font-semibold">
+                Email Verification Needed
+              </CardTitle>
+              <CardDescription className="text-base">
+                You&apos;re almost done! We need to verify your email.
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              <div className="text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  We sent a verification link to:
+                </p>
+                {/* <p className="font-medium text-foreground bg-muted px-3 py-2 rounded-md"> */}
+                <p className="font-medium text-foreground px-3 py-2 rounded-md">
+                  {email}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Check your inbox and click the verification link, <br/> then log in again.
+                </p>
+              </div>
 
-            {/* here actually create button, and have button have link/ref to cal the function */}
-            <div className="pt-2">
-              <ResendVerificationButton 
-                email={email || ""} 
-                auth0Id={auth0Id || ""} 
-              />
-            </div>
+              <div className="space-y-3">
+                <ResendVerificationButton 
+                  email={email || ""} 
+                  auth0Id={auth0Id || ""} 
+                />
+                
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                    <HelpCircle className="h-3 w-3" />
+                    Still having trouble? <a href="/support" className="text-primary hover:underline">Contact support</a>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          
+          
+          // <>
+          // <AlertTitle>Email Verification Required</AlertTitle>
+          // <AlertDescription className="mt-2 space-y-4">
+          //   <p>
+          //     Hi, {email}.  <br/>
+          //     To complete your signup, please verify your email address.<br/>
+          //     Check your inbox for a message from us and click the verification link inside, then log in again.<br/>
+          //     Can&apos;t find the email? Click the button below to send a new one.
+          //   </p>
 
-          </AlertDescription>  
-          </>
+          //   <div className="pt-2">
+          //     <ResendVerificationButton 
+          //       email={email || ""} 
+          //       auth0Id={auth0Id || ""} 
+          //     />
+          //   </div>
+
+          // </AlertDescription>  
+          // </>
+
+          
         );
 
       default:
@@ -98,12 +119,19 @@ const renderContent = () => {
   };
   // 5 - return it all
   return (
+    // <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
     <main className="max-w-xl mx-auto mt-20 px-4">
-      <Alert variant="destructive">
-        <AlertTriangle className="h-5 w-5" />
+      <div className="w-full max-w-md">
         {renderContent()}
-      </Alert>
+      </div>
     </main>
+    
+    // <main className="max-w-xl mx-auto mt-20 px-4">
+    //   <Alert variant="destructive">
+    //     <AlertTriangle className="h-5 w-5" />
+    //     {renderContent()}
+    //   </Alert>
+    // </main>
   );
 }
 
