@@ -68,6 +68,7 @@ model LoginFailure {
   errorCode     String?                               @map("error_code")
   email         String?                               @map("email")
   auth0Id       String?                               @map("auth0_id")
+  verifyEmailResent       Boolean?  @default(false)   @map("verify_email_resent")
 
   @@map("login_error")
 }
