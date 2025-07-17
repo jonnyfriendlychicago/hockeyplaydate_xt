@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Mail, CheckCircle, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle, RefreshCw } from "lucide-react";
 
 interface ResendVerificationButtonProps {
   email: string;
@@ -45,6 +45,7 @@ export function ResendVerificationButton({ email, auth0Id }: ResendVerificationB
         setErrorMessage(data.error || 'Failed to resend verification email');
       }
     } catch (error) {
+      console.error('Resend verification error:', error);
       setStatus('error');
       setErrorMessage('Network error. Please try again.');
     } finally {
