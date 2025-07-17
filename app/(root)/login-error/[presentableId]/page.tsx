@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { prisma } from '@/lib/prisma';
 import { Metadata } from "next"; 
 import { ResendVerificationButton } from "@/components/resend-verification-button";
+import { auth0 } from "@/lib/auth0"; 
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {title: "Login Error",}; // 101: this will add a prefix to tab/page title displayed on EU broswer
 
@@ -15,7 +17,15 @@ interface PageProps {
 }
 
 export default async function LoginErrorPage({ params }: PageProps) {
-const { presentableId } = params;
+// 0 - destructure params
+  const { presentableId } = params;
+
+// 0.5 - redirect if authenticated (This prevents authenticated user from accidentally getting this page again, causing confusion and potentially initiating extraneous verify emails)
+const session = await auth0.getSession();
+if (session?.user) {
+  redirect('/dashboard');
+}
+
 // 1 - get the error record from db
 const record = await prisma.loginFailure.findUnique({
     where: { presentableId },
