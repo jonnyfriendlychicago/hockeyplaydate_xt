@@ -20,8 +20,6 @@ export default async function RootLayout({
 
   const userProfile = authSessionUser? await syncUserFromAuth0(authSessionUser) : null; // runs the sync every login, AND gets the user profile that results from the sync
   // 101: above ternary could also be written as traditional 'if' syntax: let userProfile = null; if (auth0User) {userProfile = await syncUserFromAuth0(auth0User);}
-  console.log("userProfile.authUser: ")
-  console.log(userProfile?.authUser)
   const dupeEmailAuthUser = userProfile?.authUser?.duplicateOfId; // basically, if there's a value for dueplicateOfId, then dupeEmailAuthUser = true / truthy
   // const showDupeEmailAccountBanner = userProfile?.authUser?.duplicateOfId; 
   // 101: above is an nice explanatory variable, but the 'check' for userProfile and its child authUser object gets "lost" when you try to use the variable downstream.  So, this variable just causes problems.  
