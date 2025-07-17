@@ -15,11 +15,14 @@ export async function POST(req: Request) {
     }
 
     // Initialize Auth0 Management API client
+    // below strips 'https://' from the existing .env.local domain, b/c Management SDK expects this stripped down string
+    const fixedAuth0Domain = process.env.AUTH0_DOMAIN!.replace(/^https?:\/\//, '');
     const management = new ManagementClient({
-      domain: process.env.AUTH0_DOMAIN!,
+    //   domain: process.env.AUTH0_DOMAIN!,
+      domain: fixedAuth0Domain , 
       clientId: process.env.AUTH0_M2M_CLIENT_ID!,
       clientSecret: process.env.AUTH0_M2M_CLIENT_SECRET!,
-      scope: 'update:users'
+    //   scope: 'update:users' // explanation on commOut: The scope (update:users) will be set when you configure the Machine-to-Machine application in the Auth0 Dashboard - that's where you grant it the necessary permissions, not in the code.
     });
 
     // Resend verification email
