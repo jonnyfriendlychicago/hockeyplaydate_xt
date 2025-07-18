@@ -73,6 +73,7 @@ const renderContent = () => {
                 <ResendVerificationButton 
                   email={email || ""} 
                   auth0Id={auth0Id || ""} 
+                  presentableId={presentableId}
                 />
                 
                 <div className="text-center">

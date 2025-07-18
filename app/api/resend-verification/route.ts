@@ -2,12 +2,13 @@
 
 import { NextResponse } from 'next/server';
 import { ManagementClient } from 'auth0'; // npm install auth0
+import { prisma } from '@/lib/prisma'; 
 
 export async function POST(req: Request) {
   try {
-    const { email, auth0Id } = await req.json();
+    const { email, auth0Id, presentableId } = await req.json();
 
-    if (!email || !auth0Id) {
+    if (!email || !auth0Id || !presentableId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -25,9 +26,19 @@ export async function POST(req: Request) {
     //   scope: 'update:users' // explanation on commOut: The scope (update:users) will be set when you configure the Machine-to-Machine application in the Auth0 Dashboard - that's where you grant it the necessary permissions, not in the code.
     });
 
-    // Resend verification email
+    // Resend verification email (heck yeah!)
     await management.jobs.verifyEmail({
       user_id: auth0Id,
+    });
+
+    // Mark this login_error as having been used for resend
+    await prisma.loginFailure.update({
+      where: { 
+        presentableId: presentableId 
+      },
+      data: { 
+        verifyEmailResent: true 
+      }
     });
 
     return NextResponse.json({ success: true });

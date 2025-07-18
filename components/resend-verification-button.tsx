@@ -9,9 +9,10 @@ import { Loader2, CheckCircle, RefreshCw } from "lucide-react";
 interface ResendVerificationButtonProps {
   email: string;
   auth0Id: string;
+  presentableId: string;
 }
 
-export function ResendVerificationButton({ email, auth0Id }: ResendVerificationButtonProps) {
+export function ResendVerificationButton({ email, auth0Id , presentableId}: ResendVerificationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -33,7 +34,7 @@ export function ResendVerificationButton({ email, auth0Id }: ResendVerificationB
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, auth0Id }),
+        body: JSON.stringify({ email, auth0Id, presentableId }),
       });
 
       const data = await response.json();
