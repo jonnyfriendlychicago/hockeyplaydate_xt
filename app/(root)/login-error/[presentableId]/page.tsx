@@ -37,6 +37,21 @@ if (!record) return notFound();
 if (record.verifyEmailResent) {
   redirect('/');
 }
+// 2.3 - if record is too old, redirect them away
+// const now = new Date();
+// const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+// if (record.createdAt < twentyFourHoursAgo) {
+//   redirect('/');
+// }
+
+const pageLifeSpanHours = 24; // this can be adjusted; make sure this is the lifespan of the link as configured in auth0 mgmt console (email templates section)
+const pageExpiration = new Date(record.createdAt.getTime() + (pageLifeSpanHours * 60 * 60 * 1000));
+const now = new Date();
+
+if (now > pageExpiration) {
+  redirect('/');
+}
 
 // 3 - establish essential vars extracted from the returned object
 const { errorCode, email , auth0Id } = record; 
