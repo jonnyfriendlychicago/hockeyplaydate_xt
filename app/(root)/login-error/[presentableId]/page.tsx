@@ -31,8 +31,12 @@ const record = await prisma.loginFailure.findUnique({
     where: { presentableId },
   });
 
-// 2 - if somehow not found: 
+// 2.1 - if somehow not found: 
 if (!record) return notFound();
+// 2.2 - if this login_error already used to resend the verification email, redirect away. 
+if (record.verifyEmailResent) {
+  redirect('/');
+}
 
 // 3 - establish essential vars extracted from the returned object
 const { errorCode, email , auth0Id } = record; 
