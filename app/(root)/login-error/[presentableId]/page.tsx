@@ -45,11 +45,20 @@ if (now > pageExpiration) {
   redirect('/');
 }
 
+// 2.4 - check if email has reached lifetime resend limit
+const totalResends = await prisma.loginFailure.count({
+  where: { 
+    // email: record.email.toLowerCase(), // this will error: could be null, ts no likey
+    email: (record.email || "").toLowerCase(),
+    verifyEmailResent: true 
+  }
+});
+const hasReachedLimit = totalResends >= 2;
+
 // 3 - establish essential vars (extracted from the returned object) 
 const { 
   errorCode, // error_code controls the renderContent;
   email , //  presented to end user on page;
-  // auth0Id 
 } = record; 
 
 // 4 - set up variable content
@@ -65,64 +74,59 @@ const renderContent = () => {
               <CardTitle className="text-xl font-semibold">
                 Email Verification Needed
               </CardTitle>
-              <CardDescription className="text-base">
+              {/* <CardDescription className="text-base">
                 You&apos;re almost done! We need to verify your email.
-              </CardDescription>
+              </CardDescription> */}
+               {!hasReachedLimit ? (
+              <CardDescription className="text-base">
+                 We sent a verification email to:
+              </CardDescription>) : <></>}
             </CardHeader>
+
             
             <CardContent className="space-y-6">
               <div className="text-center space-y-3">
-                <p className="text-sm text-muted-foreground">
+                {/* <p className="text-sm text-muted-foreground">
                   We sent a verification link to:
-                </p>
+                </p> */}
                 {/* <p className="font-medium text-foreground bg-muted px-3 py-2 rounded-md"> */}
-                <p className="font-medium text-foreground px-3 py-2 rounded-md">
+                <p className="font-medium text-foreground px-3  rounded-md">
                   {email}
                 </p>
+                {!hasReachedLimit ? (
                 <p className="text-sm text-muted-foreground">
                   Check your inbox and click the verification link, <br/> then log in again.
-                </p>
+                </p>): <></>}
+
               </div>
 
               <div className="space-y-3">
-                <ResendVerificationButton 
-                  // email={email || ""} 
-                  // auth0Id={auth0Id || ""} 
-                  presentableId={presentableId}
-                />
+                {hasReachedLimit ? (
+                  <div className="text-center space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg">
+                      <span className="font-medium">
+                        Our records indicate we have already sent three verification emails to the above address. <br/>
+                        Please find any one of those emails and click the verification link, then log in again. <br/>
+                        Cant find those emails?  None of the links working?  Need another email sent? <br/>
+                        We can help! Just <a href="/support" className=" hover:underline">contact support.</a> 
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <ResendVerificationButton presentableId={presentableId} />
+                )}
                 
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  {!hasReachedLimit ? (
+                  // <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <p className=" text-muted-foreground flex items-center justify-center gap-1">
                     <HelpCircle className="h-3 w-3" />
                     Still having trouble? <a href="/support" className="text-primary hover:underline">Contact support</a>
-                  </p>
+                  </p>) : (<></>)}
                 </div>
               </div>
             </CardContent>
           </Card>
-          
-          
-          
-          // <>
-          // <AlertTitle>Email Verification Required</AlertTitle>
-          // <AlertDescription className="mt-2 space-y-4">
-          //   <p>
-          //     Hi, {email}.  <br/>
-          //     To complete your signup, please verify your email address.<br/>
-          //     Check your inbox for a message from us and click the verification link inside, then log in again.<br/>
-          //     Can&apos;t find the email? Click the button below to send a new one.
-          //   </p>
-
-          //   <div className="pt-2">
-          //     <ResendVerificationButton 
-          //       email={email || ""} 
-          //       auth0Id={auth0Id || ""} 
-          //     />
-          //   </div>
-
-          // </AlertDescription>  
-          // </>
-
           
         );
 
@@ -145,19 +149,11 @@ const renderContent = () => {
   };
   // 5 - return it all
   return (
-    // <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
     <main className="max-w-xl mx-auto mt-20 px-4">
       <div className="w-full max-w-md">
         {renderContent()}
       </div>
     </main>
-    
-    // <main className="max-w-xl mx-auto mt-20 px-4">
-    //   <Alert variant="destructive">
-    //     <AlertTriangle className="h-5 w-5" />
-    //     {renderContent()}
-    //   </Alert>
-    // </main>
   );
 }
 

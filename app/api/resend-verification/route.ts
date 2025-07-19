@@ -83,8 +83,13 @@ export async function POST(req: Request) {
         verifyEmailResent: true 
       }
     });
+    // math/logic for this: 
+    // initial send after sign-up: 1 total; 
+    // first time button clicked, there are 0 'true' items in the loging_error table before, and after there's 1, and total emails sent is 2
+    // second time button clicked, there are 1 'true' items in the loging_error table before, and after there's 2, and total emails sent is 3
+    // at this point, there are TWO true items in the login_error table, and we prohibit any further.  hence, logic: existing 2 or more => error. 
 
-    if (totalResends > 2) {
+    if (totalResends >= 2) { 
       return NextResponse.json(
         { error: 'Maximum resend attempts reached for this email address' },
         { status: 429 }
