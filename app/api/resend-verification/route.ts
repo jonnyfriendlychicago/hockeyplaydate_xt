@@ -2,15 +2,93 @@
 
 import { NextResponse } from 'next/server';
 import { ManagementClient } from 'auth0'; // npm install auth0
+import { prisma } from '@/lib/prisma'; 
+import { auth0 } from '@/lib/auth0';
 
 export async function POST(req: Request) {
   try {
-    const { email, auth0Id } = await req.json();
+    // Check if user is already authenticated - if so, they don't need verification emails
+    const session = await auth0.getSession();
+    if (session?.user) {
+      return NextResponse.json(
+        { error: 'You are already logged in and verified' },
+        { status: 400 }
+      );
+    }
+    
+    const { 
+      presentableId 
+    } = await req.json();
 
-    if (!email || !auth0Id) {
+    if (
+      !presentableId
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
+      );
+    }
+
+    // Get and validate the record
+    const record = await prisma.loginFailure.findUnique({
+      where: { presentableId }
+    });
+
+    // error if no record
+    if (!record) {
+      return NextResponse.json(
+        { error: 'Invalid request' }, 
+        { status: 404 }
+      );
+    }
+
+    // error if record already used for email resend
+    if (record.verifyEmailResent) {
+      return NextResponse.json(
+        { error: 'Verification email already sent' }, 
+        { status: 400 }
+      );
+    }
+
+    // error if login_error expired (for purposes of resending email)
+    const pageLifeSpanHours = 24;
+    const pageExpiration = new Date(record.createdAt.getTime() + (pageLifeSpanHours * 60 * 60 * 1000));
+    const now = new Date();
+
+    if (now > pageExpiration) {
+      return NextResponse.json(
+        { error: 'Request has expired' }, 
+        { status: 410 }
+      );
+    }
+
+    // Extract email and auth0Id from the database record (for next validation and downstream api function)
+    const { email, auth0Id } = record;
+
+    if (!email || !auth0Id) {
+      return NextResponse.json(
+        { error: 'Invalid record data' },
+        { status: 500 }
+      );
+    }
+
+    // error if lifetime resend limit reached (only two resends allowed, which in combination with original sent upon sign-up = 3 total verification emamils sent)
+    const totalResends = await prisma.loginFailure.count({
+      where: { 
+        email: email.toLowerCase(),
+        verifyEmailResent: true 
+      }
+    });
+    // math/logic for this: 
+    // initial send after sign-up: 1 total; 
+    // first time button clicked, there are 0 'true' items in the loging_error table before, and after there's 1, and total emails sent is 2
+    // second time button clicked, there are 1 'true' items in the loging_error table before, and after there's 2, and total emails sent is 3
+    // at this point, there are TWO true items in the login_error table, and we prohibit any further.  hence, logic: existing 2 or more => error. 
+
+    if (totalResends >= 2) { 
+      return NextResponse.json(
+        { error: 'Maximum resend attempts reached for this email address' },
+        { status: 429 }
       );
     }
 
@@ -21,16 +99,26 @@ export async function POST(req: Request) {
     //   domain: process.env.AUTH0_DOMAIN!,
       domain: fixedAuth0Domain , 
       clientId: process.env.AUTH0_M2M_CLIENT_ID!,
-      clientSecret: process.env.AUTH0_M2M_CLIENT_SECRET!,
-    //   scope: 'update:users' // explanation on commOut: The scope (update:users) will be set when you configure the Machine-to-Machine application in the Auth0 Dashboard - that's where you grant it the necessary permissions, not in the code.
+      clientSecret: process.env.AUTH0_M2M_CLIENT_SECRET!
     });
 
-    // Resend verification email
+    // Resend verification email (heck yeah!)
     await management.jobs.verifyEmail({
       user_id: auth0Id,
     });
 
+    // Mark this login_error as having been used for resend
+    await prisma.loginFailure.update({
+      where: { 
+        presentableId: presentableId 
+      },
+      data: { 
+        verifyEmailResent: true 
+      }
+    });
+
     return NextResponse.json({ success: true });
+
   } catch (error) {
     console.error('Failed to resend verification email:', error);
     

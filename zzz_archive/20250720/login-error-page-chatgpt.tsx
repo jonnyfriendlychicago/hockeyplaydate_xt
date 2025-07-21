@@ -1,6 +1,6 @@
 // app/(root)/login-error/[presentableId]/page.tsx
-
-import { Mail, HelpCircle, AlertCircle , AlertTriangle } from "lucide-react";
+// 101: this is the chat version we're embracing now
+import { Mail, HelpCircle, AlertCircle } from "lucide-react";
 import {Card,CardContent, CardHeader,CardTitle,} from "@/components/ui/card";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -62,8 +62,8 @@ export default async function LoginErrorPage({ params }: PageProps) {
         return (
             <Card className="w-full px-4 py-2">
               <CardHeader className="text-center space-y-4">
-                <div className="mx-auto w-14 h-14  rounded-full flex items-center justify-center">
-                  <Mail className="h-12 w-12 text-blue-600" />
+                <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-blue-600" />
                 </div>
                 <CardTitle className="text-2xl font-semibold">
                   Verify Your Email
@@ -109,45 +109,27 @@ export default async function LoginErrorPage({ params }: PageProps) {
 
       default:
         return (
-          <Card className="w-full max-w-lg mx-auto">
-            <CardHeader className="text-center pb-6">
-              <div className="mx-auto w-14 h-14  rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="h-12 w-12 text-red-600" />
-              </div>
-              <CardTitle className="text-2xl font-semibold">
-                Login Error
-              </CardTitle>
-            </CardHeader>
-        
-            <CardContent className="space-y-4">
-              <div className="text-center text-gray-600 mb-4">
-                <p>Sorry about this. </p> 
-                <p>Something went wrong during login. <br/>Please try again.</p>
-              </div>
-
-              <div className=" border border-red-500 rounded-lg p-4">
-                <div className="text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2 text-red-500">
-                    <span className="font-medium">Error Details</span>
-                  </div>
-                  <div className="text-sm text-red-500 space-y-2">
-                    <p>Error code: {errorCode}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base text-muted-foreground text-center">
-                <span>If this error persists, please</span>
-                <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</a>
-              </div>
-
-            </CardContent>
-          </Card>
+          <main className="max-w-xl mx-auto mt-20 px-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Login Error</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p>
+                  Something went wrong during login. Please try again. If the problem
+                  continues, <a href="/support" className="text-primary underline">contact support</a>.
+                </p>
+                <p className="text-muted-foreground">
+                  Error code: <code>{errorCode}</code>
+                </p>
+              </CardContent>
+            </Card>
+          </main>
         )
     }
   }
 
-  // 5 - return it all
+    // 5 - return it all
   return (
     <main className="max-w-4xl mx-auto mt-10 px-4">
       <div className="w-full max-w-lg mx-auto">

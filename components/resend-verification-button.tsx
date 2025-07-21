@@ -7,17 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, RefreshCw } from "lucide-react";
 
 interface ResendVerificationButtonProps {
-  email: string;
-  auth0Id: string;
+  // email: string;
+  // auth0Id: string;
+  presentableId: string;
 }
 
-export function ResendVerificationButton({ email, auth0Id }: ResendVerificationButtonProps) {
+export function ResendVerificationButton({ 
+  // email, 
+  // auth0Id , 
+  presentableId}: ResendVerificationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleResend = async () => {
-    if (!email || !auth0Id) {
+    // check if essential vars available
+    if (
+      // !email || 
+      // !auth0Id ||
+      !presentableId) {
       setStatus('error');
       setErrorMessage('Missing user information');
       return;
@@ -33,7 +41,10 @@ export function ResendVerificationButton({ email, auth0Id }: ResendVerificationB
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, auth0Id }),
+        body: JSON.stringify({ 
+          // email, 
+          // auth0Id, 
+          presentableId }),
       });
 
       const data = await response.json();
