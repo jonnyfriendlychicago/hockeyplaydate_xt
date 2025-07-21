@@ -17,14 +17,10 @@ export async function POST(req: Request) {
     }
     
     const { 
-      // email, 
-      // auth0Id, 
       presentableId 
     } = await req.json();
 
     if (
-      // !email || 
-      // !auth0Id || 
       !presentableId
     ) {
       return NextResponse.json(

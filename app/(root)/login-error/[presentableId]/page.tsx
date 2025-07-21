@@ -1,5 +1,5 @@
 // app/(root)/login-error/[presentableId]/page.tsx
-// 101: this is the chat version we're embracing now
+
 import { Mail, HelpCircle, AlertCircle } from "lucide-react";
 import {Card,CardContent, CardHeader,CardTitle,} from "@/components/ui/card";
 import { notFound, redirect } from "next/navigation";
@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { ResendVerificationButton } from "@/components/resend-verification-button";
 import { auth0 } from "@/lib/auth0";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // pre-export essentials
 export const metadata: Metadata = {title: "Login Error",};
@@ -150,7 +149,7 @@ export default async function LoginErrorPage({ params }: PageProps) {
     }
   }
 
-    // 5 - return it all
+  // 5 - return it all
   return (
     <main className="max-w-4xl mx-auto mt-10 px-4">
       <div className="w-full max-w-lg mx-auto">
