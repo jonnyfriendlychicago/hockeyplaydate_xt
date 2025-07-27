@@ -74,7 +74,7 @@ export default async function Menu() {
           </DropdownMenu>
         ) : (
           <a href='/auth/login'> 
-            <Button>Sign in / Sign Up</Button>
+            <Button>Login / Sign Up</Button>
           </a>
         )}
       </div>
