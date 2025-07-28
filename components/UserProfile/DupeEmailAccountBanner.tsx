@@ -5,6 +5,7 @@
 import { CopyText } from '@/components/shared/copyText';
 import Image from 'next/image';
 
+// simple function to toggle display of enhanced login name
 function LoginMethodLabel({ type }: { type: string }) {
   if (type === 'Google') {
     return (
@@ -37,11 +38,11 @@ export function DupeEmailAccountBanner({
     accountType: string;
   }) 
 {
-  
-  const textAccountType = accountType === 'googleSocial' ? 'Google' : 'email+password';
-  const textAccountTypeAlt = accountType === 'googleSocial' ? 'email+password' : 'Google';
-  const supportEmailAddy = 'support@hockeyplaydate.com'
-  
+  // 0 - establish essential vars
+  const textAccountType = accountType === 'googleSocial' ? 'Google' : 'email+password'; // this translates the functional parameter value into a styled string, for display to EU
+  const textAccountTypeAlt = accountType === 'googleSocial' ? 'email+password' : 'Google'; // ditto above
+  const supportEmailAddy = 'support@hockeyplaydate.com' // easily changed variable in case we ever want to swap out the HPD email addy
+  // 1 - return it all
   return (
     <div className="w-full max-w-3xl mx-auto px-6 py-6 my-6 rounded-lg border-2 border-blue-200 bg-blue-50">
       
@@ -57,10 +58,6 @@ export function DupeEmailAccountBanner({
         <p> 
           You&apos;ve successfully logged in using {textAccountType}. <em>Nice work!</em>  Just one small problem... 
         </p>
-
-        {/* <p> 
-          As you probably noticed during login/sign up, there are two ways to access Hockey Playdate: login with {textAccountType} <em>or</em> login with <LoginMethodLabel type={textAccountTypeAlt} />. 
-        </p> */}
 
         <p>
           As you probably noticed during login/sign up, there are two ways to access Hockey Playdate:
@@ -88,7 +85,7 @@ export function DupeEmailAccountBanner({
               Option 1: Use Your Original {textAccountTypeAlt} Login
             </h4>
             <p>
-              Log out, then login again with your original {textAccountTypeAlt}, then use that {textAccountTypeAlt} login going forward. That login already has your profile, groups, and history, etc.
+              Log out, then login again with your original {textAccountTypeAlt} login, then use that {textAccountTypeAlt} login going forward. That login already has your profile, groups, and history, etc.
             </p>
           </div>
 
