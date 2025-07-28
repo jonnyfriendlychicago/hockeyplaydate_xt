@@ -23,6 +23,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
+  if (dbUser.duplicateOfId ) {
+  return NextResponse.json(
+    { error: 'This account is linked to another primary account and cannot be edited.' },
+    { status: 403 }
+  );
+}
+
   const userProfile = await prisma.userProfile.findFirst({
     where: {
       authUser: {

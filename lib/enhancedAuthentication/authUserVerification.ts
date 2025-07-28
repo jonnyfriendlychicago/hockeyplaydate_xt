@@ -37,6 +37,11 @@ export async function getAuthUserOrRedirect(): Promise<FullUserProfile> {
     redirect('/auth/login');
   }
 
+  // if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, redirect. 
+  if (dbUser.duplicateOfId) {
+    redirect('/');
+  }
+
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId: dbUser.id },
     include: {
