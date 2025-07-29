@@ -11,6 +11,9 @@ export async function POST(req: Request) {
   const sessionUser = session?.user;
 
   // (0) validate authentication
+  // 2025jul29: leaving this section as-is for now, but near future, all of this should be a reuseable offboard function very similar in nature to: 
+  // lib/enhancedAuthentication/authUserVerification.ts
+
   if (!sessionUser) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
