@@ -6,20 +6,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
-import { getAuthUserOrRedirect } from '@/lib/enhancedAuthentication/authUserVerification';
+import { getAuthenticatedUser } from '@/lib/enhancedAuthentication/authUserVerification';
 
 export default async function EditProfilePage() {
-  const  userProfile = await getAuthUserOrRedirect();
-
+  // 0 - authenticate user
+  const  authenticatedUser = await getAuthenticatedUser(); 
+  
   // (1) essential variables
   const displayName = // create a display name variable, which shall be the altProp in the  profile photo displayed on the page (which is not edittable on this form, fyi)
-  `${userProfile.givenName ?? ''} ${userProfile.familyName ?? ''}`.trim() || userProfile.authUser.email 
-  || 'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
+  `${authenticatedUser.givenName ?? ''} ${authenticatedUser.familyName ?? ''}`.trim() || authenticatedUser.authUser.email 
+  || 'Nameless User'; // this last value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
   
-  const cancelButtonSluggy= userProfile.slugVanity || userProfile.slugDefault // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
+  const cancelButtonSluggy= authenticatedUser.slugVanity || authenticatedUser.slugDefault // this sluggy variable is used in the "cancel" button of this form page, to correctly return to the correct user profile page
 
-  const authUserEmail = userProfile.authUser.email; // super simple var we need to pass into the form for a form description value
-
+  const authUserEmail = authenticatedUser.authUser.email; // super simple var we need to pass into the form for a form description value
 
   // (2) Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. 
   
@@ -28,19 +28,15 @@ export default async function EditProfilePage() {
   // But our validation schema that this form hits requires a value (rightly so), so is not nullable: userProfileValSchema.familyName is typed as string (non-nullable, required via .min(1)). Same for givenName.
   // This would cause a typescript mismatch, and break the app.  
   // We resolve this by creating this "normalized" version of the object, which ensures givenName and familyName are guaranteed string going into the form flow.
+  
   const normalizedProfile = {
-    ...userProfile, // this is a spread operator: takes all the key:value paries from the object, exposes them for use
+    ...authenticatedUser, // this is a spread operator: takes all the key:value paries from the object, exposes them for use
     // givenName kvp, familyName kvp, etc. comes out of above, but then we override it with the following lines:
-    givenName: userProfile.givenName ?? '', // 101: '??' is a nullish coalescing operator: It means: If userProfile.givenName is null or undefined, use '' (empty string) instead.
-    familyName: userProfile.familyName ?? '',
-
-    // below is legacy code, to be deleted when feel like it.  2025may07
-    // altNickname: userProfile.altNickname ?? '',
-    // altEmail: userProfile.altEmail ?? '',
-    // phone: userProfile.phone ?? '',
-    // slugVanity: userProfile.slugVanity ?? ''
+    givenName: authenticatedUser.givenName ?? '', // 101: '??' is a nullish coalescing operator: It means: If userProfile.givenName is null or undefined, use '' (empty string) instead.
+    familyName: authenticatedUser.familyName ?? '',
   };
 
+  // (3) return it all 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
 
@@ -63,7 +59,7 @@ export default async function EditProfilePage() {
         <div className="col-span-2 flex flex-col items-center justify-center gap-4">
           <UserAvatar
             // src={dbUser.picture}
-            src={userProfile.authUser.picture}
+            src={authenticatedUser.authUser.picture}
             fallback="A"
             size="xl"
             className="ring-2 ring-gray-400 shadow-lg"
@@ -86,7 +82,7 @@ export default async function EditProfilePage() {
       <div className="w-full">
         <EditUserProfileForm 
         initialValues={normalizedProfile} 
-        defaultSluggy={userProfile.slugDefault} 
+        defaultSluggy={authenticatedUser.slugDefault} 
         authUserEmail= {authUserEmail}
         />
       </div>

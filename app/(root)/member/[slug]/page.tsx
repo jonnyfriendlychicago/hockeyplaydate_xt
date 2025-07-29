@@ -1,9 +1,5 @@
 // app/(root)/member/[slug]/page.tsx
 
-// 2025may16: note for future self: 
-// (1) we should enhance this to use a function from lib/enhancedAuthentication/authUserVerification.ts and 
-// (2) this entire file needs to be updated: only display those users who are fellow members of authenticated users groups
-
 export const dynamic = 'force-dynamic';
 // 101: This server-side page, by default, doesn't refresh data when its been visited just recently.  
 // Result is that upon routing here from edit form, the page will display with cached (and now stale) data.
@@ -17,18 +13,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Pencil } from 'lucide-react';
-import { auth0 } from '@/lib/auth0';
 import { EmailBlock } from '@/components/UserProfile/EmailBlock';
 import { CopyText } from '@/components/shared/copyText';
+import { getAuthenticatedUser } from '@/lib/enhancedAuthentication/authUserVerification';
 
 export default async function MemberPage({ params }: { params: { slug: string } }) {
-  // (0) authentication / security
-  const session = await auth0.getSession();
-  const sessionUser = session?.user;
-  // PLACEHOLDER FOR REDIRECTING NOT-AUTHENTICATED / NOT-ALLOWED USERS
+  
+  // 0 - authenticate user
+  const  authenticatedUser = await getAuthenticatedUser(); 
+
+  // OTHER THINGS WE WANT TO DO IN THIS FILE.... 
+  // if presentedUserProfile is not in a group with authenticatedUser, redirect.
 
   // (1) essential variables
-  const profile = await prisma.userProfile.findFirst({
+  const presentedUserProfile = await prisma.userProfile.findFirst({
     where: {
       OR: [
         { slugVanity: params.slug },
@@ -39,21 +37,28 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       authUser: true, 
     },
   });
-  // (1.1) abandon if path failure encountered
-  if (!profile) notFound(); // this is essential, b/c profile record comes from slug, which comes from URL param, which could be junk, ergo: display notfound page
-  if (!profile?.authUser) notFound(); // no such thing as a valid profile without a linked authUser.  This line resolves typescript errors. 
 
+  // (2) redirect if user not found in db via look-up above.  
+  // Note: by having this check at this point in file, TS is satisfied that presentedUserProfile exists, so the downstream references of 'presentedUserProfile' don't need to resolve possible null situation.  
+  if (!presentedUserProfile) notFound(); // this is essential, b/c profile record comes from slug, which comes from URL param, which could be junk, ergo: display notfound page
+  if (!presentedUserProfile?.authUser) notFound(); // no such thing as a valid profile without a linked authUser.  This line resolves typescript errors. 
 
-  const { authUser, altEmail, phone } = profile; // Extract common fields from profile for easier reference below
+  // (3) more essential variables
+
+  // quick note: we previously used this method: 
+
+  // const { authUser, altEmail, phone } = presentedUserProfile
+  // ... to extract common fields from presentedUserProfile for easier reference downstream in file. 
+  // BUT! This variable naming convention caused lots of confusion between the authenticatedUser profile and presentedUserProfile.  So, abandoned.  
   // 101 on above: this is object destructuring to cleanly extract values from the profile object. It’s equivalent to this:
-  // const authUser = profile.authUser;
-  // const altEmail = profile.altEmail;
-  // const phone = profile.phone;
+  // const authUser = presentedUserProfile.authUser;
+  // const altEmail = presentedUserProfile.altEmail;
+  // const phone = presentedUserProfile.phone;
 
-  const displayName =
-    `${profile.givenName ?? ''} ${profile.familyName ?? ''}`.trim() || authUser.email ||'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
+  const displayName = `${presentedUserProfile.givenName ?? ''} ${presentedUserProfile.familyName ?? ''}`.trim() || presentedUserProfile.authUser.email 
+  ||'Nameless User'; // this value should never be reached, b/c every authUser record will have email, unless Auth0 or core HPD usermgmt code went berzerk at login
 
-  const isSessionUserProfile = sessionUser?.sub === authUser.auth0Id;
+  const isAuthenticatedUsersProfile = authenticatedUser.authUser.auth0Id === presentedUserProfile.authUser.auth0Id; 
 
   const formatPhoneNumber = (raw: string) =>
     raw.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1.$2.$3');
@@ -61,7 +66,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Edit Icon Top-Right */}
-      {isSessionUserProfile && (
+      {isAuthenticatedUsersProfile && (
         <div className="flex justify-end">
           <Link href="/member/edit">
             <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-muted">
@@ -73,15 +78,15 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       )}
 
       {/* Family Display Name (altNickname as brand/hero) */}
-      {profile.altNickname && (
+      {presentedUserProfile.altNickname && (
         <div className="text-center mb-6">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
-            {profile.altNickname}
+            {presentedUserProfile.altNickname}
           </h1>
         </div>
       )}
 
-      {!profile.altNickname && isSessionUserProfile && (
+      {!presentedUserProfile.altNickname && isAuthenticatedUsersProfile && (
         <div className="text-center mb-6">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             [PLACEHOLDER FOR YOUR FAMILY BRAND!]
@@ -95,7 +100,7 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         {/* Left: Name + Avatar */}
         <div className="col-span-2 flex flex-col items-center justify-center gap-4">
           <UserAvatar
-            src={authUser.picture}
+            src={presentedUserProfile.authUser.picture}
             fallback="A"
             size="xl"
             className="ring-2 ring-gray-400 shadow-lg"
@@ -127,17 +132,17 @@ export default async function MemberPage({ params }: { params: { slug: string } 
               <div className="md:max-w-md w-full space-y-4">
                 {/* note: EmailBlock could be smaller, put all that show/not logic on this page, and then only pass altEmail and loginEmail to the component; but leaving well-enough alone for now. 2025may08 */}
                 <EmailBlock
-                  altEmail={altEmail}
-                  loginEmail={authUser.email}
-                  isOwner={isSessionUserProfile}
+                  altEmail={presentedUserProfile.altEmail}
+                  loginEmail={presentedUserProfile.authUser.email}
+                  isOwner={isAuthenticatedUsersProfile}
                 />
 
-                {phone && (
+                {presentedUserProfile.phone && (
                   <div id="phone">
                     <p className="text-sm text-muted-foreground">Phone</p>
                     <div className="flex items-center gap-1">
-                      <p className="font-medium">{formatPhoneNumber(phone)}</p>
-                      <CopyText text={phone} />
+                      <p className="font-medium">{formatPhoneNumber(presentedUserProfile.phone)}</p>
+                      <CopyText text={presentedUserProfile.phone} />
                     </div>
                   </div>
                 )}
