@@ -1,16 +1,8 @@
 // components/shared/header/menu.tsx
 // everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive Additional documentation: https://github.com/auth0/nextjs-auth0
-// 2025may16: when ready, enhance below to import/use the newly created lib/enhancedAuthentication/authUserVerification.ts
 
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator, 
-  DropdownMenuLabel
-} from '@/components/ui/dropdown-menu';
+import {DropdownMenu, DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger,DropdownMenuSeparator, DropdownMenuLabel} from '@/components/ui/dropdown-menu';
 import ModeToggle from './mode-toggler';
 import { auth0 } from '@/lib/auth0';
 import Image from 'next/image';
@@ -20,33 +12,44 @@ import { prisma } from '@/lib/prisma';
 import MenuClient from './menuClient';
 
 export default async function Menu() {  
-  // get session user, set variables
-  const session = await auth0.getSession();
-  const sessionUser = session?.user; 
-  const profileImage = session?.user?.picture;
   
-  let profileUrl = '/profile'; // Fallback URL; don't see how this would ever be reached, but whatev
+  // 0 - authenticate user
+  // note: this component can't readily use lib/enhancedAuthentication/authUserVerification.ts, b/c that file has various redirects
+  // so, decent amount of logic/code repeated here. 2025jul29: doens't seem worth refactoring to adjust. 
+  const authSession = await auth0.getSession();
+  const authSessionUser = authSession?.user; 
+  const profileImage = authSession?.user?.picture;
+  
+  // 1 - declare downstream vars, which potentially get updated in next step
+  let profileUrl = '/profile'; 
+  let dupeAuthUser = false; 
 
-  if (session?.user?.sub) {
-    const authUser = await prisma.authUser.findUnique({
-      where: { auth0Id: session.user.sub },
+  // 2 - get full user object from database, set essential vars
+  if (authSession?.user?.sub) {
+    const dbAuthUser = await prisma.authUser.findUnique({
+      where: { auth0Id: authSession.user.sub },
       include: { userProfile: true },
     });
 
-    const slug = authUser?.userProfile?.slugVanity || authUser?.userProfile?.slugDefault;
+    const slug = dbAuthUser?.userProfile?.slugVanity || dbAuthUser?.userProfile?.slugDefault;
 
     if (slug) {
       profileUrl = `/member/${slug}`;
     }
+
+    if (dbAuthUser?.duplicateOfId) {
+      dupeAuthUser = true; 
+    }
   }
 
+  // 3 - return it all
   return (
     <div className='flex justify-end gap-3 items-center'>
       {/* Desktop view */}
       <div className='hidden md:flex items-center gap-3'>
         <ModeToggle />
 
-        {session ? (
+        {authSession ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className='flex items-center gap-2 cursor-pointer'>
@@ -60,16 +63,27 @@ export default async function Menu() {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'> {/* below this line begins what's displayed */}
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuItem disabled>{sessionUser?.email}</DropdownMenuItem>
-            <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              
+              <DropdownMenuItem disabled>{authSessionUser?.email}</DropdownMenuItem>
+              
+              <DropdownMenuSeparator />  
+              
+             {dupeAuthUser ? (
+              <>
+              </>
+             ) : (
+             <>
+             <DropdownMenuItem asChild>
                 <Link href={profileUrl}>Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              </>) } 
+              
               <DropdownMenuItem asChild>
                 <a href='/auth/logout'>Logout</a>
               </DropdownMenuItem>
+            
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
@@ -84,8 +98,7 @@ export default async function Menu() {
       <MenuClient
         profileUrl={profileUrl}
         profileImage={profileImage}
-        // sessionEmail={email}
-        isLoggedIn={!!session}
+        isLoggedIn={!!authSession}
       />
       
     </div>
