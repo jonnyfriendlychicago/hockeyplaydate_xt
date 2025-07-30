@@ -5,62 +5,95 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { UserProfile, AuthUser } from '@prisma/client';
 
-/**
- * Retrieves and verifies the full user profile associated with the authenticated user.
- * - Redirects to /auth/login if no session or auth_user is found.
- * - Redirects to / if no userProfile is found (should never happen under normal flows).
- * Returns the fully populated userProfile, including the related authUser object.
- */
+// ********** OVERVIEW: BEGIN ************************
+// This file validates: 
+// (1) user is authenticated
+// (2) existence of essential db records/data for the authenticated user
+// (3) existence of any data/flags that preclude system access
 
-//  Custom type for the joined profile with authUser relation included
+// ... and redirects for any fatal scenarios. 
+// Absent that, returns fully populated userProfile, including the related authUser object.
+ 
+// Note: parent files will invoke herein function and assign the return as follows: 
+
+// const  authenticatedUser = await getAuthenticatedUser(); 
+
+// ... and use of the string 'authenticatedUser' as variable is explained as: 
+// this variable is not named 'authUser' ,  'authedUser' , etc., b/c that's easily confused with the db object 'authUser'.  
+// this variable could have also gone with 'authenticatedUserProfile' which might have been more accurate and complete, but authenticatedUser is long enough already. 
+
+// ********** OVERVIEW: END ************************
+
+
+//  prereq: Declare custom type for the joined profile with authUser relation included
 type FullUserProfile = UserProfile & {
     authUser: AuthUser;
   };
 
-export async function getAuthUserOrRedirect(): Promise<FullUserProfile> {
-  const session = await auth0.getSession();
-  const sessionUser = session?.user;
+export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUser
+  
+// 1 - if not authenticated, redirect to login
+  const authSession = await auth0.getSession();
+  const authSessionUser = authSession?.user;
 
-  // if not authenticated, must do so
-  if (!sessionUser) {
+  if (!authSessionUser) {
     redirect('/auth/login');
   }
 
-  // authUser record is created for user upon very first authentication/login, and repeated/synced for each subsequent login.  
-  // no scenario wheren authUser record should not exist for this user; 
+  // 2 - ensure auth_user record exists for user; else, redirect. 
+  // this scenario should never occur, as authUser record is created for each user upon very first authentication/login, and repeated/synced for each subsequent login.  
   // below this is a safe guard / double check
-  const dbUser = await prisma.authUser.findUnique({
-    where: { auth0Id: sessionUser.sub },
+  // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
+  const dbAuthUser = await prisma.authUser.findUnique({
+    where: { auth0Id: authSessionUser.sub },
   });
 
-  if (!dbUser) {
+  if (!dbAuthUser) {
     redirect('/auth/login');
   }
 
+  // 3 - ensure user_profile record exists for user; else, redirect. 
+  // this scenario should never occur, as userProfile record is created for each user upon very first authentication/login. 
+  // below this is a safe guard / double check
+  // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
   const userProfile = await prisma.userProfile.findUnique({
-    where: { userId: dbUser.id },
+    where: { userId: dbAuthUser.id },
     include: {
       authUser: true,
     },
   });
 
-  // userProfile record is created / double-checked for existence upon first and all subsequent logins
-  // below this is a safe guard / double check
-  if (!userProfile) {redirect('/');}
+  // if (!userProfile) {redirect('/');}
+  if (!userProfile) {
+    redirect('/auth/login');
+  }
+
+  // 2025jul29: no idea why below line is needed, this seems entirely redundant with code above; leaving in for now, what harm? 
   if (!userProfile.authUser) {redirect('/');} // added 2025jul09 to avert newfound Ts issue with nullable userProfile.authUser
   
+  // 4 - if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, so redirect. 
+  // this prevents all system interaction for duplicate authUsers
+  if (dbAuthUser.duplicateOfId) {
+    redirect('/');
+  }
 
-  // below means userProfile is fully accessible by the importing page/component
-  // return userProfile;
+  // FINAL: 
+  // failure to redirect based on scenarios above mean all goo, so return full userProfile object (for consumption/used by parent file)
   return userProfile as FullUserProfile; // 2025jul09: replaces above to avert newfound Ts issue with nullable userProfile.authUser
 
 }
+
+
+
+
+
+
 
 /**
  * Placeholder: Extend this to verify the authenticated user is an organizer.
  * If not an organizer, redirect to login or access-denied page.
  */
-export async function getAuthOrganizerOrRedirect() {
+export async function getAuthOrganizerOrRedirect() { // we are gonnna rename this: verifyAuthenticatedUserOrganizer (or something like that)
   throw new Error('getAuthOrganizerOrRedirect not yet implemented');
 }
 
@@ -68,7 +101,7 @@ export async function getAuthOrganizerOrRedirect() {
  * Placeholder: Extend this to verify the authenticated user is an admin.
  * If not an admin, redirect to login or access-denied page.
  */
-export async function getAuthAdminOrRedirect() {
+export async function getAuthAdminOrRedirect() { // we are gonnna rename this: verifyAuthenticatedUseAdmin (or something like that)
   throw new Error('getAuthAdminOrRedirect not yet implemented');
 }
 
