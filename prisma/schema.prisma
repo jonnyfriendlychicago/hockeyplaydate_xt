@@ -139,6 +139,7 @@ model Chapter {
   // future fields: 
   // location     String? // 2025jul30: leave this out for now, might do differently.  possibly: geography?  
   // status       String?     array: Active/Inactive
+    @@map("chapter")
 }
 
 model ChapterMember {
@@ -191,6 +192,7 @@ model Event {
   chapter         Chapter            @relation(fields: [chapterId], references: [id])
   rsvps           Rsvp[]     
 
+  @@map("event")
   // future fields: 
   // createdBy       lookup to userProfile.  need to track this, display it
   // stuff about rsvp cap, etc. 
@@ -216,6 +218,7 @@ model Rsvp {
   event          Event                @relation(fields: [eventId], references: [id])
   userProfile    UserProfile?         @relation(fields: [userProfileId], references: [id])
   
+  @@map("rsvp")
   // future fields: 
   // createdBy       lookup to userProfile.  need to track this, display it
   // respondedAt     DateTime?           @map("responded_at")    // set when user responds?? 
