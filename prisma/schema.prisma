@@ -127,11 +127,12 @@ model AuthUserUserProfileSwapAudit {
 }
 
 model Chapter {
-  id           Int                 @id @default(autoincrement())
-  name         String? 
-  description  String?
-  createdAt    DateTime            @default(now()) @map("created_at")
-  updatedAt    DateTime            @updatedAt @map("updated_at")
+  id              Int                 @id @default(autoincrement())
+  name            String? 
+  description     String?
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  slug            String              @unique // 2025jul31 added. 
   
   members      ChapterMember[]  
   events       Event[]
