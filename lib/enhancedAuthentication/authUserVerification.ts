@@ -30,7 +30,7 @@ type FullUserProfile = UserProfile & {
     authUser: AuthUser;
   };
 
-export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUser
+export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUserProfileOrRedirect
   
 // 1 - if not authenticated, redirect to login
   const authSession = await auth0.getSession();
@@ -83,6 +83,32 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
 
 }
 
+export async function getAuthenticatedUserProfileOrNull() {
+  const authSession = await auth0.getSession();
+  const authSessionUser = authSession?.user;
+
+  if (!authSession || !authSessionUser || !authSessionUser.sub) { // note: I don't think it's possible in auth0 to get session but no .sub, but double check is fine
+    return null;
+  }
+
+  const dbAuthUser = await prisma.authUser.findUnique({
+    where: { auth0Id: authSessionUser.sub },
+  });
+
+  if (!dbAuthUser) {
+    return null; 
+  }
+
+  // 3 - ensure user_profile record exists for user; else, redirect. 
+  const dbUserProfile = await prisma.userProfile.findUnique({
+    where: { userId: dbAuthUser.id },
+    include: {
+      authUser: true,
+    },
+  });
+
+  return dbUserProfile as FullUserProfile;
+}
 
 
 

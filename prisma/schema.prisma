@@ -168,6 +168,7 @@ model ChapterMember {
 enum MemberRole {
   MEMBER
   MANAGER
+  BLOCKED
 }
 
 model Event {
