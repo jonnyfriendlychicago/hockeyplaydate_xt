@@ -46,7 +46,8 @@ export default function MenuClient({
           {isLoggedIn ? (
             <div className="flex flex-col gap-2 text-base">
               <Link href={profileUrl} onClick={() => setOpen(false)}>Profile</Link>
-              <a href="/auth/logout" onClick={() => setOpen(false)}>Logout</a>
+              {/* <a href="/auth/logout" onClick={() => setOpen(false)}>Logout</a> */}
+              <Link href="/auth/logout" onClick={() => setOpen(false)}>Logout</Link>
               <Image
                 className='h-8 w-8 rounded-full mt-2'
                 src={profileImage || profileDefault}
@@ -56,9 +57,11 @@ export default function MenuClient({
               />
             </div>
           ) : (
-            <a href="/auth/login" onClick={() => setOpen(false)}>
+            // <a href="/auth/login" onClick={() => setOpen(false)}>
+            <Link href="/auth/login" onClick={() => setOpen(false)}>
               <Button>Sign in</Button>
-            </a>
+            {/* </a> */}
+            </Link>
           )}
 
           <SheetDescription />
