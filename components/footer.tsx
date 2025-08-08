@@ -2,7 +2,7 @@
 
 import { APP_NAME } from '@/lib/constants';
 
-const Footer = () => {
+export default function Footer () {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -14,4 +14,19 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+// 2025aug07: below is old school format
+// import { APP_NAME } from '@/lib/constants';
+
+// const Footer = () => {
+//   const currentYear = new Date().getFullYear();
+
+//   return (
+//     <footer className='border-t'>
+//       <div className='p-5 flex-center'>
+//         {currentYear} {APP_NAME}. All Rights reserved.
+//       </div>
+//     </footer>
+//   );
+// };
+
+// export default Footer;

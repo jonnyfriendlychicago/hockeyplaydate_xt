@@ -1,6 +1,6 @@
 // prisma/schema.prisma
-// This is your Prisma schema file.  Defines all tables.columns that shall exist in db
-// this skeleton file was created automatically by 'npx prisma init'
+// This Prisma schema file defines all tables.columns that shall exist in db
+// The first version of this file was created automatically by 'npx prisma init'
 
 generator client {
   provider = "prisma-client-js"
@@ -13,25 +13,24 @@ datasource db {
 
 model AuthUser {
   // maintains data delivered continually from the auth0-based authentication method in a synch fashion.  
-  // auth0Id (called 'sub' in the incoming auth0 object) is a string that is the the unique Id from Auth0
-  id             Int       @id @default(autoincrement())
-  auth0Id        String    @unique         @map("auth0_id") // 101: this @map specifies the exact name of the field to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
-  // email          String    @unique  
-  email          String    // 2025jun21: removed unique constraint on email, b/c we will accept (then manage) "identity collision" being sent to us from auth0
-  emailVerified  Boolean   @default(false) @map("email_verified")
-  name           String?    // 101: no @map needed here, b/c it's a single world all lower case.  Prisma will create it simply as-is in psql. 
-  givenName      String?   @map("given_name")
-  familyName     String?   @map("family_name")
-  nickname       String?
-  picture        String?
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt      @map("updated_at")
+  // field below called 'auth0Id' (called 'sub' in the incoming auth0 object) is a string that is the the unique Id from Auth0
+  id              Int         @id @default(autoincrement())
+  auth0Id         String      @unique         @map("auth0_id") // 101: this @map specifies the exact name of the field to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
+  email           String      // 2025jun21: removed unique constraint on email, b/c we will accept (then manage) "identity collision" being sent to us from auth0
+  emailVerified   Boolean     @default(false) @map("email_verified")
+  name            String?     // 101: no @map needed here, b/c it's a single world all lower case.  Prisma will create it simply as-is in psql. 
+  givenName       String?     @map("given_name")
+  familyName      String?     @map("family_name")
+  nickname        String?
+  picture         String?
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt      @map("updated_at")
 
-  userProfile        UserProfile? // 101: 'userProfile' on this line is an alias to the UserProfile object table
+  userProfile     UserProfile? // 101: 'userProfile' on this line is an alias to the UserProfile object table
 
-  duplicateOfId  Int?      @map("duplicateof_id")
-  duplicateOf    AuthUser? @relation("DuplicateRelation", fields: [duplicateOfId], references: [id])
-  duplicates AuthUser[] @relation("DuplicateRelation")
+  duplicateOfId   Int?        @map("duplicateof_id")
+  duplicateOf     AuthUser?   @relation("DuplicateRelation", fields: [duplicateOfId], references: [id])
+  duplicates      AuthUser[]  @relation("DuplicateRelation")
 
   @@map("auth_user") // 101: this @map specifies the exact name of the table to be created/written to in PostgresQL.  without this, Prisma will create all kinds of funky names in PSQL. 
 }
@@ -41,21 +40,21 @@ model UserProfile {
   // records herein created once by auth0 sync process; after initial record creation, data does not again get written from authUser record. 
   // maintains data about the end user; 
   // this record the true "end user" account to which all down-stream activity is linked, such as groups, rsvps, etc.  
-  id           Int      @id @default(autoincrement())
-  // userId       Int      @unique         @map("user_id")
-  userId       Int?      @unique         @map("user_id")
-  altEmail     String?  @map("alt_email")     
-  altNickname  String?  @map("alt_nickname")  // 2025may05: this *was* a deprecated field, to be whacked.  But then it got repurposed to be "family brand name"
-  phone        String?
-  slugDefault  String   @unique         @map("slug_default")
-  slugVanity   String?  @unique         @map("slug_vanity")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt      @map("updated_at")
-  givenName    String?  @map("given_name")     
-  familyName   String?  @map("family_name")   
+  id              Int         @id @default(autoincrement())
+  userId          Int?        @unique         @map("user_id")
+  altEmail        String?     @map("alt_email")     
+  altNickname     String?     @map("alt_nickname")  // 2025may05: this *was* a deprecated field, to be whacked.  But then it got repurposed to be "family brand name"
+  phone           String?
+  slugDefault     String      @unique         @map("slug_default")
+  slugVanity      String?     @unique         @map("slug_vanity")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt      @map("updated_at")
+  givenName       String?     @map("given_name")     
+  familyName      String?     @map("family_name")   
 
-  // authUser         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  authUser    AuthUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authUser        AuthUser?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rsvps           Rsvp[]              // RSVP responses
+  chapterMembership  ChapterMember[]     // join to Chapters
 
   @@map("user_profile")
 }
@@ -90,7 +89,6 @@ model AuthUserUserProfileSwapAudit {
 
   // below is the unique ID for this swap action/audit record
   id                                         Int      @id @default(autoincrement()) @map("id")
-
   // Below are captured for present and future sanity. Email is an essential join, and auth0id basically tells you the *type* of authentication record we're dealing with: 
   // googleSocial v. emailPassword v. (etc.)
   promotedAuthUserEmail                      String?     @map("promoted_auth_user_email")           // SOURCE_TABLE.FIELD: auth_user.email
@@ -123,8 +121,127 @@ model AuthUserUserProfileSwapAudit {
   precludedUserProfileUserIdInitial           Int?     @map("precluded_user_profile_userid_initial")     
   precludedUserProfileUserIdInitialPost       Int?     @map("precluded_user_profile_userid_post")  
 
-  createdAt    DateTime @default(now()) @map("created_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
 
   @@map("authuser_userprofile_swap_audit")
 }
 
+model Chapter {
+  id              Int                 @id @default(autoincrement())
+  name            String? 
+  description     String?
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  slug            String              @unique // 2025jul31 added. 
+  
+  members      ChapterMember[]  
+  events       Event[]
+
+  // future fields: 
+  // location     String? // 2025jul30: leave this out for now, might do differently.  possibly: geography?  
+  // status       String?     array: Active/Inactive
+    @@map("chapter")
+}
+
+model ChapterMember {
+  id              Int              @id @default(autoincrement())
+  chapterId       Int              @map("chapter_id")
+  userProfileId   Int              @map("user_profile_id")
+  memberRole      MemberRole       @map("member_role") @default(MEMBER)
+  joinedAt        DateTime         @default(now()) @map("joined_at")
+
+  chapter         Chapter          @relation(fields: [chapterId], references: [id])
+  userProfile     UserProfile      @relation(fields: [userProfileId], references: [id])
+
+  @@unique([chapterId, userProfileId]) // each user_profile can only appear once per chapter
+  @@map("chapter_member")
+
+  // future fields: 
+  // status       String?     array: Active/Inactive/Pending
+
+  // something to handle application and decision process for each would-be chapterMember
+  // leaveReason  String?     array: voluntary; removed; other?  
+  // also, maybe a table to handle membership actions: applied; approved; denied; removed; blocked; 
+  // bear in mind per our business design: there is no "invite users to chapter" program: no fishing for users! 
+}
+
+enum MemberRole {
+  MEMBER
+  MANAGER
+  BLOCKED
+}
+
+model Event {
+  id              Int               @id @default(autoincrement())
+  chapterId       Int               @map("chapter_id")
+  title           String?
+  description     String?
+
+  // Google Maps data
+  placeId         String?           @map("place_id") // from Google Place Details API
+  venueName       String?           @map("venue_name") // e.g. "Johnny's Ice House West"
+  address         String?           // full formatted address
+  lat             Float?            // optional: for map pins
+  lng             Float?            // optional
+
+  // time info
+  startsAt        DateTime?          @map("starts_at") // from Google Place Details API// UTC preferred
+  durationMin     Int?               @map("duration_min") // total minutes
+
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  chapter         Chapter            @relation(fields: [chapterId], references: [id])
+  rsvps           Rsvp[]     
+
+  @@map("event")
+  // future fields: 
+  // createdBy       lookup to userProfile.  need to track this, display it
+  // stuff about rsvp cap, etc. 
+  // status       String?     array: Active/Cancelled
+}
+
+model Rsvp {
+  id              Int                 @id @default(autoincrement())
+  eventId         Int                 @map("event_id")           
+  
+  // optional: populated for member rsvps, null for ad hoc rsvps 
+  userProfileId   Int?                @map("user_profile_id") 
+  
+  // optional: null for member rsvps, populated for ad hoc rsvps
+  name            String?             
+  email           String?             
+  slug            String?             @unique 
+
+  rsvpStatus      RsvpStatus?          @map("rsvp_status")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  event          Event                @relation(fields: [eventId], references: [id])
+  userProfile    UserProfile?         @relation(fields: [userProfileId], references: [id])
+  
+  @@map("rsvp")
+  // future fields: 
+  // createdBy       lookup to userProfile.  need to track this, display it
+  // respondedAt     DateTime?           @map("responded_at")    // set when user responds?? 
+  // count of on-ice kids
+  // count of on-ice adults
+  // attributes about volunteering, i.e. music, team captain, referee, photographer, etc. 
+}
+
+enum RsvpStatus {
+  YES
+  NO
+  MAYBE
+}
+
+// design rules when making a new table: 
+// all id look like this: id           Int              @id @default(autoincrement())
+// only require fields when absolutely necessary in db; handle soft requirement in validation
+// camel-case fields must have an @map for declared db field name
+// createdAt always required, barring major exception
+// all createdAt looks like this: createdAt    DateTime         @default(now()) @map("created_at")
+// updatedAt required for table whose records are prone to frequent changing
+// all updatedAt looks like this: updatedAt    DateTime         @updatedAt @map("updated_at")
+// all relationship attributes at the bottom
+// camel-case table name must have an @@map for declared table name

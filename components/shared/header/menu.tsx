@@ -81,15 +81,18 @@ export default async function Menu() {
               </>) } 
               
               <DropdownMenuItem asChild>
-                <a href='/auth/logout'>Logout</a>
+                {/* <a href='/auth/logout'>Logout</a> */}
+                 <Link href="/auth/logout">Logout</Link>
               </DropdownMenuItem>
             
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <a href='/auth/login'> 
+          // <a href='/auth/login'> 
+          <Link href="/auth/login">
             <Button>Login / Sign Up</Button>
-          </a>
+          {/* </a> */}
+          </Link>
         )}
       </div>
 
