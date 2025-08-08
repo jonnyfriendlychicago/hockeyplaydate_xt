@@ -1,5 +1,9 @@
 // app/(root)/[slug]/page.tsx 
 
+// IMPORTANT FYI: THIS IS THE "CHAPTER" PAGE.  Business/design decision made to place the chapter page (i.e. chapter slug) at the highest root level, 
+// so that chapters look like this: hockeyplaydate.com/chicago-central ... rather than hockeyplaydate.com/chapters/chicago-central
+// This enhances chapter branding and sharing/communications among members and potential members. 
+
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { notFound } from 'next/navigation';
