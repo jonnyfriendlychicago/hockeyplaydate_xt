@@ -2,14 +2,17 @@
 // this file was originally created per Auth0 documentation: https://auth0.com/docs/quickstart/webapp/nextjs/interactive
 // additional documentation: https://github.com/auth0/nextjs-auth0
 
-// 101: auth0 authentication is handled by combination of the following essential files/configs:
+// devNotes: (updated 2025aug08)
+// auth0 authentication is handled by combination of the following essential files/configs:
 // set-up on auth0.com >> tenant >> various fields/configs 
 // npm i @auth0/nextjs-auth0: make sure this has been run at least once for the life of the project
 // .env.local file (contains localized esssential auth0 variables)
 // components/shared/header/menu.tsx (which contains sign-in button gui that points to url for auth0 universal login)
+// components/shared/header/menuClient.tsx (same as above, but specially for mobile)
 // middleware.ts (local auth0 config stuff: used to enforce authentication on specific routes)
 // lib/auth0.ts (this file)
-// app/api/login-error/route.ts (called by above, if error response)
+// app/api/auth0-callback/route.ts
+// app/api/login-error/route.ts (called by above two files, if auth0 gives error response or auth0 gives custom email-not-verified redirect)
 // app/(root)/login-error/[presentableId]/page.tsx (page user redirected to, if error response )
 // app/(root)/login-exception/page.tsx (page user redirected to, if exception encountered )
 // app/(root)/page.tsx (home page, which we redirect to if successful authentication; this could be a different page, btw)
