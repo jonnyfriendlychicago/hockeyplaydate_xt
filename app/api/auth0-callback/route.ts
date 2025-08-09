@@ -2,6 +2,12 @@
 // This route handles the custom Auth0 redirect for unverified users
 // implemented 2025aug08
 
+export const dynamic = 'force-dynamic'; // this silences a false alarm during 'npm run build': 
+// Error in auth0-callback route: ... couldn't be rendered statically because it used `nextUrl.searchParams`
+// What's happening:
+// Next.js is trying to statically analyze your routes during build time, and it's warning that /api/auth0-callback can't be pre-rendered because it reads searchParams (which is dynamic). 
+// This is totally normal and expected for API routes that handle query parameters.
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
