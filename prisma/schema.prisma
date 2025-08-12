@@ -176,6 +176,7 @@ model Event {
   chapterId       Int               @map("chapter_id")
   title           String?
   description     String?
+  presentableId   String            @unique   @map("presentable_id")
 
   // Google Maps data
   placeId         String?           @map("place_id") // from Google Place Details API
