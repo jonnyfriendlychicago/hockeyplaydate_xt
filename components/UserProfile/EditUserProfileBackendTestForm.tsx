@@ -16,12 +16,22 @@ type Props = {
   authUserEmail: string;
 };
 
-export default function EditUserProfileBackendTestForm({ initialValues, defaultSluggy, authUserEmail }: Props) {
+export default function EditUserProfileBackendTestForm({ 
+  initialValues, 
+  defaultSluggy, 
+  authUserEmail 
+}: Props) {
+  
   const safeRedirect = useSafeRedirect();
   const [loading, setLoading] = useState(false);
   const [errorOutput, setErrorOutput] = useState('');
   const [formValues, setFormValues] = 
+  // devNotes on useState / InputType below: 
+  // `initialValues` is a complete RawUserProfileInputType object
+  // The normalization step (on the upstream user profile page) ensured it has all required fields
+  // Direct assignment works perfectly.  Life is simple/good.  Not same for other entity/forms in app.
   useState<RawUserProfileInputType>(initialValues);
+  
 
   const handleChange = (field: string, value: string) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));

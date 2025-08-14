@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const session = await auth0.getSession();
   const sessionUser = session?.user;
 
-  // (0) validate authentication
+  // 0 validate authentication
   // 2025jul29: leaving this section as-is for now, but near future, all of this should be a reuseable offboard function very similar in nature to: 
   // lib/enhancedAuthentication/authUserVerification.ts
 
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
   }
   
-  // (1) Server-side validation with Zod
+  // 1 - Server-side validation with Zod
   let parsed;
     try {
       const body = await req.json();
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-  // (2a) - backend validation: email
+  // 2a - backend validation: email
   // set altEmail to null if value incoming from form is the same as login email
   if (parsed.altEmail && parsed.altEmail.toLowerCase() === dbUser.email.toLowerCase()) {
     parsed.altEmail = null;
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     // Normalize casing if valid
     parsed.altEmail = alt;}
 
-    // (2b) - backend validation: vanitySlug
+    // 2b - backend validation: vanitySlug
     if (parsed.slugVanity) {
       const slug = parsed.slugVanity.toLowerCase();
       // const defaultSlug = dbUser.slugDefault.toLowerCase();
@@ -173,7 +173,7 @@ export async function POST(req: Request) {
       }
     }
     
-  // (3) Sanitize nullable fields (this step is legacy, leaving for future reference)
+  // 3 - Sanitize nullable fields (this step is legacy, leaving for future reference)
   const payload = {
     ...parsed,
     // slugVanity: parsed.slugVanity?.trim() || null,
@@ -184,7 +184,7 @@ export async function POST(req: Request) {
     // this section reserved for any additional unforeseen post-Zod data manipulation
   };
   
-  // (4) run the update
+  // 4 - run the update
   const updated = await prisma.userProfile.update({
     where: { userId: dbUser.id },
     data: payload,
@@ -196,3 +196,39 @@ export async function POST(req: Request) {
   
   return NextResponse.json(updated);
 }
+
+// devNotes: claude believes that step 4 above is inadequate and should be replaced with this enhanced code.
+// explanation: 
+// without try/catch (UserProfile), if the Prisma operation fails:
+
+// Unhandled exception gets thrown; 
+// Next.js returns generic 500 error; 
+// No logging of the actual error; 
+// Poor user experience - generic error message; 
+
+// What COULD go wrong in UserProfile:
+
+// Database connection issues
+// Constraint violations (duplicate emails, etc.)
+// Prisma validation errors
+// Transaction failures
+
+// try {
+//   const updated = await prisma.userProfile.update({
+//     where: { userId: dbUser.id },
+//     data: payload,
+//     select: {
+//       slugDefault: true,
+//       slugVanity: true,
+//     },
+//   });
+  
+//   return NextResponse.json(updated);
+// } catch (error) {
+//   console.error('Failed to update user profile:', error);
+//   return NextResponse.json(
+//     { error: 'Failed to update profile. Please try again.' },
+//     { status: 500 }
+//   );
+// }
+

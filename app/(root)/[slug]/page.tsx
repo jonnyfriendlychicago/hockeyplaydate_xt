@@ -2,7 +2,7 @@
 
 // IMPORTANT FYI: THIS IS THE "CHAPTER" PAGE.  Business/design decision made to place the chapter page (i.e. chapter slug) at the highest root level, 
 // so that chapters look like this: hockeyplaydate.com/chicago-central ... rather than hockeyplaydate.com/chapters/chicago-central
-// This enhances chapter branding and sharing/communications among members and potential members. 
+// This enhances chapter branding, eases sharing/communications among members, and improved accessibility for potential members. 
 
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
@@ -23,6 +23,7 @@ import { JoinChapterButton } from '@/components/chapter/JoinChapterButton';
 import { BlockedNotice } from '@/components/chapter/BlockedNotice';
 import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
+import { redirect } from 'next/navigation';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -31,8 +32,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function ChapterPage({ params }: { params: { slug: string } }) {
   
-  // 0 - authenticate user
+  // 0 - Validate user, part 1: authenticated not-dupe user? 
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
+  // bounce if dupe user 
+  if (authenticatedUserProfile?.authUser.duplicateOfId) {
+    return redirect('/');
+  }
   
   // 1 - load chapter / redirect
   const slug = params.slug;
@@ -42,7 +47,8 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
   if (!chapter) notFound();
   
-  // 3 - Determine user profile
+  // devNotes: this user profile stuff needs to be cut and replaced with the new lib/helpers/getUserChapterStatus.ts
+  // 2 - Validate user, part 2: chapterMember permissions
   let anonVisitor = false;
   let authVisitor = false;
   let genMember = false;
