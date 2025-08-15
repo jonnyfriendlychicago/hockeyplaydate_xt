@@ -7,7 +7,10 @@ import leoProfanity from 'leo-profanity';
 // one alternative is to use .loadDictionary() in strict mode or use isProfane() on substrings, but that increases the risk of false positives (e.g. class, Scunthorpe).  
 // Shelving this topic for another day. 
 
-const englishyRegex = /^[a-zA-ZÀ-ÿ'’\-\s.]+$/;
+// const englishyRegex = /^[a-zA-ZÀ-ÿ'’\-\s.]+$/;
+
+const englishyPlusNumberSymbolsRegex = /^[a-zA-ZÀ-ÿ0-9''\-\s.,!?@#$%&()+=":;/_*]+$/;
+
 export const eventValSchema = z.object({
   
   chapterId: z.number()
@@ -24,7 +27,8 @@ export const eventValSchema = z.object({
       .nullable()
       .default(null)
       .refine(
-        (val) => val === null || (val.length >= 3 && val.length <= 100),
+        // (val) => val === null || (val.length >= 3 && val.length <= 100),
+          (val) => val !== null && val.length >= 3 && val.length <= 100, // replaced above, which was allowing zero-char/null entries
         { message: 'Title must be between 3 and 100 characters if provided' }
       )
       .refine(
@@ -32,8 +36,8 @@ export const eventValSchema = z.object({
         { message: 'Inappropriate content detected in title. Please use different wording.' }
       )
       .refine(
-      (val) => val === null || englishyRegex.test(val),
-      { message: 'Entered name contains prohibited characters.' }
+      (val) => val === null || englishyPlusNumberSymbolsRegex.test(val),
+      { message: 'Title contains prohibited characters. Only allowed: letters, numbers, and symbols: .,!?@#$%&()+=":;/_-*' }
       )
   ),
 
@@ -48,7 +52,8 @@ export const eventValSchema = z.object({
       .default(null)
       .refine(
         // (val) => val === null || val.length <= 1000,
-        (val) => val === null || (val.length >= 3 && val.length <= 1000),
+        // (val) => val === null || (val.length >= 3 && val.length <= 1000),
+        (val) => val !== null && val.length >= 3 && val.length <= 1000, // replaced above, which was allowing zero-char/null entries
         { message: 'Description must be between 3 and 1000 characters if provided' }
       )
       .refine(
@@ -56,8 +61,8 @@ export const eventValSchema = z.object({
         { message: 'Inappropriate content detected in description. Please use different wording.' }
       )
       .refine(
-      (val) => val === null || englishyRegex.test(val),
-      { message: 'Entered name contains prohibited characters.' }
+      (val) => val === null || englishyPlusNumberSymbolsRegex.test(val),
+      { message: 'Description contains prohibited characters. Only allowed: letters, numbers, and symbols: .,!?@#$%&()+=":;/_-*' }
       )
   ),
 

@@ -59,14 +59,26 @@ export default function ManageEventBackendTestForm({
     try {
       // Convert string inputs to appropriate types for backend; 
       // devNotes: this 'const payloard = ...' need not happen for entities like userProfile which is all string fields
+      
       const payload = {
         ...formValues,
         chapterId: chapterId, // Ensure it's always the locked chapter
+        ...(initialEventData?.eventId && { eventId: initialEventData.eventId }), // Include eventId for updates
         lat: formValues.lat ? parseFloat(formValues.lat) : null,
         lng: formValues.lng ? parseFloat(formValues.lng) : null,
         startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
         durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
       };
+      
+      // above replaces below; below seemingly was the reason each edit was creating a new record
+      // const payload = {
+      //   ...formValues,
+      //   chapterId: chapterId, // Ensure it's always the locked chapter
+      //   lat: formValues.lat ? parseFloat(formValues.lat) : null,
+      //   lng: formValues.lng ? parseFloat(formValues.lng) : null,
+      //   startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
+      //   durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
+      // };
 
       const res = await fetch('/api/event/save', {
         method: 'POST',

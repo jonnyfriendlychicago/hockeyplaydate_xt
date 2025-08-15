@@ -42,7 +42,10 @@ export default async function EventPage({ params }: { params: { slug: string } }
   });
 
   // redirect if no exists
-  if (!presentedEvent) notFound(); // future consideration: special return or redirect: "no such event, dude!"
+  if (!presentedEvent) {
+    console.log('!presentedEvent issue' )
+    notFound(); // future consideration: special return or redirect: "no such event, dude!"
+  }
 
   // 2 - Validate user, part 2: requisite chapterMember permissions? 
   const userStatus = await getUserChapterStatus(
@@ -50,10 +53,10 @@ export default async function EventPage({ params }: { params: { slug: string } }
     authenticatedUserProfile
   );
 
-  if (userStatus.mgrMember || userStatus.genMember) {
-    notFound(); // hard redirct is fine for now.  only members should be getting to events 
-    // future consideration: special return or redirect: "only current chapters organizers and members can view events, dude!"
-    // should be a super minimal page.  maybe redirect so there's no remaining trace of the event-specific URL. Door closed!
+  if (!(userStatus.mgrMember || userStatus.genMember)) {
+    // devNotes: above reads very simple: if not (this OR that), then do such and such
+    // way more intuitive than if not this and not that, then do such and such
+    notFound();
   }
 
   // 3 - data presention helpers
