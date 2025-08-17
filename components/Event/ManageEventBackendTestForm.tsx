@@ -1,5 +1,6 @@
 // components/Event/ManageEventBackendTestForm.tsx
 // this entire file purely for testing backend api; it is not intended for production use by real-life end users
+// this is JonnyFriendly's original file before google maps introduction. 
 
 'use client';
 
@@ -10,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSafeRedirect } from '@/lib/navigation';
 import { RawEventInputType } from '@/app/types/forms/rawEventInputType';
+import VenueSelector from './VenueSelector';
 
 type Props = {
   chapterId: number;
@@ -50,6 +52,24 @@ export default function ManageEventBackendTestForm({
   const handleChange = (field: keyof RawEventInputType, value: string | number) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Add this new function after handleChange
+const handleVenueChange = (venueData: {
+  placeId: string;
+  venueName: string;
+  address: string;
+  lat: number | null;
+  lng: number | null;
+}) => {
+  setFormValues((prev) => ({
+    ...prev,
+    placeId: venueData.placeId,
+    venueName: venueData.venueName,
+    address: venueData.address,
+    lat: venueData.lat?.toString() || '',
+    lng: venueData.lng?.toString() || '',
+  }));
+};
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,24 +171,16 @@ export default function ManageEventBackendTestForm({
         </CardContent>
       </Card>
 
+
+
+
       {/* Location Fields (Placeholders) */}
-      <Card className="bg-gray-50">
+
+      {/* <Card className="bg-gray-50">
         <CardHeader>
           <CardTitle className="text-lg text-gray-600">Location (Placeholder Fields)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          
-          {/* <div>
-            <label className="block text-sm font-medium mb-2">Google Place ID</label>
-            <Input
-              placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
-              // value={formValues.placeId}
-              value={formValues.placeId ?? ''}
-
-              onChange={(e) => handleChange('placeId', e.target.value)}
-              disabled={loading}
-            />
-          </div> */}
 
           <div>
             <label className="block text-sm font-medium mb-2">Venue Name</label>
@@ -192,31 +204,19 @@ export default function ManageEventBackendTestForm({
             />
           </div>
 
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Latitude</label>
-              <Input
-                placeholder="41.8781"
-                // value={formValues.lat}
-                value={formValues.lat ?? ''}
-                onChange={(e) => handleChange('lat', e.target.value)}
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Longitude</label>
-              <Input
-                placeholder="-87.6298"
-                // value={formValues.lng}
-                value={formValues.lng ?? ''}
-                onChange={(e) => handleChange('lng', e.target.value)}
-                disabled={loading}
-              />
-            </div>
-          </div> */}
-
         </CardContent>
-      </Card>
+      </Card> */}
+
+      {/* Google Maps Venue Selector - REPLACES the old placeholder fields */}
+      <VenueSelector
+        venueName={formValues.venueName ?? ''}
+        address={formValues.address ?? ''}
+        placeId={formValues.placeId ?? ''}
+        onVenueChange={handleVenueChange}
+        onVenueNameChange={(value) => handleChange('venueName', value)}
+        onAddressChange={(value) => handleChange('address', value)}
+        disabled={loading}
+      />
 
       {/* Time Fields (Placeholders) */}
       <Card className="bg-gray-50">
