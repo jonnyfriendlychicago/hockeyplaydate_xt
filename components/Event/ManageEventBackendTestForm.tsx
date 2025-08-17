@@ -46,6 +46,7 @@ export default function ManageEventBackendTestForm({
     lng: initialEventData?.lng || '',
     startsAt: initialEventData?.startsAt || '',
     durationMin: initialEventData?.durationMin || '',
+    bypassAddressValidation: initialEventData?.bypassAddressValidation || 'false',
     // ...initialEventData,
   });
 
@@ -88,6 +89,7 @@ const handleVenueChange = (venueData: {
         lng: formValues.lng ? parseFloat(formValues.lng) : null,
         startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
         durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
+        bypassAddressValidation: formValues.bypassAddressValidation === 'true', 
       };
       
       // above replaces below; below seemingly was the reason each edit was creating a new record
@@ -171,51 +173,27 @@ const handleVenueChange = (venueData: {
         </CardContent>
       </Card>
 
-
-
-
-      {/* Location Fields (Placeholders) */}
-
-      {/* <Card className="bg-gray-50">
-        <CardHeader>
-          <CardTitle className="text-lg text-gray-600">Location (Placeholder Fields)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Venue Name</label>
-            <Input
-              placeholder="Johnny's Ice House - West"
-              // value={formValues.venueName}
-              value={formValues.venueName ?? ''}
-              onChange={(e) => handleChange('venueName', e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Address</label>
-            <Input
-              placeholder="123 Hockey Lane, Chicago, IL 60614"
-              // value={formValues.address}
-              value={formValues.address ?? ''}
-              onChange={(e) => handleChange('address', e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-        </CardContent>
-      </Card> */}
-
-      {/* Google Maps Venue Selector - REPLACES the old placeholder fields */}
+      {/* Google Maps Venue Selector */}
       <VenueSelector
         venueName={formValues.venueName ?? ''}
         address={formValues.address ?? ''}
         placeId={formValues.placeId ?? ''}
+        bypassAddressValidation={formValues.bypassAddressValidation === 'true'} 
         onVenueChange={handleVenueChange}
         onVenueNameChange={(value) => handleChange('venueName', value)}
         onAddressChange={(value) => handleChange('address', value)}
         disabled={loading}
+        onManualModeChange={(isManual) => {
+          handleChange('bypassAddressValidation', isManual.toString());  // UPDATE THIS
+          if (isManual) {
+            setFormValues(prev => ({
+              ...prev,
+              placeId: '',
+              lat: '',
+              lng: ''
+            }));
+          }
+        }}
       />
 
       {/* Time Fields (Placeholders) */}

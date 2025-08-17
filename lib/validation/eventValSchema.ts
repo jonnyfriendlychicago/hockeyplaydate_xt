@@ -126,6 +126,9 @@ export const eventValSchema = z.object({
       { message: 'Longitude must be between -180 and 180' }
     ),
 
+    bypassAddressValidation: z.boolean()  // ADD THIS
+    .default(false),
+
   // Time fields
   startsAt: z.preprocess(
     (val) => {

@@ -27,11 +27,13 @@ interface VenueSelectorProps {
   venueName: string;
   address: string;
   placeId: string;
+  bypassAddressValidation: boolean;  
   
   // Callbacks to update parent form
   onVenueChange: (venueData: VenueData) => void;
   onVenueNameChange: (value: string) => void;
   onAddressChange: (value: string) => void;
+  onManualModeChange: (isManual: boolean) => void;  
   
   // Loading state
   disabled?: boolean;
@@ -41,9 +43,11 @@ export default function VenueSelector({
   venueName,
   address,
   placeId,
+  bypassAddressValidation, 
   onVenueChange,
   onVenueNameChange,
   onAddressChange,
+  onManualModeChange, 
   disabled = false
 }: VenueSelectorProps) {
   
@@ -52,6 +56,8 @@ export default function VenueSelector({
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
   const [status, setStatus] = useState<string>('');
+  // const [useManualEntry, setUseManualEntry] = useState(false);
+  const [useManualEntry, setUseManualEntry] = useState(bypassAddressValidation);
 
   // Define handlePlaceSelect first (before useEffect that uses it)
   const handlePlaceSelect = useCallback(() => {
@@ -177,6 +183,20 @@ export default function VenueSelector({
     }
   };
 
+  const handleManualToggle = (checked: boolean) => {
+  setUseManualEntry(checked);
+  onManualModeChange(checked);
+  
+  if (checked) {
+    // Switching to manual mode - clear Google data
+    setSelectedPlace(null);
+    setStatus('');
+  } else {
+    // Switching back to Google mode - clear manual entries and reset
+    resetFields();
+  }
+};
+
   const hasContent = venueName.length > 0 || address.length > 0;
 
   return (
@@ -194,8 +214,8 @@ export default function VenueSelector({
           </div>
         )}
 
-        {/* Venue field with autocomplete */}
-        <div>
+        {/* Venue field with autocomplete original */}
+        {/* <div>
           <label className="block text-sm font-medium mb-2">Venue</label>
           <Input
             ref={venueInputRef}
@@ -207,19 +227,79 @@ export default function VenueSelector({
           <p className="text-xs text-muted-foreground mt-1">
             {isGoogleLoaded ? 'Type to search venues' : 'Loading venue search...'}
           </p>
+        </div> */}
+
+        {/* Manual entry checkbox */}
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="manual-entry"
+            checked={useManualEntry}
+            onChange={(e) => handleManualToggle(e.target.checked)}
+            disabled={disabled}
+            className="rounded border-gray-300"
+          />
+          <label htmlFor="manual-entry" className="text-sm font-medium">
+            Enter venue / address manually
+          </label>
+        </div>
+
+        {/* Warning for manual entry */}
+        {useManualEntry && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
+            <strong className="text-yellow-800">Warning:</strong> 
+            <span className="text-yellow-700"> Manually entered venues/addresses will disable map services. 
+            Only use this option if your venue is not accessible via the lookup above. 
+            You can add enhanced location details in your event description (e.g., quoteMark east rink near 5th Ave quoteMark). 
+            Uncheck the box to return to Google venue lookup.</span>
+          </div>
+        )}
+
+        {/* Venue field - conditional behavior */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Venue</label>
+          <Input
+            ref={useManualEntry ? null : venueInputRef}
+            placeholder={useManualEntry ? "Enter venue name manually" : "Start typing a venue name..."}
+            value={venueName}
+            onChange={handleVenueInputChange}
+            disabled={disabled || (!useManualEntry && !isGoogleLoaded)}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {useManualEntry 
+              ? 'Manual entry - no autocomplete' 
+              : (isGoogleLoaded ? 'Type to search venues' : 'Loading venue search...')
+            }
+          </p>
         </div>
 
         {/* Address field */}
         <div>
           <label className="block text-sm font-medium mb-2">Address</label>
-          <Input
+          {/* <Input
             placeholder="Address will populate automatically..."
             value={address}
             onChange={handleAddressInputChange}
             disabled={disabled}
+          /> */}
+
+          <Input
+            placeholder={useManualEntry ? "Enter address manually" : "Address will populate automatically..."}
+            value={address}
+            onChange={handleAddressInputChange}
+            disabled={disabled}
+            readOnly={!useManualEntry}
           />
-          <p className="text-xs text-muted-foreground mt-1">
+
+          {/* <p className="text-xs text-muted-foreground mt-1">
             Editable - will auto-fill when venue is selected
+          </p> */}
+
+          <p className="text-xs text-muted-foreground mt-1">
+            {useManualEntry 
+              ? 'Manual entry - no validation' 
+              : 'Auto-fills when venue is selected'
+            }
           </p>
         </div>
 

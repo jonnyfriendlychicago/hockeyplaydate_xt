@@ -14,4 +14,5 @@ export type RawEventInputType = {
   // Time fields
   startsAt: string | null; // stored as string in form, converted to Date for backend
   durationMin: string | null; // stored as string in form, converted to number for backend
+  bypassAddressValidation: string; 
 };

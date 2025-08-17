@@ -191,6 +191,8 @@ model Event {
 
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
+  bypassAddressValidation    Boolean           @default(false) @map("bypass_address_validation") 
+
 
   chapter         Chapter            @relation(fields: [chapterId], references: [id])
   rsvps           Rsvp[]     
