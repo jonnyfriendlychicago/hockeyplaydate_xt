@@ -187,7 +187,8 @@ export default function VenueSelector({
       <CardContent className="space-y-4">
         
         {/* Status indicator */}
-        {status && (
+        {/* {status && ( */}
+        {false && status && (
           <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
             {status}
           </div>
@@ -234,7 +235,8 @@ export default function VenueSelector({
         </Button>
 
         {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && placeId && (
+        {/* {process.env.NODE_ENV === 'development' && placeId && ( */}
+        {false && process.env.NODE_ENV === 'development' && placeId && (
           <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
             <strong>Debug:</strong> Place ID: {placeId}
           </div>
