@@ -105,7 +105,8 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
     lng: existingEvent.lng?.toString() ?? '',
     startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
     durationMin: existingEvent.durationMin?.toString() ?? '',
-    bypassAddressValidation: existingEvent.bypassAddressValidation?.toString() ?? 'false',  
+    // bypassAddressValidation: existingEvent.bypassAddressValidation?.toString() ?? 'false',  
+    bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
   } : null;
 
   // 5 - return it all

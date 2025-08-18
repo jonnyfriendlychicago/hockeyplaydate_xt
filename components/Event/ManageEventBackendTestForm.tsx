@@ -46,7 +46,8 @@ export default function ManageEventBackendTestForm({
     lng: initialEventData?.lng || '',
     startsAt: initialEventData?.startsAt || '',
     durationMin: initialEventData?.durationMin || '',
-    bypassAddressValidation: initialEventData?.bypassAddressValidation || 'false',
+    // bypassAddressValidation: initialEventData?.bypassAddressValidation || 'false',
+    bypassAddressValidation: initialEventData?.bypassAddressValidation || false,
     // ...initialEventData,
   });
 
@@ -89,7 +90,8 @@ const handleVenueChange = (venueData: {
         lng: formValues.lng ? parseFloat(formValues.lng) : null,
         startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
         durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
-        bypassAddressValidation: formValues.bypassAddressValidation === 'true', 
+        // bypassAddressValidation: formValues.bypassAddressValidation === 'true', 
+        bypassAddressValidation: formValues.bypassAddressValidation,
       };
       
       // above replaces below; below seemingly was the reason each edit was creating a new record
@@ -178,13 +180,19 @@ const handleVenueChange = (venueData: {
         venueName={formValues.venueName ?? ''}
         address={formValues.address ?? ''}
         placeId={formValues.placeId ?? ''}
-        bypassAddressValidation={formValues.bypassAddressValidation === 'true'} 
+        // bypassAddressValidation={formValues.bypassAddressValidation === 'true'} 
+        bypassAddressValidation={formValues.bypassAddressValidation}
         onVenueChange={handleVenueChange}
         onVenueNameChange={(value) => handleChange('venueName', value)}
         onAddressChange={(value) => handleChange('address', value)}
         disabled={loading}
         onManualModeChange={(isManual) => {
-          handleChange('bypassAddressValidation', isManual.toString());  // UPDATE THIS
+          // handleChange('bypassAddressValidation', isManual.toString());  // UPDATE THIS
+          // handleChange('bypassAddressValidation', isManual);
+          setFormValues(prev => ({
+            ...prev,
+            bypassAddressValidation: isManual
+          }));
           if (isManual) {
             setFormValues(prev => ({
               ...prev,
