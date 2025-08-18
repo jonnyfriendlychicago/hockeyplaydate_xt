@@ -85,9 +85,10 @@ export default function VenueSelector({
     setStatus(`Selected: ${place.name}`);
   }, [onVenueChange]);
 
-  // Load Google Maps script
+  // Load Google Maps script (only if not in manual mode)
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.google) {
+    // if (typeof window !== 'undefined' && !window.google) {
+    if (!useManualEntry && typeof window !== 'undefined' && !window.google) {
       // Create script element
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleMaps`;
@@ -117,15 +118,18 @@ export default function VenueSelector({
       };
       
       document.head.appendChild(script);
-    } else if (window.google && window.google.maps && window.google.maps.places) {
+    // } else if (window.google && window.google.maps && window.google.maps.places) {
+    } else if (!useManualEntry && window.google && window.google.maps && window.google.maps.places) {
       setIsGoogleLoaded(true);
       setStatus('Google Maps already loaded');
     }
-  }, []);
+    // }, []);
+    }, [useManualEntry]); 
 
-  // Initialize autocomplete when Google Maps is loaded
+  // Initialize autocomplete when Google Maps is loaded (only if not manual mode)
   useEffect(() => {
-    if (isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
+    // if (isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
+    if (!useManualEntry && isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
       try {
         // Additional safety check
         if (!window.google || !window.google.maps || !window.google.maps.places) {
@@ -148,7 +152,8 @@ export default function VenueSelector({
         console.error('Autocomplete initialization error:', error);
       }
     }
-  }, [isGoogleLoaded, handlePlaceSelect]);
+    // }, [isGoogleLoaded, handlePlaceSelect]);
+  }, [isGoogleLoaded, handlePlaceSelect, useManualEntry]);
 
   const handleVenueInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -183,19 +188,141 @@ export default function VenueSelector({
     }
   };
 
-  const handleManualToggle = (checked: boolean) => {
+  // original handleManualToggle
+  // const handleManualToggle = (checked: boolean) => {
+  //   setUseManualEntry(checked);
+  //   onManualModeChange(checked);
+    
+  //   if (checked) {
+  //     // Switching to manual mode - clear Google data
+  //     setSelectedPlace(null);
+  //     setStatus('');
+  //   } else {
+  //     // Switching back to Google mode - clear manual entries and reset
+  //     resetFields();
+  //   }
+  // };
+
+  // // try 2: handleManualToggle
+  // const handleManualToggle = (checked: boolean) => {
+  //   setUseManualEntry(checked);
+  //   onManualModeChange(checked);
+    
+  //   // if (checked) {
+  //   //   // Switching to manual mode - clear Google data and disable autocomplete
+  //   //   setSelectedPlace(null);
+  //   //   setStatus('');
+  //   //   setIsGoogleLoaded(false);
+      
+  //   //   // Clean up existing autocomplete
+  //   //   if (autocompleteRef.current) {
+  //   //     autocompleteRef.current = null;
+  //   //   }
+    
+  //   if (checked) {
+  //     // Switching to manual mode - clear Google data and disable autocomplete
+  //     setSelectedPlace(null);
+  //     setStatus('');
+  //     setIsGoogleLoaded(false);
+      
+  //     // ACTIVELY remove autocomplete from the input element
+  //     if (autocompleteRef.current && venueInputRef.current) {
+  //       // Clear all event listeners from the input
+  //       google.maps.event.clearInstanceListeners(autocompleteRef.current);
+  //       autocompleteRef.current = null;
+        
+  //       // Create a fresh input element to completely remove autocomplete
+  //       const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
+  //       venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
+  //       venueInputRef.current = newInput;
+  //     }
+
+  //   } else {
+  //     // Switching back to Google mode - clear manual entries and reset
+  //     resetFields();
+      
+  //     // Re-enable Google Maps if available
+  //     if (window.google && window.google.maps && window.google.maps.places) {
+  //       setIsGoogleLoaded(true);
+  //       setStatus('Google Maps already loaded');
+  //     }
+  //   }
+  // };
+
+// try 3: handleManualToggle
+const handleManualToggle = (checked: boolean) => {
   setUseManualEntry(checked);
   onManualModeChange(checked);
   
   if (checked) {
-    // Switching to manual mode - clear Google data
+    // Switching to manual mode - clear everything for fresh start
     setSelectedPlace(null);
     setStatus('');
+    setIsGoogleLoaded(false);
+    
+    // ACTIVELY remove autocomplete from the input element
+    // if (autocompleteRef.current && venueInputRef.current) {
+    //   // Clear all event listeners from the input
+    //   google.maps.event.clearInstanceListeners(autocompleteRef.current);
+    //   autocompleteRef.current = null;
+      
+    //   // Create a fresh input element to completely remove autocomplete
+    //   const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
+    //   venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
+    //   venueInputRef.current = newInput;
+    // }
+
+    // ACTIVELY remove autocomplete from the input element
+    if (autocompleteRef.current && venueInputRef.current) {
+      // Clear all event listeners from the input
+      google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      autocompleteRef.current = null;
+      
+      // Create a fresh input element to completely remove autocomplete
+      const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
+      newInput.value = ''; 
+      // newInput.addEventListener('change', (e) => handleVenueInputChange(e as any));
+      // newInput.addEventListener('input', (e) => handleVenueInputChange(e as any));
+
+      newInput.addEventListener('change', (e) => {
+      const changeEvent = {
+        target: { value: (e.target as HTMLInputElement).value }
+      } as React.ChangeEvent<HTMLInputElement>;
+      handleVenueInputChange(changeEvent);
+    });
+
+    newInput.addEventListener('input', (e) => {
+      const changeEvent = {
+        target: { value: (e.target as HTMLInputElement).value }
+      } as React.ChangeEvent<HTMLInputElement>;
+      handleVenueInputChange(changeEvent);
+    });
+
+      venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
+      venueInputRef.current = newInput;
+    }
+    
+    // CLEAR the fields for fresh manual entry
+    onVenueNameChange('');
+    onAddressChange('');
+    
   } else {
     // Switching back to Google mode - clear manual entries and reset
     resetFields();
+    
+    // Re-enable Google Maps if available
+    if (window.google && window.google.maps && window.google.maps.places) {
+      setIsGoogleLoaded(true);
+      setStatus('Google Maps already loaded');
+    }
   }
 };
+
+
+
+
+
+
 
   const hasContent = venueName.length > 0 || address.length > 0;
 
@@ -259,7 +386,8 @@ export default function VenueSelector({
         <div>
           <label className="block text-sm font-medium mb-2">Venue</label>
           <Input
-            ref={useManualEntry ? null : venueInputRef}
+            // ref={useManualEntry ? null : venueInputRef}
+            ref={!useManualEntry ? venueInputRef : null}
             placeholder={useManualEntry ? "Enter venue name manually" : "Start typing a venue name..."}
             value={venueName}
             onChange={handleVenueInputChange}
