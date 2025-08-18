@@ -77,9 +77,17 @@ export const eventValSchema = z.object({
     z.string()
       .nullable()
       .default(null)
+      // .refine(
+      //   (val) => val === null || val.length <= 200,
+      //   { message: 'Venue name must be 200 characters or less' }
+      // )
       .refine(
-        (val) => val === null || val.length <= 200,
-        { message: 'Venue name must be 200 characters or less' }
+        (val) => val !== null && val.length >= 3 && val.length <= 200,
+        { message: 'Venue name is required and must be between 3 and 200 characters' }
+      )
+      .refine(
+        (val) => val === null || !leoProfanity.check(val),
+        { message: 'Inappropriate content detected in venue name. Please correct this.' }
       )
   ),
 
@@ -92,9 +100,17 @@ export const eventValSchema = z.object({
     z.string()
       .nullable()
       .default(null)
+      // .refine(
+      //   (val) => val === null || val.length <= 300,
+      //   { message: 'Address must be 300 characters or less' }
+      // )
+       .refine(
+        (val) => val !== null && val.length >= 3 && val.length <= 300,
+        { message: 'Address is required and must be between 3 and 300 characters' }
+      )
       .refine(
-        (val) => val === null || val.length <= 300,
-        { message: 'Address must be 300 characters or less' }
+        (val) => val === null || !leoProfanity.check(val),
+        { message: 'Inappropriate content detected in address. Please correct this.' }
       )
   ),
 
