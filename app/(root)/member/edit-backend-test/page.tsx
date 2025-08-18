@@ -73,8 +73,8 @@ import { CircleX } from 'lucide-react';
   
   // (2) Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls. 
   const normalizedProfile = {
-    ...userProfile, 
-    givenName: userProfile.givenName ?? '',
+    ...userProfile, // this copies ALL fields from userProfile
+    givenName: userProfile.givenName ?? '', // this overrides specific fields
     familyName: userProfile.familyName ?? '',
   };
   

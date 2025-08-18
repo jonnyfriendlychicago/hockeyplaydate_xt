@@ -176,6 +176,7 @@ model Event {
   chapterId       Int               @map("chapter_id")
   title           String?
   description     String?
+  presentableId   String            @unique   @map("presentable_id")
 
   // Google Maps data
   placeId         String?           @map("place_id") // from Google Place Details API
@@ -190,6 +191,8 @@ model Event {
 
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
+  bypassAddressValidation    Boolean           @default(false) @map("bypass_address_validation") 
+
 
   chapter         Chapter            @relation(fields: [chapterId], references: [id])
   rsvps           Rsvp[]     
