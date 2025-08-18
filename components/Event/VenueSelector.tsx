@@ -159,10 +159,21 @@ export default function VenueSelector({
     const value = e.target.value;
     onVenueNameChange(value);
     
-    // If user manually types after selecting a place, clear the selection
+    // If user manually types after selecting a place, clear the selection AND reset coordinates/address
     if (selectedPlace && value !== selectedPlace.name) {
       setSelectedPlace(null);
       setStatus('Venue modified. Search for suggestions or use Reset to start over.');
+
+      // Clear the mismatched address and coordinates
+    onAddressChange('');
+    onVenueChange({
+      placeId: '',
+      venueName: value, // Keep the user's typed venue name
+      address: '',
+      lat: null,
+      lng: null
+    });
+    
     }
   };
 
@@ -250,79 +261,73 @@ export default function VenueSelector({
   // };
 
 // try 3: handleManualToggle
-const handleManualToggle = (checked: boolean) => {
-  setUseManualEntry(checked);
-  onManualModeChange(checked);
-  
-  if (checked) {
-    // Switching to manual mode - clear everything for fresh start
-    setSelectedPlace(null);
-    setStatus('');
-    setIsGoogleLoaded(false);
+  const handleManualToggle = (checked: boolean) => {
+    setUseManualEntry(checked);
+    onManualModeChange(checked);
     
-    // ACTIVELY remove autocomplete from the input element
-    // if (autocompleteRef.current && venueInputRef.current) {
-    //   // Clear all event listeners from the input
-    //   google.maps.event.clearInstanceListeners(autocompleteRef.current);
-    //   autocompleteRef.current = null;
+    if (checked) {
+      // Switching to manual mode - clear everything for fresh start
+      setSelectedPlace(null);
+      setStatus('');
+      setIsGoogleLoaded(false);
       
-    //   // Create a fresh input element to completely remove autocomplete
-    //   const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
-    //   venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
-    //   venueInputRef.current = newInput;
-    // }
+      // ACTIVELY remove autocomplete from the input element
+      // if (autocompleteRef.current && venueInputRef.current) {
+      //   // Clear all event listeners from the input
+      //   google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      //   autocompleteRef.current = null;
+        
+      //   // Create a fresh input element to completely remove autocomplete
+      //   const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
+      //   venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
+      //   venueInputRef.current = newInput;
+      // }
 
-    // ACTIVELY remove autocomplete from the input element
-    if (autocompleteRef.current && venueInputRef.current) {
-      // Clear all event listeners from the input
-      google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      autocompleteRef.current = null;
+      // ACTIVELY remove autocomplete from the input element
+      if (autocompleteRef.current && venueInputRef.current) {
+        // Clear all event listeners from the input
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+        
+        // Create a fresh input element to completely remove autocomplete
+        const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
+        newInput.value = ''; 
+        // newInput.addEventListener('change', (e) => handleVenueInputChange(e as any));
+        // newInput.addEventListener('input', (e) => handleVenueInputChange(e as any));
+
+        newInput.addEventListener('change', (e) => {
+        const changeEvent = {
+          target: { value: (e.target as HTMLInputElement).value }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleVenueInputChange(changeEvent);
+      });
+
+      newInput.addEventListener('input', (e) => {
+        const changeEvent = {
+          target: { value: (e.target as HTMLInputElement).value }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleVenueInputChange(changeEvent);
+      });
+
+        venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
+        venueInputRef.current = newInput;
+      }
       
-      // Create a fresh input element to completely remove autocomplete
-      const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
-      newInput.value = ''; 
-      // newInput.addEventListener('change', (e) => handleVenueInputChange(e as any));
-      // newInput.addEventListener('input', (e) => handleVenueInputChange(e as any));
-
-      newInput.addEventListener('change', (e) => {
-      const changeEvent = {
-        target: { value: (e.target as HTMLInputElement).value }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleVenueInputChange(changeEvent);
-    });
-
-    newInput.addEventListener('input', (e) => {
-      const changeEvent = {
-        target: { value: (e.target as HTMLInputElement).value }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleVenueInputChange(changeEvent);
-    });
-
-      venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
-      venueInputRef.current = newInput;
+      // CLEAR the fields for fresh manual entry
+      onVenueNameChange('');
+      onAddressChange('');
+      
+    } else {
+      // Switching back to Google mode - clear manual entries and reset
+      resetFields();
+      
+      // Re-enable Google Maps if available
+      if (window.google && window.google.maps && window.google.maps.places) {
+        setIsGoogleLoaded(true);
+        setStatus('Google Maps already loaded');
+      }
     }
-    
-    // CLEAR the fields for fresh manual entry
-    onVenueNameChange('');
-    onAddressChange('');
-    
-  } else {
-    // Switching back to Google mode - clear manual entries and reset
-    resetFields();
-    
-    // Re-enable Google Maps if available
-    if (window.google && window.google.maps && window.google.maps.places) {
-      setIsGoogleLoaded(true);
-      setStatus('Google Maps already loaded');
-    }
-  }
-};
-
-
-
-
-
-
+  };
 
   const hasContent = venueName.length > 0 || address.length > 0;
 
@@ -357,7 +362,7 @@ const handleManualToggle = (checked: boolean) => {
         </div> */}
 
         {/* Manual entry checkbox */}
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <input
             type="checkbox"
             id="manual-entry"
@@ -369,6 +374,55 @@ const handleManualToggle = (checked: boolean) => {
           <label htmlFor="manual-entry" className="text-sm font-medium">
             Enter venue / address manually
           </label>
+        </div> */}
+
+        {/* Manual entry disclosure - much less prominent */}
+        {/* {!useManualEntry ? (
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={() => handleManualToggle(true)}
+              disabled={disabled}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Cant find your venue? Enter manually
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Manual entry mode</span>
+            <button
+              type="button"
+              onClick={() => handleManualToggle(false)}
+              disabled={disabled}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Return to venue search
+            </button>
+          </div>
+        )} */}
+
+        {/* Manual entry disclosure - much less prominent */}
+        <div className="text-center md:text-right">
+          {!useManualEntry ? (
+            <button
+              type="button"
+              onClick={() => handleManualToggle(true)}
+              disabled={disabled}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Cant find your venue? Enter manually
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleManualToggle(false)}
+              disabled={disabled}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Return to venue search
+            </button>
+          )}
         </div>
 
         {/* Warning for manual entry */}
@@ -376,9 +430,9 @@ const handleManualToggle = (checked: boolean) => {
           <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
             <strong className="text-yellow-800">Warning:</strong> 
             <span className="text-yellow-700"> Manually entered venues/addresses will disable map services. 
-            Only use this option if your venue is not accessible via the lookup above. 
-            You can add enhanced location details in your event description (e.g., quoteMark east rink near 5th Ave quoteMark). 
-            Uncheck the box to return to Google venue lookup.</span>
+            Only use this option if your venue for sure cannot be found using the venue search / lookup. 
+            Remember: you can add enhanced location details in your event description (e.g., quoteMark playdate will be at East rink near 5th Ave quoteMark). 
+            </span>
           </div>
         )}
 
@@ -431,16 +485,19 @@ const handleManualToggle = (checked: boolean) => {
           </p>
         </div>
 
-        {/* Reset button */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={resetFields}
-          disabled={disabled || !hasContent}
-        >
-          Reset Address
-        </Button>
+        {/* Reset button - only show in Google mode */}
+        {!useManualEntry && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={resetFields}
+            disabled={disabled || !hasContent}
+          >
+            Reset Address
+          </Button>
+        )}
+
 
         {/* Debug info in development */}
         {/* {process.env.NODE_ENV === 'development' && placeId && ( */}
