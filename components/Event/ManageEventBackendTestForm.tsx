@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSafeRedirect } from '@/lib/navigation';
 import { RawEventInputType } from '@/app/types/forms/rawEventInputType';
 import VenueSelector from './VenueSelector';
+import { useCallback } from 'react';
 
 type Props = {
   chapterId: number;
@@ -56,7 +57,9 @@ export default function ManageEventBackendTestForm({
   };
 
   // Add this new function after handleChange
-const handleVenueChange = (venueData: {
+  // below commentout edits made to resolve failure-to-initiate-dropdown when switching from manual back to venue search
+  // const handleVenueChange = (venueData: {
+const handleVenueChange = useCallback((venueData: {
   placeId: string;
   venueName: string;
   address: string;
@@ -71,7 +74,8 @@ const handleVenueChange = (venueData: {
     lat: venueData.lat?.toString() || '',
     lng: venueData.lng?.toString() || '',
   }));
-};
+  // };
+}, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

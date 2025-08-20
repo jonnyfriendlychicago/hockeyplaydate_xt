@@ -89,6 +89,13 @@ export default function VenueSelector({
   useEffect(() => {
     // if (typeof window !== 'undefined' && !window.google) {
     if (!useManualEntry && typeof window !== 'undefined' && !window.google) {
+
+      // Check if script is already being loaded - added to address error incurred when flipping from venue select to manual entry
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      if (existingScript) {
+        return; // Script already exists, don't create another
+      }
+
       // Create script element
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleMaps`;
@@ -128,15 +135,24 @@ export default function VenueSelector({
 
   // Initialize autocomplete when Google Maps is loaded (only if not manual mode)
   useEffect(() => {
+    console.log('Autocomplete useEffect triggered:', {
+      useManualEntry,
+      isGoogleLoaded,
+      hasVenueInput: !!venueInputRef.current,
+      hasAutocomplete: !!autocompleteRef.current
+    });
+
     // if (isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
     if (!useManualEntry && isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
       try {
         // Additional safety check
         if (!window.google || !window.google.maps || !window.google.maps.places) {
+          console.log('Google Maps Places library not ready');
           setStatus('Google Maps Places library not ready');
           return;
         }
 
+        console.log('Creating new autocomplete...');
         autocompleteRef.current = new window.google.maps.places.Autocomplete(
           venueInputRef.current,
           {
@@ -146,8 +162,10 @@ export default function VenueSelector({
         );
 
         autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
+        console.log('Autocomplete created successfully');
         setStatus('Venue search ready');
       } catch (error) {
+        console.error('Autocomplete creation failed:', error);
         setStatus('Error initializing venue search');
         console.error('Autocomplete initialization error:', error);
       }
@@ -318,13 +336,30 @@ export default function VenueSelector({
       onAddressChange('');
       
     } else {
-      // Switching back to Google mode - clear manual entries and reset
+      
+      // // Switching back to Google mode - clear manual entries and reset
+      // resetFields();
+      
+      // // Re-enable Google Maps if available
+      // if (window.google && window.google.maps && window.google.maps.places) {
+      //   setIsGoogleLoaded(true);
+      //   setStatus('Google Maps already loaded');
+      // }
+
+      // !!!above 'else' seemingly a cause of venue dropdown not working when switch from manual to google, so replaced by below
+
+        // Switching back to Google mode - clear manual entries and reset
       resetFields();
       
-      // Re-enable Google Maps if available
+      // Force the useEffect to re-run by toggling isGoogleLoaded
+      setIsGoogleLoaded(false);
+      
+      // Re-enable Google Maps after a brief delay to let React re-render
       if (window.google && window.google.maps && window.google.maps.places) {
-        setIsGoogleLoaded(true);
-        setStatus('Google Maps already loaded');
+        setTimeout(() => {
+          setIsGoogleLoaded(true);
+          setStatus('Google Maps already loaded');
+        }, 10);
       }
     }
   };
