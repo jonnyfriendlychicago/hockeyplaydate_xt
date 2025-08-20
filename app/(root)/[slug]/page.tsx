@@ -36,7 +36,8 @@ export default async function ChapterPage({ params }: { params: { slug: string }
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
   // bounce if dupe user 
   if (authenticatedUserProfile?.authUser.duplicateOfId) {
-    return redirect('/');
+     redirect('/');
+     // devNotes: please do not type above line as `return redirect('/');`  That will work in development but not ubuntu server in production.
   }
   
   // 1 - load chapter / redirect
