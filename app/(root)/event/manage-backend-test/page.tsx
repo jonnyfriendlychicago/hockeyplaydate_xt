@@ -4,9 +4,8 @@
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
-// import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import ManageEventBackendTestForm from '@/components/Event/ManageEventBackendTestForm';
+import ManageEventBackendTestForm from '@/components/Event/ManageEventBackendTestFormTwo';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,8 @@ interface PageProps {
 export default async function ManageEventBackendTestPage({ searchParams }: PageProps) {
   if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
   
-  // devNotes: should this page refrain from doing this bounce if not auth / bounce if dupe?  we're supposed to be checking that with route
+  // devNotes: below validations commented OUT of this file, to ensure such occurs successfully in the route.ts.  
+  // Below kept for reference: something like this should be in the production user-facing edit page
 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   // const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();
@@ -78,7 +78,9 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
     notFound();
   }
 
-  // devNotes: should this page refrain from doing this bounce ?  we're supposed to be checkign that with route
+  // devNotes: below validations commented OUT of this file, to ensure such occurs successfully in the route.ts.  
+  // Below kept for reference: something like this should be in the production user-facing edit page
+
   // 3 - Validate user, part 2: requisite chapterMember permissions? 
   // get userChapterStatus
   // const userStatus = await getUserChapterStatus(
@@ -105,7 +107,6 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
     lng: existingEvent.lng?.toString() ?? '',
     startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
     durationMin: existingEvent.durationMin?.toString() ?? '',
-    // bypassAddressValidation: existingEvent.bypassAddressValidation?.toString() ?? 'false',  
     bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
   } : null;
 
