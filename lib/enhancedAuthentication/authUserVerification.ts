@@ -110,11 +110,6 @@ export async function getAuthenticatedUserProfileOrNull() {
   return dbUserProfile as FullUserProfile;
 }
 
-
-
-
-
-
 /**
  * Placeholder: Extend this to verify the authenticated user is an organizer.
  * If not an organizer, redirect to login or access-denied page.

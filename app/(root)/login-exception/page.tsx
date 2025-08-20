@@ -2,6 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import {Card,CardContent, CardHeader,CardTitle,} from "@/components/ui/card";
+import Link from 'next/link';
 
 export default function LoginExceptionPage({ 
   searchParams 
@@ -43,7 +44,8 @@ export default function LoginExceptionPage({
 
               <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base text-muted-foreground text-center">
                 <span>If this error persists, please</span>
-                <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</a>
+                {/* <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</a> */}
+                <Link href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</Link>
               </div>
 
             </CardContent>

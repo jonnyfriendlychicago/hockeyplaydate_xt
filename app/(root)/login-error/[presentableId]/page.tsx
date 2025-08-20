@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { ResendVerificationButton } from "@/components/resend-verification-button";
 import { auth0 } from "@/lib/auth0";
+import Link from 'next/link';
+
 
 // pre-export essentials
 export const metadata: Metadata = {title: "Login Error",};
@@ -82,7 +84,8 @@ export default async function LoginErrorPage({ params }: PageProps) {
                         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base text-muted-foreground text-center">
                           <HelpCircle className="h-4 w-4" />
                           <span>Need help?</span>
-                          <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">Contact support</a>
+                          {/* <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">Contact support</a> */}
+                          <Link href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">Contact support</Link>
                         </div>
                       </>
                     ) : (
@@ -96,7 +99,10 @@ export default async function LoginErrorPage({ params }: PageProps) {
                             <p>We&apos;ve now sent three verification emails to this address.</p>
                             <p>Please check your inbox (including spam folder) and click any of the verification links, then log in again. </p>
                             <p>Can&apos;t find the emails? None of the links work? </p>
-                            <p><a href="/support" className="text-amber-700 underline">Contact support</a> and we&apos;ll help.</p>
+                            <p>
+                              {/* <a href="/support" className="text-amber-700 underline">Contact support</a>  */}
+                              <Link href="/support" className="text-amber-700 underline">Contact support</Link> 
+                              and we&apos;ll help.</p>
                           </div>
                         </div>
                       </div>
@@ -138,7 +144,8 @@ export default async function LoginErrorPage({ params }: PageProps) {
 
               <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base text-muted-foreground text-center">
                 <span>If this error persists, please</span>
-                <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</a>
+                {/* <a href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</a> */}
+                <Link href="/support" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">contact support</Link>
               </div>
 
             </CardContent>
