@@ -4,9 +4,8 @@
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
-// import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import ManageEventBackendTestForm from '@/components/Event/ManageEventBackendTestForm';
+import ManageEventBackendTestForm from '@/components/Event/ManageEventBackendTestFormTwo';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,8 @@ interface PageProps {
 export default async function ManageEventBackendTestPage({ searchParams }: PageProps) {
   if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
   
-  // devNotes: should this page refrain from doing this bounce if not auth / bounce if dupe?  we're supposed to be checking that with route
+  // devNotes: below validations commented OUT of this file, to ensure such occurs successfully in the route.ts.  
+  // Below kept for reference: something like this should be in the production user-facing edit page
 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   // const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();
@@ -78,7 +78,9 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
     notFound();
   }
 
-  // devNotes: should this page refrain from doing this bounce ?  we're supposed to be checkign that with route
+  // devNotes: below validations commented OUT of this file, to ensure such occurs successfully in the route.ts.  
+  // Below kept for reference: something like this should be in the production user-facing edit page
+
   // 3 - Validate user, part 2: requisite chapterMember permissions? 
   // get userChapterStatus
   // const userStatus = await getUserChapterStatus(
@@ -92,22 +94,41 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
 
   // 4 - Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls
   // devNote: this is presented as a ternary: event flow is both create and edit, and in create, there's not existing event data, so it's null
+
+
+  // 2025aug21: below replaced by following new section, attempt to resolve persistent event maps bug: places lookup won't work on toggle from manual entry
+        // const normalizedEventData = existingEvent ? {
+        //   // note: we do not use `... existingEvent` (like userProfile mgmt) b/c our form is not going to be managing all fields
+        //   eventId: existingEvent.id,
+        //   chapterId: existingEvent.chapterId,
+        //   title: existingEvent.title ?? '',
+        //   description: existingEvent.description ?? '',
+        //   placeId: existingEvent.placeId ?? '',
+        //   venueName: existingEvent.venueName ?? '',
+        //   address: existingEvent.address ?? '',
+        //   lat: existingEvent.lat?.toString() ?? '',
+        //   lng: existingEvent.lng?.toString() ?? '',
+        //   startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+        //   durationMin: existingEvent.durationMin?.toString() ?? '',
+        //   bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
+        // } : null;
+
   const normalizedEventData = existingEvent ? {
-    // note: we do not use `... existingEvent` (like userProfile mgmt) b/c our form is not going to be managing all fields
-    eventId: existingEvent.id,
-    chapterId: existingEvent.chapterId,
-    title: existingEvent.title ?? '',
-    description: existingEvent.description ?? '',
-    placeId: existingEvent.placeId ?? '',
-    venueName: existingEvent.venueName ?? '',
-    address: existingEvent.address ?? '',
-    lat: existingEvent.lat?.toString() ?? '',
-    lng: existingEvent.lng?.toString() ?? '',
-    startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
-    durationMin: existingEvent.durationMin?.toString() ?? '',
-    // bypassAddressValidation: existingEvent.bypassAddressValidation?.toString() ?? 'false',  
-    bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
-  } : null;
+  eventId: existingEvent.id,
+  chapterId: existingEvent.chapterId,
+  title: existingEvent.title ?? '',
+  description: existingEvent.description ?? '',
+  placeId: existingEvent.placeId ?? '',
+  lat: existingEvent.lat?.toString() ?? '',
+  lng: existingEvent.lng?.toString() ?? '',
+  startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+  durationMin: existingEvent.durationMin?.toString() ?? '',
+  bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
+  
+  // NEW: Map old fields to new field structure
+  venueName: existingEvent.venueName ?? '',    // Keep for backward compatibility
+  address: existingEvent.address ?? '',        // Keep for backward compatibility
+} : null;
 
   // 5 - return it all
   return (
