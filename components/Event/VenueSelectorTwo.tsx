@@ -25,42 +25,51 @@ interface VenueData {
 }
 
 interface VenueSelectorProps {
-  // Current values from your form
-  venueName: string;
-  address: string;
-  placeId: string;
-  bypassAddressValidation: boolean;  
+  // Control field
+  bypassAddressValidation: boolean;
   
-  // Callbacks to update parent form
+  // Google Places API fields (always present)
+  venueByApi: string;
+  addressByApi: string;
+  placeId: string;
+  
+  // Manual entry fields (always present)
+  venueManualEntry: string;
+  addressManualEntry: string;
+  
+  // Callbacks
   onVenueChange: (venueData: VenueData) => void;
-  onVenueNameChange: (value: string) => void;
-  onAddressChange: (value: string) => void;
-  onManualModeChange: (isManual: boolean) => void;  
+  onVenueByApiChange: (value: string) => void;
+  onVenueManualEntryChange: (value: string) => void;
+  onAddressManualEntryChange: (value: string) => void;
+  onManualModeChange: (isManual: boolean) => void;
   
   // Loading state
   disabled?: boolean;
 }
 
 export default function VenueSelector({
-  venueName,
-  address,
+  bypassAddressValidation,
+  venueByApi,
+  addressByApi,
   placeId,
-  bypassAddressValidation, 
+  venueManualEntry,
+  addressManualEntry,
   onVenueChange,
-  onVenueNameChange,
-  onAddressChange,
-  onManualModeChange, 
+  onVenueByApiChange,
+  onVenueManualEntryChange,
+  onAddressManualEntryChange,
+  onManualModeChange,
   disabled = false
 }: VenueSelectorProps) {
   
-  const venueInputRef = useRef<HTMLInputElement>(null);
+  const venueApiInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
   const [status, setStatus] = useState<string>('');
-  const [useManualEntry, setUseManualEntry] = useState(bypassAddressValidation);
 
-  // Define handlePlaceSelect first (before useEffect that uses it)
+  // Handle place selection from Google Places API
   const handlePlaceSelect = useCallback(() => {
     if (!autocompleteRef.current) return;
 
@@ -86,15 +95,13 @@ export default function VenueSelector({
     setStatus(`Selected: ${place.name}`);
   }, [onVenueChange]);
 
-  // Load Google Maps script (only if not in manual mode)
+  // Load Google Maps script (always load, since we always have the API fields)
   useEffect(() => {
-    // if (typeof window !== 'undefined' && !window.google) {
-    if (!useManualEntry && typeof window !== 'undefined' && !window.google) {
-
-      // Check if script is already being loaded - added to address error incurred when flipping from venue select to manual entry
+    if (typeof window !== 'undefined' && !window.google) {
+      // Check if script is already being loaded
       const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
       if (existingScript) {
-        return; // Script already exists, don't create another
+        return;
       }
 
       // Create script element
@@ -105,7 +112,6 @@ export default function VenueSelector({
       
       // Define callback function
       window.initGoogleMaps = () => {
-        // Double check that places library is loaded
         if (window.google && window.google.maps && window.google.maps.places) {
           setIsGoogleLoaded(true);
           setStatus('Google Maps loaded successfully');
@@ -126,36 +132,23 @@ export default function VenueSelector({
       };
       
       document.head.appendChild(script);
-    // } else if (window.google && window.google.maps && window.google.maps.places) {
-    } else if (!useManualEntry && window.google && window.google.maps && window.google.maps.places) {
+    } else if (window.google && window.google.maps && window.google.maps.places) {
       setIsGoogleLoaded(true);
       setStatus('Google Maps already loaded');
     }
-    // }, []);
-    }, [useManualEntry]); 
+  }, []);
 
-  // Initialize autocomplete when Google Maps is loaded (only if not manual mode)
+  // Initialize autocomplete when Google Maps is loaded (always initialize)
   useEffect(() => {
-    console.log('Autocomplete useEffect triggered:', {
-      useManualEntry,
-      isGoogleLoaded,
-      hasVenueInput: !!venueInputRef.current,
-      hasAutocomplete: !!autocompleteRef.current
-    });
-
-    // if (isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
-    if (!useManualEntry && isGoogleLoaded && venueInputRef.current && !autocompleteRef.current) {
+    if (isGoogleLoaded && venueApiInputRef.current && !autocompleteRef.current) {
       try {
-        // Additional safety check
         if (!window.google || !window.google.maps || !window.google.maps.places) {
-          console.log('Google Maps Places library not ready');
           setStatus('Google Maps Places library not ready');
           return;
         }
 
-        console.log('Creating new autocomplete...');
         autocompleteRef.current = new window.google.maps.places.Autocomplete(
-          venueInputRef.current,
+          venueApiInputRef.current,
           {
             types: ['establishment'],
             fields: ['place_id', 'name', 'formatted_address', 'geometry']
@@ -163,44 +156,37 @@ export default function VenueSelector({
         );
 
         autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
-        console.log('Autocomplete created successfully');
         setStatus('Venue search ready');
       } catch (error) {
         console.error('Autocomplete creation failed:', error);
         setStatus('Error initializing venue search');
-        console.error('Autocomplete initialization error:', error);
       }
     }
-    // }, [isGoogleLoaded, handlePlaceSelect]);
-  }, [isGoogleLoaded, handlePlaceSelect, useManualEntry]);
+  }, [isGoogleLoaded, handlePlaceSelect]);
 
-  const handleVenueInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle changes to Google Places API venue field
+  const handleVenueApiInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    onVenueNameChange(value);
+    onVenueByApiChange(value);
     
-    // If user manually types after selecting a place, clear the selection AND reset coordinates/address
+    // If user manually types after selecting a place, clear the selection
     if (selectedPlace && value !== selectedPlace.name) {
       setSelectedPlace(null);
       setStatus('Venue modified. Search for suggestions or use Reset to start over.');
-
-      // Clear the mismatched address and coordinates
-    onAddressChange('');
-    onVenueChange({
-      placeId: '',
-      venueName: value, // Keep the user's typed venue name
-      address: '',
-      lat: null,
-      lng: null
-    });
-    
+      
+      // Clear the mismatched data
+      onVenueChange({
+        placeId: '',
+        venueName: value,
+        address: '',
+        lat: null,
+        lng: null
+      });
     }
   };
 
-  const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onAddressChange(e.target.value);
-  };
-
-  const resetFields = () => {
+  // Reset Google Places API fields
+  const resetApiFields = () => {
     const emptyVenueData: VenueData = {
       placeId: '',
       venueName: '',
@@ -213,87 +199,10 @@ export default function VenueSelector({
     setSelectedPlace(null);
     setStatus('Fields cleared. Ready for new venue search');
     
-    if (venueInputRef.current) {
-      venueInputRef.current.focus();
+    if (venueApiInputRef.current) {
+      venueApiInputRef.current.focus();
     }
   };
-
-// try 3: handleManualToggle
-  const handleManualToggle = (checked: boolean) => {
-    setUseManualEntry(checked);
-    onManualModeChange(checked);
-    
-    if (checked) {
-      // Switching to manual mode - clear everything for fresh start
-      setSelectedPlace(null);
-      setStatus('');
-      setIsGoogleLoaded(false);
-    
-
-      // ACTIVELY remove autocomplete from the input element
-      if (autocompleteRef.current && venueInputRef.current) {
-        // Clear all event listeners from the input
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
-        
-        // Create a fresh input element to completely remove autocomplete
-        const newInput = venueInputRef.current.cloneNode(true) as HTMLInputElement;
-        newInput.value = ''; 
-        // newInput.addEventListener('change', (e) => handleVenueInputChange(e as any));
-        // newInput.addEventListener('input', (e) => handleVenueInputChange(e as any));
-
-        newInput.addEventListener('change', (e) => {
-        const changeEvent = {
-          target: { value: (e.target as HTMLInputElement).value }
-        } as React.ChangeEvent<HTMLInputElement>;
-        handleVenueInputChange(changeEvent);
-      });
-
-      newInput.addEventListener('input', (e) => {
-        const changeEvent = {
-          target: { value: (e.target as HTMLInputElement).value }
-        } as React.ChangeEvent<HTMLInputElement>;
-        handleVenueInputChange(changeEvent);
-      });
-
-        venueInputRef.current.parentNode?.replaceChild(newInput, venueInputRef.current);
-        venueInputRef.current = newInput;
-      }
-      
-      // CLEAR the fields for fresh manual entry
-      onVenueNameChange('');
-      onAddressChange('');
-      
-    } else {
-      
-      // // Switching back to Google mode - clear manual entries and reset
-      // resetFields();
-      
-      // // Re-enable Google Maps if available
-      // if (window.google && window.google.maps && window.google.maps.places) {
-      //   setIsGoogleLoaded(true);
-      //   setStatus('Google Maps already loaded');
-      // }
-
-      // !!!above 'else' seemingly a cause of venue dropdown not working when switch from manual to google, so replaced by below
-
-        // Switching back to Google mode - clear manual entries and reset
-      resetFields();
-      
-      // Force the useEffect to re-run by toggling isGoogleLoaded
-      setIsGoogleLoaded(false);
-      
-      // Re-enable Google Maps after a brief delay to let React re-render
-      if (window.google && window.google.maps && window.google.maps.places) {
-        setTimeout(() => {
-          setIsGoogleLoaded(true);
-          setStatus('Google Maps already loaded');
-        }, 10);
-      }
-    }
-  };
-
-  const hasContent = venueName.length > 0 || address.length > 0;
 
   return (
     <Card>
@@ -302,107 +211,134 @@ export default function VenueSelector({
       </CardHeader>
       <CardContent className="space-y-4">
         
-        {/* Status indicator */}
-        {/* {status && ( */}
+        {/* Status indicator (optional - can be hidden) */}
         {false && status && (
           <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
             {status}
           </div>
         )}
 
-        {/* Manual entry disclosure - much less prominent */}
+        {/* Mode toggle */}
         <div className="text-center md:text-right">
-          {!useManualEntry ? (
+          {!bypassAddressValidation ? (
             <button
               type="button"
-              onClick={() => handleManualToggle(true)}
+              onClick={() => onManualModeChange(true)}
               disabled={disabled}
               className="text-xs text-blue-600 hover:text-blue-800 underline"
             >
-              Cant find your venue? Enter manually
+              Use manually entered values
             </button>
           ) : (
             <button
               type="button"
-              onClick={() => handleManualToggle(false)}
+              onClick={() => onManualModeChange(false)}
               disabled={disabled}
               className="text-xs text-blue-600 hover:text-blue-800 underline"
             >
-              Return to venue search
+              Use venue search values
             </button>
           )}
         </div>
 
         {/* Warning for manual entry */}
-        {useManualEntry && (
+        {bypassAddressValidation && (
           <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
             <strong className="text-yellow-800">Warning:</strong> 
             <span className="text-yellow-700"> Manually entered venues/addresses will disable map services. 
             Only use this option if your venue for sure cannot be found using the venue search / lookup. 
-            Remember: you can add enhanced location details in your event description (e.g., quoteMark playdate will be at East rink near 5th Ave quoteMark). 
+            Remember: you can add enhanced location details in your event description (e.g.,  quote playdate will be at East rink near 5th Ave quote ). 
             </span>
           </div>
         )}
 
-        {/* Venue field - conditional behavior */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Venue</label>
-          <Input
-            // ref={useManualEntry ? null : venueInputRef}
-            ref={!useManualEntry ? venueInputRef : null}
-            placeholder={useManualEntry ? "Enter venue name manually" : "Start typing a venue name..."}
-            value={venueName}
-            onChange={handleVenueInputChange}
-            disabled={disabled || (!useManualEntry && !isGoogleLoaded)}
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            {useManualEntry 
-              ? 'Manual entry - no autocomplete' 
-              : (isGoogleLoaded ? 'Type to search venues' : 'Loading venue search...')
-            }
-          </p>
-        </div>
+        {/* GOOGLE PLACES API FIELDS - always shown for testing */}
+        
+          <div className={bypassAddressValidation ? 'hidden' : 'block'}>
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-2">VenueY (API Search)</label>
+              <Input
+                ref={venueApiInputRef}
+                placeholder="Start typing a venue name..."
+                value={venueByApi}
+                onChange={handleVenueApiInputChange}
+                disabled={disabled || !isGoogleLoaded}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {isGoogleLoaded ? 'Type to search venues' : 'Loading venue search...'}
+              </p>
+            </div>
 
-        {/* Address field */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Address</label>
+            <div>
+              <label className="block text-sm font-medium mb-2">AddressY (API Auto-fill)</label>
+              <Input
+                placeholder="Address will populate automatically..."
+                value={addressByApi}
+                readOnly
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Auto-fills when venue is selected
+              </p>
+            </div>
 
-          <Input
-            placeholder={useManualEntry ? "Enter address manually" : "Address will populate automatically..."}
-            value={address}
-            onChange={handleAddressInputChange}
-            disabled={disabled}
-            readOnly={!useManualEntry}
-          />
+                      {/* Debug info in development */}
+          {false && process.env.NODE_ENV === 'development' && placeId && (
+            <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+              <strong>Debug:</strong> Place ID: {placeId}
+            </div>
+          )}
 
-          <p className="text-xs text-muted-foreground mt-1">
-            {useManualEntry 
-              ? 'Manual entry - no validation' 
-              : 'Auto-fills when venue is selected'
-            }
-          </p>
-        </div>
-
-        {/* Reset button - only show in Google mode */}
-        {!useManualEntry && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={resetFields}
-            disabled={disabled || !hasContent}
-          >
-            Reset Address
-          </Button>
-        )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={resetApiFields}
+              disabled={disabled || (venueByApi.length === 0 && addressByApi.length === 0)}
+            >
+              Reset API FieldsY
+            </Button>
 
 
-        {/* Debug info in development */}
-        {false && process.env.NODE_ENV === 'development' && placeId && (
-          <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-            <strong>Debug:</strong> Place ID: {placeId}
-          </div>
-        )}
+        </>
+        </div>  
+        
+
+
+        {/* MANUAL ENTRY FIELDS - always shown for testing */}
+        
+          <div className={bypassAddressValidation ? 'block' : 'hidden'}>
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-2">VenueY (Manual Entry)</label>
+              <Input
+                placeholder="Enter venue name manually"
+                value={venueManualEntry}
+                onChange={(e) => onVenueManualEntryChange(e.target.value)}
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Manual entry - no autocomplete
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">AddressY (Manual Entry)</label>
+              <Input
+                placeholder="Enter address manually"
+                value={addressManualEntry}
+                onChange={(e) => onAddressManualEntryChange(e.target.value)}
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Manual entry - no validation
+              </p>
+            </div>
+            </>
+            </div>
+         
+
 
       </CardContent>
     </Card>

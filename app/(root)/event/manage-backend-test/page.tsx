@@ -94,21 +94,41 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
 
   // 4 - Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls
   // devNote: this is presented as a ternary: event flow is both create and edit, and in create, there's not existing event data, so it's null
+
+
+  // 2025aug21: below replaced by following new section, attempt to resolve persistent event maps bug: places lookup won't work on toggle from manual entry
+        // const normalizedEventData = existingEvent ? {
+        //   // note: we do not use `... existingEvent` (like userProfile mgmt) b/c our form is not going to be managing all fields
+        //   eventId: existingEvent.id,
+        //   chapterId: existingEvent.chapterId,
+        //   title: existingEvent.title ?? '',
+        //   description: existingEvent.description ?? '',
+        //   placeId: existingEvent.placeId ?? '',
+        //   venueName: existingEvent.venueName ?? '',
+        //   address: existingEvent.address ?? '',
+        //   lat: existingEvent.lat?.toString() ?? '',
+        //   lng: existingEvent.lng?.toString() ?? '',
+        //   startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+        //   durationMin: existingEvent.durationMin?.toString() ?? '',
+        //   bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
+        // } : null;
+
   const normalizedEventData = existingEvent ? {
-    // note: we do not use `... existingEvent` (like userProfile mgmt) b/c our form is not going to be managing all fields
-    eventId: existingEvent.id,
-    chapterId: existingEvent.chapterId,
-    title: existingEvent.title ?? '',
-    description: existingEvent.description ?? '',
-    placeId: existingEvent.placeId ?? '',
-    venueName: existingEvent.venueName ?? '',
-    address: existingEvent.address ?? '',
-    lat: existingEvent.lat?.toString() ?? '',
-    lng: existingEvent.lng?.toString() ?? '',
-    startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
-    durationMin: existingEvent.durationMin?.toString() ?? '',
-    bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
-  } : null;
+  eventId: existingEvent.id,
+  chapterId: existingEvent.chapterId,
+  title: existingEvent.title ?? '',
+  description: existingEvent.description ?? '',
+  placeId: existingEvent.placeId ?? '',
+  lat: existingEvent.lat?.toString() ?? '',
+  lng: existingEvent.lng?.toString() ?? '',
+  startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+  durationMin: existingEvent.durationMin?.toString() ?? '',
+  bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
+  
+  // NEW: Map old fields to new field structure
+  venueName: existingEvent.venueName ?? '',    // Keep for backward compatibility
+  address: existingEvent.address ?? '',        // Keep for backward compatibility
+} : null;
 
   // 5 - return it all
   return (
