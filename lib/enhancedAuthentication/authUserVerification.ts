@@ -99,7 +99,6 @@ export async function getAuthenticatedUserProfileOrNull() {
     return null; 
   }
 
-  // 3 - ensure user_profile record exists for user; else, redirect. 
   const dbUserProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
     include: {
