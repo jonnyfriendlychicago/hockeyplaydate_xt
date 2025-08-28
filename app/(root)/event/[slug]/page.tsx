@@ -15,7 +15,7 @@ import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
-  // devNotes for future: maybe expand getAuthenticated into accepting the result if auth fails: sendHome; loginRedirect; getNull; etc. 
+  // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 

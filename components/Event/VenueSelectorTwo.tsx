@@ -170,7 +170,12 @@ export default function VenueSelector({
     onVenueByApiChange(value);
     
     // If user manually types after selecting a place, clear the selection
-    if (selectedPlace && value !== selectedPlace.name) {
+    // if (selectedPlace && value !== selectedPlace.name) {
+    
+    // above replace by below: 
+    
+    // Clear if user types after selecting a place OR if editing pre-existing venue
+    if ((selectedPlace && value !== selectedPlace.name) || (placeId && value !== venueByApi)) {
       setSelectedPlace(null);
       setStatus('Venue modified. Search for suggestions or use Reset to start over.');
       
