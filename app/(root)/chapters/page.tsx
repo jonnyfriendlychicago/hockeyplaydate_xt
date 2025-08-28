@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Users, Calendar, MapPin, Plus, Search } from 'lucide-react';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { format } from 'date-fns';
+import { NewChapterApplicationBanner } from '@/components/Chapters/NewChapterApplicationBanner';
 
 interface ChapterWithData {
   id: number;
@@ -233,32 +234,24 @@ export default async function ChaptersPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hockey Playdate Chapters</h1>
         <p className="text-gray-600 text-lg">
-          Find your local hockey community and join the fun!
+          New to Hockey Playdate?
+          <br className="sm:hidden" />
+          <span className="sm:ml-1">
+            <Link href="/getting-started" className="text-blue-600 hover:text-blue-800 underline font-medium">
+              Learn how it works
+            </Link>
+          </span>
         </p>
       </div>
 
-      {/* Call to Action Banner */}
-      <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Interested in starting your own chapter?
-              </h2>
-              <p className="text-gray-600">
-                It QUOTE s free to do, and weQUOTEd love your partnership. Contact us and weQUOTEll discuss the details!
-              </p>
-            </div>
-            <Button variant="outline" className="flex-shrink-0">
-              Contact Us
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* New Chapter Application Banner */}
+      <NewChapterApplicationBanner />
 
-      {/* Search Placeholder */}
-      <div className="mb-8">
-        <div className="relative max-w-md">
+      {/* Search and Admin Controls Row */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        
+        {/* search bar - for future dev*/}
+        <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
@@ -267,35 +260,37 @@ export default async function ChaptersPage() {
             disabled
           />
         </div>
-      </div>
-
-      {/* Admin Create Chapter Button (Placeholder) */}
-      <div className="mb-8 flex justify-end">
-        <Button variant="outline" disabled className="flex items-center gap-2">
+        
+        {/* create new chapter */}
+        <Button variant="outline" disabled className="flex items-center gap-2 sm:flex-shrink-0">
           <Plus className="h-4 w-4" />
-          Create New Chapter (Admin Only)
+          Create New Chapter (Admin)
         </Button>
       </div>
 
-      {/* User's Chapters Section */}
       {userChapters.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <Badge variant="default" className="text-sm">Your Chapters</Badge>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userChapters.map((chapter) => (
-              <ChapterCard key={chapter.id} chapter={chapter} />
-            ))}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="text-base font-medium text-gray-700">Your Chapters:</span>
+            <div className="flex items-center gap-3 flex-wrap">
+              {userChapters.map((chapter) => (
+                <Link key={chapter.id} href={`/${chapter.slug}`}>
+                  <Badge variant="default" className="hover:bg-blue-600 transition-colors cursor-pointer text-sm px-3 py-1.5">
+                    {chapter.name || 'Unnamed Chapter'}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
           </div>
-          <Separator className="mt-12" />
+          <Separator className="mt-6" />
         </div>
       )}
+
 
       {/* All Chapters Section */}
       <div>
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          {userChapters.length > 0 ? 'All Chapters' : 'Browse Chapters'}
+          {userChapters.length > 0 ? 'Browse All Chapters' : 'Browse Chapters'}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {otherChapters.map((chapter) => (
