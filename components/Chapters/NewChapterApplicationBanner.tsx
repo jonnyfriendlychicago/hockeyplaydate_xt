@@ -48,7 +48,7 @@ export const NewChapterApplicationBanner = () => {
                   <li>recruit friends/neighbors to join HPD/your chapter</li>
                   <li>manage chapter members</li>
                   <li>create/schedule the playdate events</li>
-                  <li>on-site manage/facilitate each playdate event</li>
+                  <li>facilitate on-site each playdate event</li>
                 </ul>
                 <p className="mt-3">To the extent you desire, you can also promote member(s) to be co-managers of the chapter, so you don&apos;t need to do it all.</p>
               </div>

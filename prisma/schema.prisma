@@ -51,6 +51,7 @@ model UserProfile {
   updatedAt       DateTime    @updatedAt      @map("updated_at")
   givenName       String?     @map("given_name")     
   familyName      String?     @map("family_name")   
+  isAdmin         Boolean     @default(false) @map("is_admin")
 
   authUser        AuthUser?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   rsvps           Rsvp[]              // RSVP responses
