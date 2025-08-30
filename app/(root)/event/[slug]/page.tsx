@@ -12,6 +12,7 @@ import { Pencil, Calendar, MapPin, Clock, Users } from 'lucide-react';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
+import EventLocationMap from '@/components/Event/EventLocationMap';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -241,7 +242,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
 
         {/* Location Map */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Location</CardTitle>
           </CardHeader>
@@ -251,6 +252,23 @@ export default async function EventPage({ params }: { params: { slug: string } }
                 [Placeholder: Google Maps integration]
               </p>
             </div>
+          </CardContent>
+        </Card> */}
+
+        {/* Location Map */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Location</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EventLocationMap
+              venueName={presentedEvent.venueName}
+              address={presentedEvent.address}
+              placeId={presentedEvent.placeId}
+              lat={presentedEvent.lat}
+              lng={presentedEvent.lng}
+              bypassAddressValidation={presentedEvent.bypassAddressValidation}
+            />
           </CardContent>
         </Card>
       </div>
