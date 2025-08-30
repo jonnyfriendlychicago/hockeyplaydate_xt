@@ -262,7 +262,7 @@ export default function VenueSelector({
           <div className={bypassAddressValidation ? 'hidden' : 'block'}>
           <>
             <div>
-              <label className="block text-sm font-medium mb-2">VenueY (API Search)</label>
+              <label className="block text-sm font-medium mb-2">Venue</label>
               <Input
                 ref={venueApiInputRef}
                 placeholder="Start typing a venue name..."
@@ -276,7 +276,7 @@ export default function VenueSelector({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">AddressY (API Auto-fill)</label>
+              <label className="block text-sm font-medium mb-2">Address</label>
               <Input
                 placeholder="Address will populate automatically..."
                 value={addressByApi}
@@ -316,7 +316,7 @@ export default function VenueSelector({
           <div className={bypassAddressValidation ? 'block' : 'hidden'}>
           <>
             <div>
-              <label className="block text-sm font-medium mb-2">VenueY (Manual Entry)</label>
+              <label className="block text-sm font-medium mb-2">Venue</label>
               <Input
                 placeholder="Enter venue name manually"
                 value={venueManualEntry}
@@ -329,7 +329,7 @@ export default function VenueSelector({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">AddressY (Manual Entry)</label>
+              <label className="block text-sm font-medium mb-2">Address</label>
               <Input
                 placeholder="Enter address manually"
                 value={addressManualEntry}
