@@ -142,7 +142,7 @@ export default function ManageEventBackendTestForm({
       {/* Basic Event Info - UNCHANGED */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Event Details - TestFormTwo</CardTitle>
+          <CardTitle className="text-lg">Event Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           

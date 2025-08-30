@@ -232,7 +232,7 @@ export default function VenueSelector({
               disabled={disabled}
               className="text-xs text-blue-600 hover:text-blue-800 underline"
             >
-              Use manually entered values
+              Enter custom venue & address
             </button>
           ) : (
             <button
@@ -241,7 +241,7 @@ export default function VenueSelector({
               disabled={disabled}
               className="text-xs text-blue-600 hover:text-blue-800 underline"
             >
-              Use venue search values
+              Use venue search
             </button>
           )}
         </div>
@@ -302,7 +302,7 @@ export default function VenueSelector({
               onClick={resetApiFields}
               disabled={disabled || (venueByApi.length === 0 && addressByApi.length === 0)}
             >
-              Reset API FieldsY
+              Reset Search
             </Button>
 
 
