@@ -16,7 +16,7 @@ export default async function RootLayout({
   // 0 - set current user variables 
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user; //  formerly: const auth0User = session?.user; ... and this was easily confused with actual entity authUser / auth_user; 
-  if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.log("layout>>authSessionUser: " + authSessionUser); // for development/testing: log all fields being delivered by Auth0
+  if (process.env.RUN_TEST_CONSOLE_LOGS == 'true') console.log("layout>>authSessionUser.email: " + authSessionUser?.email); // for development/testing: log all fields being delivered by Auth0
 
   const userProfile = authSessionUser? await syncUserFromAuth0(authSessionUser) : null; // runs the sync every login, AND gets the user profile that results from the sync
   // 101: above ternary could also be written as traditional 'if' syntax: let userProfile = null; if (auth0User) {userProfile = await syncUserFromAuth0(auth0User);}
