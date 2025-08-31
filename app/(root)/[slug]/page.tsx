@@ -24,6 +24,7 @@ import { BlockedNotice } from '@/components/chapter/BlockedNotice';
 import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
 import { redirect } from 'next/navigation';
+import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -47,6 +48,35 @@ export default async function ChapterPage({ params }: { params: { slug: string }
   });
 
   if (!chapter) notFound();
+
+  // const events = await prisma.event.findMany({
+  //   where: { chapterId: chapter.id },
+  //   include: {
+  //     rsvps: {
+  //       select: {
+  //         id: true,
+  //         rsvpStatus: true,
+  //         userProfileId: true,
+  //       },
+  //     },
+  //   },
+  //   orderBy: { createdAt: 'desc' }, // Default order, component will re-sort
+  // });
+
+  // NEW: Load events with RSVPs for this chapter
+  const events = await prisma.event.findMany({
+    where: { chapterId: chapter.id },
+    include: {
+      rsvps: {
+        select: {
+          id: true,
+          rsvpStatus: true,
+          userProfileId: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' }, // Default order, component will re-sort
+  });
   
   // devNotes: this user profile stuff needs to be cut and replaced with the new lib/helpers/getUserChapterStatus.ts
   // 2 - Validate user, part 2: chapterMember permissions
@@ -85,6 +115,8 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
   // 5 - other variables
   const authenticatedUserProfileNameString = getUserDisplayName(authenticatedUserProfile);
+
+  const isApprovedMember = genMember || mgrMember;
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
@@ -176,9 +208,24 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               </div>
             </div>
 
-            <TabsContent value="events">
+            {/* <TabsContent value="events">
               <p className="text-muted-foreground italic">[Events Placeholder]</p>
+            </TabsContent> */}
+
+            <TabsContent value="events">
+              {/* UPDATED: Replace placeholder with EventsTabContent */}
+              <EventsTabContent 
+                // chapter={chapter}
+                events={events}
+                // userProfileId={authenticatedUserProfile?.id}
+                isApprovedMember={isApprovedMember}
+                slug={slug}
+              />
             </TabsContent>
+
+
+
+
             <TabsContent value="members">
               <p className="text-muted-foreground italic">[Members Placeholder]</p>
             </TabsContent>
@@ -212,7 +259,16 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <AccordionItem value="events">
               <AccordionTrigger>Events</AccordionTrigger>
               <AccordionContent>
-                <p className="text-muted-foreground italic">[Events Placeholder]</p>
+                {/* <p className="text-muted-foreground italic">[Events Placeholder]</p> */}
+
+                <EventsTabContent 
+                // chapter={chapter}
+                events={events}
+                // userProfileId={authenticatedUserProfile?.id}
+                isApprovedMember={isApprovedMember}
+                slug={slug}
+              />
+
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="members">
