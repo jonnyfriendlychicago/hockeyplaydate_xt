@@ -33,8 +33,9 @@ export default function MenuClient({
         <SheetContent className='flex flex-col items-start gap-4'>
           <SheetTitle>Menu</SheetTitle>
 
+          {/* devNotes: below is a kinda wacky reverse-slugification: take the slug and revert it back to englishy words for displayed titles on the menu; legacy code, just go with it for now  */}
           <nav className='flex flex-col gap-2 text-base'>
-            {['/events', '/groups', '/members', '/getting-started', '/about'].map((path) => (
+            {['/dashboard', '/events', '/chapters', '/members', '/getting-started', '/about'].map((path) => (
               <Link key={path} href={path} onClick={() => setOpen(false)}>
                 {path.replace('/', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Link>
@@ -46,7 +47,6 @@ export default function MenuClient({
           {isLoggedIn ? (
             <div className="flex flex-col gap-2 text-base">
               <Link href={profileUrl} onClick={() => setOpen(false)}>Profile</Link>
-              {/* <a href="/auth/logout" onClick={() => setOpen(false)}>Logout</a> */}
               <Link href="/auth/logout" onClick={() => setOpen(false)}>Logout</Link>
               <Image
                 className='h-8 w-8 rounded-full mt-2'
@@ -57,10 +57,8 @@ export default function MenuClient({
               />
             </div>
           ) : (
-            // <a href="/auth/login" onClick={() => setOpen(false)}>
             <Link href="/auth/login" onClick={() => setOpen(false)}>
               <Button>Sign in</Button>
-            {/* </a> */}
             </Link>
           )}
 

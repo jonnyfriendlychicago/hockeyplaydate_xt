@@ -15,7 +15,7 @@ export default async function Menu() {
   
   // 0 - authenticate user
   // note: this component can't readily use lib/enhancedAuthentication/authUserVerification.ts, b/c that file has various redirects
-  // so, decent amount of logic/code repeated here. 2025jul29: doens't seem worth refactoring to adjust. 
+  // so, decent amount of logic/code repeated here. 2025jul29: doesn't seem worth refactoring to adjust. 
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user; 
   const profileImage = authSession?.user?.picture;
@@ -81,17 +81,14 @@ export default async function Menu() {
               </>) } 
               
               <DropdownMenuItem asChild>
-                {/* <a href='/auth/logout'>Logout</a> */}
                  <Link href="/auth/logout">Logout</Link>
               </DropdownMenuItem>
             
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          // <a href='/auth/login'> 
           <Link href="/auth/login">
             <Button>Login / Sign Up</Button>
-          {/* </a> */}
           </Link>
         )}
       </div>
