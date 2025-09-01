@@ -71,19 +71,31 @@ export default async function EventPage({ params }: { params: { slug: string } }
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'America/Chicago',   
       timeZoneName: 'short',
     }).format(date);
   };
 
-  const formatDuration = (minutes: number | null) => {
-    if (!minutes) return '';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-    return `${mins}m`;
-  };
+  // const formatDuration = (minutes: number | null) => {
+  //   if (!minutes) return '';
+  //   const hours = Math.floor(minutes / 60);
+  //   const mins = minutes % 60;
+  //   if (hours > 0) {
+  //     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  //   }
+  //   return `${mins}m`;
+  // };
+
+  // NEW CODE - format end time instead of duration
+const formatEndTime = (endDate: Date | null) => {
+  if (!endDate) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Chicago',
+    timeZoneName: 'short',
+  }).format(endDate);
+};
 
   // 3b - RSVP counts
   const rsvpCounts = {
@@ -141,12 +153,23 @@ export default async function EventPage({ params }: { params: { slug: string } }
               <div className="flex items-start gap-3">
                 <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  
+                  {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
                   {presentedEvent.durationMin && (
                     <p className="text-sm text-muted-foreground">
                       Duration: {formatDuration(presentedEvent.durationMin)}
                     </p>
+                  )} */}
+
+                  {/* NEW CODE - show end time instead of duration */}
+                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  {presentedEvent.endsAt && (
+                    <p className="text-sm text-muted-foreground">
+                      Ends: {formatEndTime(presentedEvent.endsAt)}
+                    </p>
                   )}
+
+
                 </div>
               </div>
 

@@ -114,14 +114,37 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
         // } : null;
 
   const normalizedEventData = existingEvent ? {
-  eventId: existingEvent.id,
-  chapterId: existingEvent.chapterId,
-  title: existingEvent.title ?? '',
-  description: existingEvent.description ?? '',
-  placeId: existingEvent.placeId ?? '',
-  lat: existingEvent.lat?.toString() ?? '',
-  lng: existingEvent.lng?.toString() ?? '',
-  startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+    eventId: existingEvent.id,
+    chapterId: existingEvent.chapterId,
+    title: existingEvent.title ?? '',
+    description: existingEvent.description ?? '',
+    placeId: existingEvent.placeId ?? '',
+    lat: existingEvent.lat?.toString() ?? '',
+    lng: existingEvent.lng?.toString() ?? '',
+    // startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
+    // below replaces above - convert UTC to Chicago time for form display
+    // startsAt: existingEvent.startsAt 
+    // ? new Date(existingEvent.startsAt.toLocaleString("en-US", {timeZone: "America/Chicago"}))
+    //   .toISOString().slice(0, 16) 
+    //   : '',
+    // // below new addition we forgot to add 
+    // endsAt: existingEvent.endsAt 
+    // ? new Date(existingEvent.endsAt.toLocaleString("en-US", {timeZone: "America/Chicago"}))
+    // .toISOString().slice(0, 16)
+    // : '',
+
+    // NEW CODE (FIXED) below replaces above
+    startsAt: existingEvent.startsAt 
+      ? new Date(existingEvent.startsAt.getTime() - (existingEvent.startsAt.getTimezoneOffset() * 60000))
+          .toISOString().slice(0, 16)
+      : '',
+    endsAt: existingEvent.endsAt 
+      ? new Date(existingEvent.endsAt.getTime() - (existingEvent.endsAt.getTimezoneOffset() * 60000))
+          .toISOString().slice(0, 16)
+      : '',
+
+
+
   durationMin: existingEvent.durationMin?.toString() ?? '',
   bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
   

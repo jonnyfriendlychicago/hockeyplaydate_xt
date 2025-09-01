@@ -20,6 +20,8 @@
 
 // 2025aug21: above replaced by below, attempt to resolve persistent event maps bug: places lookup won't work on toggle from manual entry
 
+// app/types/forms/rawEventInputType.ts
+
 export type RawEventInputType = {
   eventId?: number; // for updates
   chapterId: number;
@@ -43,6 +45,7 @@ export type RawEventInputType = {
   // Time fields (unchanged)
   startsAt: string | null;
   durationMin: string | null;
+  endsAt: string | null; // ADDED THIS JUST NOW
   
   // fyi, these old fields have beenreplaced by the 4 new fields above
   // venueName: string | null;  // REMOVE
