@@ -118,12 +118,8 @@ export default async function ChaptersPage() {
         </p>
       </div>
 
-      {/* New Chapter Application Banner */}
       <NewChapterApplicationBanner />
-      {/* above component replaced by below */}
       
-
-
       {/* Search and Admin Controls Row */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         

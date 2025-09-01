@@ -7,7 +7,6 @@ import { syncUserFromAuth0 } from '@/lib/syncUser'; // added to get the auth'ed 
 import { UserProfileNameGate } from '@/components/UserProfile/UserProfileNameGate';
 import { DupeEmailAccountBanner } from '@/components/UserProfile/DupeEmailAccountBanner';
 
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -40,8 +39,6 @@ export default async function RootLayout({
     : userProfile?.authUser?.auth0Id?.startsWith('google')
     ? 'googleSocial'
     : 'unknown';
-
-  
 
   // 1 - return baby
   return (
