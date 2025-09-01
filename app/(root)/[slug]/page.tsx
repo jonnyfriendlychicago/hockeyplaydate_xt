@@ -49,20 +49,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
   if (!chapter) notFound();
 
-  // const events = await prisma.event.findMany({
-  //   where: { chapterId: chapter.id },
-  //   include: {
-  //     rsvps: {
-  //       select: {
-  //         id: true,
-  //         rsvpStatus: true,
-  //         userProfileId: true,
-  //       },
-  //     },
-  //   },
-  //   orderBy: { createdAt: 'desc' }, // Default order, component will re-sort
-  // });
-
   // NEW: Load events with RSVPs for this chapter
   const events = await prisma.event.findMany({
     where: { chapterId: chapter.id },
@@ -208,30 +194,22 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               </div>
             </div>
 
-            {/* <TabsContent value="events">
-              <p className="text-muted-foreground italic">[Events Placeholder]</p>
-            </TabsContent> */}
-
             <TabsContent value="events">
-              {/* UPDATED: Replace placeholder with EventsTabContent */}
               <EventsTabContent 
-                // chapter={chapter}
                 events={events}
-                // userProfileId={authenticatedUserProfile?.id}
                 isApprovedMember={isApprovedMember}
                 slug={slug}
               />
             </TabsContent>
 
-
-
-
             <TabsContent value="members">
               <p className="text-muted-foreground italic">[Members Placeholder]</p>
             </TabsContent>
+
             <TabsContent value="locations">
               <p className="text-muted-foreground italic">[Locations Placeholder]</p>
             </TabsContent>
+
             {(mgrMember || genMember) && (
               <TabsContent value="membership">
                 <p className="text-muted-foreground italic">[Membership Placeholder]</p>
@@ -253,18 +231,12 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <CreateEventButton mgrMember={mgrMember} slug={slug}  />
           </div>
 
-          {/* below would make the accordion ever expanding for each accordionItem tapped, and only manual retapping will collapse and expanded accordionItem */}
-          {/* <Accordion type="multiple" className="w-full"> */}
           <Accordion type="single" collapsible className="w-full"> 
             <AccordionItem value="events">
               <AccordionTrigger>Events</AccordionTrigger>
               <AccordionContent>
-                {/* <p className="text-muted-foreground italic">[Events Placeholder]</p> */}
-
                 <EventsTabContent 
-                // chapter={chapter}
                 events={events}
-                // userProfileId={authenticatedUserProfile?.id}
                 isApprovedMember={isApprovedMember}
                 slug={slug}
               />
