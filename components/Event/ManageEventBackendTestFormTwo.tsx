@@ -12,6 +12,10 @@ import { useSafeRedirect } from '@/lib/navigation';
 import { RawEventInputType } from '@/app/types/forms/rawEventInputType';
 import VenueSelector from './VenueSelectorTwo';
 import { useCallback } from 'react';
+// ADD these imports at the top
+import { parseISO } from 'date-fns';
+// import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 type Props = {
   chapterId: number;
@@ -103,8 +107,28 @@ export default function ManageEventBackendTestForm({
         lat: formValues.bypassAddressValidation ? null : (formValues.lat ? parseFloat(formValues.lat) : null),
         lng: formValues.bypassAddressValidation ? null : (formValues.lng ? parseFloat(formValues.lng) : null),
         
-        startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
-        endsAt: formValues.endsAt ? new Date(formValues.endsAt).toISOString() : null,  
+
+        // startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
+        // endsAt: formValues.endsAt ? new Date(formValues.endsAt).toISOString() : null,  
+        // above replaced by below
+        // startsAt: formValues.startsAt 
+        //   ? zonedTimeToUtc(parseISO(formValues.startsAt), 'America/Chicago') 
+        //   : null,
+        // endsAt: formValues.endsAt 
+        //   ? zonedTimeToUtc(parseISO(formValues.endsAt), 'America/Chicago') 
+        //   : null,
+
+        // below change uses correct updated function name 'toZoneTime'; 
+        startsAt: formValues.startsAt 
+          ? fromZonedTime(parseISO(formValues.startsAt), 'America/Chicago') 
+          : null,
+        endsAt: formValues.endsAt 
+          ? fromZonedTime(parseISO(formValues.endsAt), 'America/Chicago') 
+          : null,
+
+
+
+
         durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
         bypassAddressValidation: formValues.bypassAddressValidation,
         
