@@ -14,6 +14,7 @@ import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import EventLocationMap from '@/components/Event/EventLocationMap';
 import { AlertTriangle } from 'lucide-react';
+import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -104,6 +105,12 @@ const formatEndTime = (endDate: Date | null) => {
     no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
     maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
   };
+
+  // 3c - Get current user's RSVP status
+  const userRsvp = authenticatedUserProfile 
+    ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
+    : null;
+  const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
   // 4 - return it all.. WHO THE HELL KNOWS WHAT THIS IS GONNA LOOK LIKE! REVISIT
   return (
@@ -274,7 +281,7 @@ const formatEndTime = (endDate: Date | null) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Calendar Integration */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Add to Calendar</CardTitle>
           </CardHeader>
@@ -286,7 +293,31 @@ const formatEndTime = (endDate: Date | null) => {
               Add to Google Calendar
             </Button>
           </CardContent>
+        </Card> */}
+        {/* above replaced by below */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add to Calendar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddToGoogleCalendar
+              event={{
+                title: presentedEvent.title || 'Hockey Event',
+                description: presentedEvent.description || undefined,
+                venueName: presentedEvent.venueName || undefined,
+                address: presentedEvent.address || undefined,
+                startsAt: presentedEvent.startsAt,
+                endsAt: presentedEvent.endsAt,
+              }}
+              userRsvpStatus={userRsvpStatus}
+            />
+          </CardContent>
         </Card>
+
+
+
+
+
 
         {/* Location Map */}
         {/* <Card>
