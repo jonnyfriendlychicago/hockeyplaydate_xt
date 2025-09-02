@@ -10,9 +10,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
-// import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
-// import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { Chapter , Event } from '@prisma/client';
+// ADD these imports at the top
+import { format } from 'date-fns';
+// import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 // below required to make URL parameters work
 interface PageProps {
@@ -95,24 +97,6 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
   // 4 - Normalize nullable fields for prop shape compliance, i.e. empty strings v. nulls
   // devNote: this is presented as a ternary: event flow is both create and edit, and in create, there's not existing event data, so it's null
 
-
-  // 2025aug21: below replaced by following new section, attempt to resolve persistent event maps bug: places lookup won't work on toggle from manual entry
-        // const normalizedEventData = existingEvent ? {
-        //   // note: we do not use `... existingEvent` (like userProfile mgmt) b/c our form is not going to be managing all fields
-        //   eventId: existingEvent.id,
-        //   chapterId: existingEvent.chapterId,
-        //   title: existingEvent.title ?? '',
-        //   description: existingEvent.description ?? '',
-        //   placeId: existingEvent.placeId ?? '',
-        //   venueName: existingEvent.venueName ?? '',
-        //   address: existingEvent.address ?? '',
-        //   lat: existingEvent.lat?.toString() ?? '',
-        //   lng: existingEvent.lng?.toString() ?? '',
-        //   startsAt: existingEvent.startsAt?.toISOString().slice(0, 16) ?? '',
-        //   durationMin: existingEvent.durationMin?.toString() ?? '',
-        //   bypassAddressValidation: existingEvent.bypassAddressValidation ?? false,
-        // } : null;
-
   const normalizedEventData = existingEvent ? {
     eventId: existingEvent.id,
     chapterId: existingEvent.chapterId,
@@ -133,14 +117,30 @@ export default async function ManageEventBackendTestPage({ searchParams }: PageP
     // .toISOString().slice(0, 16)
     // : '',
 
-    // NEW CODE (FIXED) below replaces above
+    // // NEW CODE (FIXED) below replaces above; 
+    // startsAt: existingEvent.startsAt 
+    //   ? new Date(existingEvent.startsAt.getTime() - (existingEvent.startsAt.getTimezoneOffset() * 60000))
+    //       .toISOString().slice(0, 16)
+    //   : '',
+    // endsAt: existingEvent.endsAt 
+    //   ? new Date(existingEvent.endsAt.getTime() - (existingEvent.endsAt.getTimezoneOffset() * 60000))
+    //       .toISOString().slice(0, 16)
+    //   : '',
+
+    // NEW PROPER TIMEZONE CODE, replaces above; Notice how this actually uses the stored timezone data (existingEvent.startsAtTz) instead of ignoring it!
+    // startsAt: existingEvent.startsAt 
+    //   ? format(utcToZonedTime(existingEvent.startsAt, existingEvent.startsAtTz || 'America/Chicago'), "yyyy-MM-dd'T'HH:mm")
+    //   : '',
+    // endsAt: existingEvent.endsAt 
+    //   ? format(utcToZonedTime(existingEvent.endsAt, existingEvent.endsAtTz || 'America/Chicago'), "yyyy-MM-dd'T'HH:mm")
+    //   : '',
+
+    // below change uses correct updated function name 'toZoneTime'; again, Notice how this actually uses the stored timezone data (existingEvent.startsAtTz) instead of ignoring it!
     startsAt: existingEvent.startsAt 
-      ? new Date(existingEvent.startsAt.getTime() - (existingEvent.startsAt.getTimezoneOffset() * 60000))
-          .toISOString().slice(0, 16)
+      ? format(toZonedTime(existingEvent.startsAt, existingEvent.startsAtTz || 'America/Chicago'), "yyyy-MM-dd'T'HH:mm")
       : '',
     endsAt: existingEvent.endsAt 
-      ? new Date(existingEvent.endsAt.getTime() - (existingEvent.endsAt.getTimezoneOffset() * 60000))
-          .toISOString().slice(0, 16)
+      ? format(toZonedTime(existingEvent.endsAt, existingEvent.endsAtTz || 'America/Chicago'), "yyyy-MM-dd'T'HH:mm")
       : '',
 
 
