@@ -158,13 +158,64 @@ export const eventValSchema = z.object({
     z.date()
       .nullable()
       .default(null)
+
+      // .refine(
+      //   (val) => val === null || val > new Date(),
+      //   { message: 'Event start time must be in the future' }
+      // )
+
+      .refine(
+        (val) => val !== null,
+        { message: 'Event start time is required' }
+      )
       .refine(
         (val) => val === null || val > new Date(),
         { message: 'Event start time must be in the future' }
       )
+
+
   ),
 
-  durationMin: z.preprocess(
+
+
+
+  startsAtTz: z.string() // will be hardcoded to "America/Chicago" in API
+    .nullable()
+    .default('America/Chicago'),
+
+  endsAt: z.preprocess(
+    (val) => {
+      if (val instanceof Date) return val;
+      if (typeof val === 'string') {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      return null;
+    },
+    z.date()
+      .nullable()
+      .default(null)
+      
+      // .refine(
+      //   (val) => val === null || val > new Date(),
+      //   { message: 'Event end time must be in the future' }
+      // )
+
+      .refine(
+        (val) => val !== null,
+        { message: 'Event end time is required' }
+      )
+      .refine(
+        (val) => val === null || val > new Date(),
+        { message: 'Event end time must be in the future' }
+      )
+  ),
+
+  endsAtTz: z.string() // will be hardcoded to "America/Chicago" in API
+    .nullable()
+    .default('America/Chicago'),
+
+  durationMin: z.preprocess( // this field deprecated by endsAt above
     (val) => {
       if (typeof val === 'string') {
         const num = parseInt(val, 10);
@@ -182,4 +233,18 @@ export const eventValSchema = z.object({
       )
   ),
 
-});
+}).refine(
+  // Cross-field validation: endsAt must be after startsAt
+  (data) => {
+    if (data.startsAt && data.endsAt) {
+      return data.endsAt > data.startsAt;
+    }
+    return true; // If either is null, skip this validation
+  },
+  {
+    message: 'Event end time must be after start time',
+    path: ['endsAt'], // Show error on endsAt field
+  }
+);
+
+// });

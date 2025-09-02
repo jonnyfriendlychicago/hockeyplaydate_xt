@@ -193,7 +193,9 @@ model Event {
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
   bypassAddressValidation    Boolean           @default(false) @map("bypass_address_validation") 
-
+  endsAt          DateTime?          @map("ends_at")     
+  startsAtTz      String?           @map("starts_at_tz")      // NEW: "America/Chicago"
+  endsAtTz        String?           @map("ends_at_tz")        // NEW: "America/Chicago"
 
   chapter         Chapter            @relation(fields: [chapterId], references: [id])
   rsvps           Rsvp[]     

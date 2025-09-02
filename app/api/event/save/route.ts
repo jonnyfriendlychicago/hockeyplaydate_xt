@@ -117,6 +117,9 @@ export async function POST(req: Request) {
           lng: parsed.lng,
           bypassAddressValidation: parsed.bypassAddressValidation, 
           startsAt: parsed.startsAt,
+          startsAtTz: 'America/Chicago',        
+          endsAt: parsed.endsAt,                
+          endsAtTz: 'America/Chicago',          
           durationMin: parsed.durationMin,
           // Note: chapterId and presentableId are intentionally NOT updated
         },
@@ -150,6 +153,9 @@ export async function POST(req: Request) {
           lng: parsed.lng,
           bypassAddressValidation: parsed.bypassAddressValidation, 
           startsAt: parsed.startsAt,
+          startsAtTz: 'America/Chicago',        
+          endsAt: parsed.endsAt,                
+          endsAtTz: 'America/Chicago',
           durationMin: parsed.durationMin,
         },
         select: {

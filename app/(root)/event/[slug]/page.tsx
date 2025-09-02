@@ -13,6 +13,8 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import EventLocationMap from '@/components/Event/EventLocationMap';
+import { AlertTriangle } from 'lucide-react';
+import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -71,19 +73,31 @@ export default async function EventPage({ params }: { params: { slug: string } }
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'America/Chicago',   
       timeZoneName: 'short',
     }).format(date);
   };
 
-  const formatDuration = (minutes: number | null) => {
-    if (!minutes) return '';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-    return `${mins}m`;
-  };
+  // const formatDuration = (minutes: number | null) => {
+  //   if (!minutes) return '';
+  //   const hours = Math.floor(minutes / 60);
+  //   const mins = minutes % 60;
+  //   if (hours > 0) {
+  //     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  //   }
+  //   return `${mins}m`;
+  // };
+
+  // NEW CODE - format end time instead of duration
+const formatEndTime = (endDate: Date | null) => {
+  if (!endDate) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Chicago',
+    timeZoneName: 'short',
+  }).format(endDate);
+};
 
   // 3b - RSVP counts
   const rsvpCounts = {
@@ -91,6 +105,12 @@ export default async function EventPage({ params }: { params: { slug: string } }
     no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
     maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
   };
+
+  // 3c - Get current user's RSVP status
+  const userRsvp = authenticatedUserProfile 
+    ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
+    : null;
+  const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
   // 4 - return it all.. WHO THE HELL KNOWS WHAT THIS IS GONNA LOOK LIKE! REVISIT
   return (
@@ -141,12 +161,46 @@ export default async function EventPage({ params }: { params: { slug: string } }
               <div className="flex items-start gap-3">
                 <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  
+                  {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
                   {presentedEvent.durationMin && (
                     <p className="text-sm text-muted-foreground">
                       Duration: {formatDuration(presentedEvent.durationMin)}
                     </p>
-                  )}
+                  )} */}
+
+                  {/* NEW CODE - show end time instead of duration */}
+                  {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  {presentedEvent.endsAt && (
+                    <p className="text-sm text-muted-foreground">
+                      Ends: {formatEndTime(presentedEvent.endsAt)}
+                    </p>
+                  )} */}
+
+                  {/* // NEW CODE - with multi-day detection */}
+                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  {presentedEvent.endsAt && (() => {
+                    // Check if same date
+                    const startDate = presentedEvent.startsAt?.toDateString();
+                    const endDate = presentedEvent.endsAt.toDateString();
+                    const isMultiDay = startDate !== endDate;
+                    
+                    return (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Ends: {isMultiDay ? formatEventDateTime(presentedEvent.endsAt) : formatEndTime(presentedEvent.endsAt)}
+                        </p>
+                        {isMultiDay && (
+                          <p className="text-sm text-red-600 font-medium mt-1 flex items-center gap-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            NOTE: Multi-day event detected
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+
                 </div>
               </div>
 
@@ -227,7 +281,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Calendar Integration */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Add to Calendar</CardTitle>
           </CardHeader>
@@ -239,7 +293,31 @@ export default async function EventPage({ params }: { params: { slug: string } }
               Add to Google Calendar
             </Button>
           </CardContent>
+        </Card> */}
+        {/* above replaced by below */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add to Calendar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddToGoogleCalendar
+              event={{
+                title: presentedEvent.title || 'Hockey Event',
+                description: presentedEvent.description || undefined,
+                venueName: presentedEvent.venueName || undefined,
+                address: presentedEvent.address || undefined,
+                startsAt: presentedEvent.startsAt,
+                endsAt: presentedEvent.endsAt,
+              }}
+              userRsvpStatus={userRsvpStatus}
+            />
+          </CardContent>
         </Card>
+
+
+
+
+
 
         {/* Location Map */}
         {/* <Card>

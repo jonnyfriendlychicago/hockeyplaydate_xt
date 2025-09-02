@@ -38,6 +38,7 @@ export default function ManageEventBackendTestForm({
     description: initialEventData?.description || '',
     startsAt: initialEventData?.startsAt || '',
     durationMin: initialEventData?.durationMin || '',
+    endsAt: initialEventData?.endsAt || '',    
     bypassAddressValidation: initialEventData?.bypassAddressValidation || false,
     
     // NEW: Initialize all 4 venue/address fields
@@ -103,6 +104,7 @@ export default function ManageEventBackendTestForm({
         lng: formValues.bypassAddressValidation ? null : (formValues.lng ? parseFloat(formValues.lng) : null),
         
         startsAt: formValues.startsAt ? new Date(formValues.startsAt).toISOString() : null,
+        endsAt: formValues.endsAt ? new Date(formValues.endsAt).toISOString() : null,  
         durationMin: formValues.durationMin ? parseInt(formValues.durationMin, 10) : null,
         bypassAddressValidation: formValues.bypassAddressValidation,
         
@@ -208,6 +210,16 @@ export default function ManageEventBackendTestForm({
               type="datetime-local"
               value={formValues.startsAt ?? ''}
               onChange={(e) => handleChange('startsAt', e.target.value)}
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">End Date & Time</label>
+            <Input
+              type="datetime-local"
+              value={formValues.endsAt ?? ''}
+              onChange={(e) => handleChange('endsAt', e.target.value)}
               disabled={loading}
             />
           </div>
