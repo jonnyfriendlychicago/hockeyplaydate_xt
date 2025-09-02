@@ -13,6 +13,7 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import EventLocationMap from '@/components/Event/EventLocationMap';
+import { AlertTriangle } from 'lucide-react';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -162,12 +163,35 @@ const formatEndTime = (endDate: Date | null) => {
                   )} */}
 
                   {/* NEW CODE - show end time instead of duration */}
-                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
                   {presentedEvent.endsAt && (
                     <p className="text-sm text-muted-foreground">
                       Ends: {formatEndTime(presentedEvent.endsAt)}
                     </p>
-                  )}
+                  )} */}
+
+                  {/* // NEW CODE - with multi-day detection */}
+                  <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
+                  {presentedEvent.endsAt && (() => {
+                    // Check if same date
+                    const startDate = presentedEvent.startsAt?.toDateString();
+                    const endDate = presentedEvent.endsAt.toDateString();
+                    const isMultiDay = startDate !== endDate;
+                    
+                    return (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Ends: {isMultiDay ? formatEventDateTime(presentedEvent.endsAt) : formatEndTime(presentedEvent.endsAt)}
+                        </p>
+                        {isMultiDay && (
+                          <p className="text-sm text-red-600 font-medium mt-1 flex items-center gap-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            NOTE: Multi-day event detected
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
 
                 </div>
