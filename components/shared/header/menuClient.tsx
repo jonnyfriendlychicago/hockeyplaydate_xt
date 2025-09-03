@@ -35,11 +35,15 @@ export default function MenuClient({
 
           {/* devNotes: below is a kinda wacky reverse-slugification: take the slug and revert it back to englishy words for displayed titles on the menu; legacy code, just go with it for now  */}
           <nav className='flex flex-col gap-2 text-base'>
-            {['/dashboard', '/events', '/chapters', '/members', '/getting-started', '/about'].map((path) => (
+            {['/chapters', '/events',  '/members'].map((path) => (
               <Link key={path} href={path} onClick={() => setOpen(false)}>
                 {path.replace('/', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Link>
+              
             ))}
+            {/* above doesn't work for more than two words in url path, e.g. how-it-works so, just do normal style like below to round it out. */}
+            <Link href="/how-it-works">How It Works</Link>
+            <Link href="/about">About</Link>
           </nav>
 
           <ModeToggle />

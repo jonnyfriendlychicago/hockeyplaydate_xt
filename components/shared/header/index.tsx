@@ -26,12 +26,12 @@ const Header = () => {
 
           {/* Global Navigation - visible on md+ */}
           <nav className='hidden md:flex gap-4 text-sm font-medium'>
-            <Link href="/dashboard">Dashboard</Link>
-            <Link href="/events">Events</Link>
-            {/* <Link href="/groups">Groups</Link> */}
+            {/* <Link href="/dashboard">Dashboard</Link> */}
             <Link href="/chapters">Chapters</Link>
+            <Link href="/events">Events</Link>
             <Link href="/members">Members</Link>
-            <Link href="/getting-started">Getting Started</Link>
+            {/* <Link href="/getting-started">Getting Started</Link> */}
+            <Link href="/how-it-works">How It Works</Link>
             <Link href="/about">About</Link>
           </nav>
         </div>
