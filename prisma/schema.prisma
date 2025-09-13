@@ -57,6 +57,8 @@ model UserProfile {
   rsvps           Rsvp[]              // RSVP responses
   chapterMembership  ChapterMember[]     // join to Chapters
 
+  updatedChapterMembers ChapterMember[] @relation("ChapterMemberUpdatedBy")
+
   @@map("user_profile")
 }
 
@@ -150,9 +152,15 @@ model ChapterMember {
   userProfileId   Int              @map("user_profile_id")
   memberRole      MemberRole       @map("member_role") @default(MEMBER)
   joinedAt        DateTime         @default(now()) @map("joined_at")
-
+  
+  createdAt       DateTime?         @default(now()) @map("created_at")
+  updatedAt       DateTime?         @updatedAt @map("updated_at")
+  updatedBy       Int?              @map("updated_by")
+  
   chapter         Chapter          @relation(fields: [chapterId], references: [id])
   userProfile     UserProfile      @relation(fields: [userProfileId], references: [id])
+
+  updatedByUser   UserProfile?     @relation("ChapterMemberUpdatedBy", fields: [updatedBy], references: [id])
 
   @@unique([chapterId, userProfileId]) // each user_profile can only appear once per chapter
   @@map("chapter_member")
@@ -167,9 +175,14 @@ model ChapterMember {
 }
 
 enum MemberRole {
+  // MEMBER
+  // MANAGER
+  // BLOCKED
+  APPLICANT
   MEMBER
   MANAGER
   BLOCKED
+  REMOVED
 }
 
 model Event {
