@@ -25,6 +25,7 @@ import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
 import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
+import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -64,34 +65,16 @@ export default async function ChapterPage({ params }: { params: { slug: string }
     orderBy: { createdAt: 'desc' }, // Default order, component will re-sort
   });
   
-  // devNotes: this user profile stuff needs to be cut and replaced with the new lib/helpers/getUserChapterStatus.ts
-  // 2 - Validate user, part 2: chapterMember permissions
-  let anonVisitor = false;
-  let authVisitor = false;
-  let genMember = false;
-  let mgrMember = false;
-  let blockedMember = false;
+  // 2 - Validate user, part 2: requisite chapterMember permissions? 
+  // devNote: 2025sep14: this var 'userStatus' is badly named; should be something like userChapterMemberStatus / similar.  
+  // Additioonally, we could consider doing this: instead of being an object, have it be a simple text variable: user = anonVisitor, or something like that.
+  // leaving both of these code design points on the backburner for now. 
+  const userStatus = await getUserChapterStatus(
+    chapter.id, 
+    authenticatedUserProfile
+  );
 
-  if (!authenticatedUserProfile) {
-    anonVisitor = true;
-  } else {
-    const membership = await prisma.chapterMember.findFirst({
-      where: {
-        userProfileId: authenticatedUserProfile.id,
-        chapterId: chapter.id,
-      },
-    });
-
-    if (!membership) {
-      authVisitor = true;
-    } else if (membership.memberRole === 'BLOCKED') {
-      blockedMember = true;
-    } else if (membership.memberRole === 'MANAGER') {
-      mgrMember = true;
-    } else {
-      genMember = true;
-    }
-  }
+  console.log(userStatus)
 
   // 4. Display logic for obfuscated organizer names if unauthenticated
   // const organizerNames = chapter.members.map((m) => {
@@ -102,7 +85,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
   // 5 - other variables
   const authenticatedUserProfileNameString = getUserDisplayName(authenticatedUserProfile);
 
-  const isApprovedMember = genMember || mgrMember;
+  const isApprovedMember = userStatus.genMember || userStatus.mgrMember;
 
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
@@ -116,7 +99,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
         </h1>
 
         {/* Top Right Edit Button (href update needed!) */}
-        {mgrMember && (
+        {userStatus.mgrMember && (
           <Link href={`/${slug}`}>
             <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-muted">
               <Pencil className="w-4 h-4" />
@@ -129,7 +112,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
       {/* ===================== */}
       {/* ZONE 1.5: Blocked Notice */}
       {/* ===================== */}
-      {blockedMember && 
+      {userStatus.blockedMember && 
        <BlockedNotice nameString={authenticatedUserProfileNameString} />
       }
 
@@ -183,14 +166,20 @@ export default async function ChapterPage({ params }: { params: { slug: string }
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
                 <TabsTrigger value="locations">Locations</TabsTrigger>
-                {(mgrMember || genMember) && (
+                {(userStatus.mgrMember || userStatus.genMember) && (
                   <TabsTrigger value="membership">My Membership</TabsTrigger>
                 )}
               </TabsList>
               <div className="ml-auto flex gap-2">
-                <JoinChapterButton anonVisitor={anonVisitor} authVisitor={authVisitor} />
+                {/* <JoinChapterButton anonVisitor={userStatus.anonVisitor} authVisitor={userStatus.authVisitor} /> */}
+                <JoinChapterButton 
+                  userStatus={userStatus}
+                  // chapterId={chapter.id}
+                  chapterSlug={slug}
+                />
+
                 {/* note: above button/userProfile component and below are mutually exclusive */}
-                <CreateEventButton mgrMember={mgrMember} slug={slug}  />
+                <CreateEventButton mgrMember={userStatus.mgrMember} slug={slug}  />
               </div>
             </div>
 
@@ -210,7 +199,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               <p className="text-muted-foreground italic">[Locations Placeholder]</p>
             </TabsContent>
 
-            {(mgrMember || genMember) && (
+            {(userStatus.mgrMember || userStatus.genMember) && (
               <TabsContent value="membership">
                 <p className="text-muted-foreground italic">[Membership Placeholder]</p>
                 {/* <myMembershipTab
@@ -227,8 +216,13 @@ export default async function ChapterPage({ params }: { params: { slug: string }
         <div className="block md:hidden space-y-4">
           {/* Action button(s) sit above the accordion */}
           <div className="flex justify-center">
-            <JoinChapterButton anonVisitor={anonVisitor} authVisitor={authVisitor} />
-            <CreateEventButton mgrMember={mgrMember} slug={slug}  />
+            {/* <JoinChapterButton anonVisitor={userStatus.anonVisitor} authVisitor={userStatus.authVisitor} /> */}
+            <JoinChapterButton 
+              userStatus={userStatus}
+              // chapterId={chapter.id}
+              chapterSlug={slug}
+            />
+            <CreateEventButton mgrMember={userStatus.mgrMember} slug={slug}  />
           </div>
 
           <Accordion type="single" collapsible className="w-full"> 
@@ -255,7 +249,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
                 <p className="text-muted-foreground italic">[Locations Placeholder]</p>
               </AccordionContent>
             </AccordionItem>
-            {(mgrMember || genMember) && (
+            {(userStatus.mgrMember || userStatus.genMember) && (
               <AccordionItem value="membership">
                 <AccordionTrigger>My Membership</AccordionTrigger>
                 <AccordionContent>

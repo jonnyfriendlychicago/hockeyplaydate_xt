@@ -12,16 +12,19 @@ type ChapterMembership = {
   id: number;
   chapterId: number;
   userProfileId: number;
-  memberRole: 'MEMBER' | 'MANAGER' | 'BLOCKED';
+  // memberRole: 'MEMBER' | 'MANAGER' | 'BLOCKED';
+  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
   joinedAt: Date;
 };
 
 export type UserChapterStatus = {
   anonVisitor: boolean;
   authVisitor: boolean;
+  applicant: boolean;  
   genMember: boolean;
   mgrMember: boolean;
   blockedMember: boolean;
+  removedMember: boolean;    
   membership: ChapterMembership | null;
 };
 
@@ -41,9 +44,11 @@ export async function getUserChapterStatus(
   // Initialize all status flags to false
   let anonVisitor = false;
   let authVisitor = false;
+  let applicant = false;
   let genMember = false;
   let mgrMember = false;
   let blockedMember = false;
+  let removedMember = false;
   let membership: ChapterMembership | null = null;
 
   if (!authenticatedUserProfile) {
@@ -58,27 +63,42 @@ export async function getUserChapterStatus(
       },
     });
 
-    if (!membership) {
-      // Logged in but not a member of this chapter
+    // if (!membership) {
+    //   // Logged in but not a member of this chapter
+    //   authVisitor = true;
+    // } else if (membership.memberRole === 'BLOCKED') {
+    //   // Member but blocked
+    //   blockedMember = true;
+    // } else if (membership.memberRole === 'MANAGER') {
+    //   // Manager member
+    //   mgrMember = true;
+    // } else {
+    //   // Regular member (memberRole === 'MEMBER')
+    //   genMember = true;
+    // }
+     if (!membership) {
       authVisitor = true;
-    } else if (membership.memberRole === 'BLOCKED') {
-      // Member but blocked
-      blockedMember = true;
-    } else if (membership.memberRole === 'MANAGER') {
-      // Manager member
-      mgrMember = true;
-    } else {
-      // Regular member (memberRole === 'MEMBER')
+    } else if (membership.memberRole === 'APPLICANT') {
+      applicant = true;
+    } else if (membership.memberRole === 'MEMBER') {
       genMember = true;
+    } else if (membership.memberRole === 'MANAGER') {
+      mgrMember = true;
+    } else if (membership.memberRole === 'BLOCKED') {
+      blockedMember = true;
+    } else if (membership.memberRole === 'REMOVED') {
+      removedMember = true;
     }
   }
 
   return {
     anonVisitor,
     authVisitor,
+    applicant, 
     genMember,
     mgrMember,
     blockedMember,
+    removedMember,
     membership,
   };
 }
