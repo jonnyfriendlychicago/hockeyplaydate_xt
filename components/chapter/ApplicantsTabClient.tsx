@@ -2,8 +2,11 @@
 
 'use client';
 
+
 import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
 import { ChapterMemberCard } from "./ChapterMemberCard";
+import { ChapterMemberManagementModal } from "./ChapterMemberManagementModal";
+import { useState } from "react";
 
 interface ChapterMember {
   id: number;
@@ -27,9 +30,18 @@ interface ApplicantsTabClientProps {
 }
 
 export function ApplicantsTabClient({ applicants, userChapterMember }: ApplicantsTabClientProps) {
+
+  const [selectedMember, setSelectedMember] = useState<ChapterMember | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleEdit = (member: ChapterMember) => {
-    // TODO: Open management modal
-    console.log('Edit member:', member);
+    setSelectedMember(member);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedMember(null);
   };
 
   if (applicants.length === 0) {
@@ -53,6 +65,12 @@ export function ApplicantsTabClient({ applicants, userChapterMember }: Applicant
           />
         ))}
       </div>
+
+      <ChapterMemberManagementModal
+        member={selectedMember}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }
