@@ -9,22 +9,31 @@ import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
 import { joinChapterAction, cancelJoinRequestAction } from '@/app/(root)/[slug]/actions';
 
 interface JoinChapterButtonProps {
-  userStatus: UserChapterStatus;
+  userChapterMember: UserChapterStatus;
   // chapterId: number;
   chapterSlug: string;
 }
 
-export function JoinChapterButton({ userStatus, 
+export function JoinChapterButton({ userChapterMember, 
   // chapterId, 
   chapterSlug 
 }: JoinChapterButtonProps) {
-  // Don't show button for members, managers, or blocked users
-  if (userStatus.genMember || userStatus.mgrMember || userStatus.blockedMember) {
+  
+  // declare who's allowed to initiate the join process... 
+  const allowedToJoin = userChapterMember.anonVisitor || userChapterMember.authVisitor || userChapterMember.removedMember; // handy short cut on whether to display/not simple stuff
+  // blockedMember is prohibited and genMember/mgrMember have already joined.
+  
+  // if (userChapterMember.genMember || userChapterMember.mgrMember || userChapterMember.blockedMember) {
+  //   return null;
+  // }
+
+  // Don't show button if not allowed to request membership
+  if (!allowedToJoin) {
     return null;
   }
 
   // Anonymous visitors - redirect to login
-  if (userStatus.anonVisitor) {
+  if (userChapterMember.anonVisitor) {
     return (
       <Link href="/auth/login">
         <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
@@ -36,7 +45,7 @@ export function JoinChapterButton({ userStatus,
   }
 
   // Authenticated visitors and removed members - show join button
-  if (userStatus.authVisitor || userStatus.removedMember) {
+  if (userChapterMember.authVisitor || userChapterMember.removedMember) {
     return (
       // <form action={`/api/chapters/${chapterSlug}/join`} method="POST">
       //   <input type="hidden" name="chapterSlug" value={chapterSlug} />
@@ -52,7 +61,7 @@ export function JoinChapterButton({ userStatus,
   }
 
   // Applicants - show cancel button with pending message
-  if (userStatus.applicant) {
+  if (userChapterMember.applicant) {
     return (
       <div className="text-center space-y-2">
         <p className="text-orange-600 text-sm">
