@@ -1,4 +1,5 @@
-// components/chapter/JoinChapterButton.tsx // recall that exported React components must be PascalCase, or just won't work.  So, name file same for clarity.
+// components/chapter/JoinChapterButton.tsx 
+// recall that exported React components must be PascalCase, or just won't work.  So, name file same for clarity.
 
 'use client';
 
@@ -19,13 +20,13 @@ export function JoinChapterButton({ userChapterMember,
   chapterSlug 
 }: JoinChapterButtonProps) {
   
-  // declare who's allowed to initiate the join process... 
-  const allowedToJoin = userChapterMember.anonVisitor || userChapterMember.authVisitor || userChapterMember.removedMember; // handy short cut on whether to display/not simple stuff
-  // blockedMember is prohibited and genMember/mgrMember have already joined.
-  
-  // if (userChapterMember.genMember || userChapterMember.mgrMember || userChapterMember.blockedMember) {
-  //   return null;
-  // }
+  // declare who's allowed to initiate the join process. Handy shortcut on whether to display/not 
+  const allowedToJoin = 
+  userChapterMember.anonVisitor || 
+  userChapterMember.authVisitor || 
+  userChapterMember.removedMember || 
+  userChapterMember.applicant; 
+
 
   // Don't show button if not allowed to request membership
   if (!allowedToJoin) {

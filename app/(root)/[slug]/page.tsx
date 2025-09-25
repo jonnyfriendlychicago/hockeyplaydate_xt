@@ -21,6 +21,9 @@ import { CreateEventButton } from "@/components/chapter/CreateEventButton";
 import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
+import { MembersTabContent } from '@/components/chapter/MembersTabContent';
+import { ApplicantsTabContent } from '@/components/chapter/ApplicantsTabContent';
+import { RestrictedTabContent } from '@/components/chapter/RestrictedTabContent';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -155,21 +158,27 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             {/* Shared row: Tabs left, Join right */}
             <div className="flex items-center justify-between w-full">
               <TabsList className="flex flex-wrap gap-2">
+
+                <TabsTrigger value="locations">Locations</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
-                <TabsTrigger value="locations">Locations</TabsTrigger>
-
-                {/* {(userChapterMember.mgrMember || userChapterMember.genMember) && (
-                  <TabsTrigger value="membership">My Membership</TabsTrigger>
-                )} */}
+                {userChapterMember.mgrMember && 
+                  <>
+                    <TabsTrigger value="applicants">Applicants</TabsTrigger>
+                    <TabsTrigger value="restricted">Restricted</TabsTrigger>
+                  </>
+                  }
 
                 {isApprovedMember && 
                   <TabsTrigger value="membership">My Membership</TabsTrigger>
                 }
 
               </TabsList>
+
+              {/* Action button(s) sit left of the tabs */}
+
               <div className="ml-auto flex gap-2">
-                {/* <JoinChapterButton anonVisitor={userStatus.anonVisitor} authVisitor={userStatus.authVisitor} /> */}
+              
                 <JoinChapterButton 
                   userChapterMember={userChapterMember}
                   // chapterId={chapter.id}
@@ -181,6 +190,12 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               </div>
             </div>
 
+            {/* tabs content      */}
+
+            <TabsContent value="locations">
+              <p className="text-muted-foreground italic">[Locations Placeholder]</p>
+            </TabsContent>
+
             <TabsContent value="events">
               <EventsTabContent 
                 events={events}
@@ -190,12 +205,29 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             </TabsContent>
 
             <TabsContent value="members">
-              <p className="text-muted-foreground italic">[Members Placeholder]</p>
+              <MembersTabContent 
+                chapterId={chapter.id}
+                userChapterMember={userChapterMember}
+              />
             </TabsContent>
 
-            <TabsContent value="locations">
-              <p className="text-muted-foreground italic">[Locations Placeholder]</p>
-            </TabsContent>
+            {userChapterMember.mgrMember && 
+              <>
+                <TabsContent value="applicants">
+                  <ApplicantsTabContent 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="restricted">
+                  <RestrictedTabContent 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                  />
+                </TabsContent>
+              </>
+            }
 
             {isApprovedMember && 
               <TabsContent value="membership">
@@ -206,19 +238,26 @@ export default async function ChapterPage({ params }: { params: { slug: string }
         </div>
 
         {/* Mobile Accordion */}
+
         <div className="block md:hidden space-y-4">
           {/* Action button(s) sit above the accordion */}
           <div className="flex justify-center">
-            {/* <JoinChapterButton anonVisitor={userStatus.anonVisitor} authVisitor={userStatus.authVisitor} /> */}
             <JoinChapterButton 
               userChapterMember={userChapterMember}
-              // chapterId={chapter.id}
               chapterSlug={slug}
             />
             <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug}  />
           </div>
 
           <Accordion type="single" collapsible className="w-full"> 
+            
+            <AccordionItem value="locations">
+              <AccordionTrigger>Locations</AccordionTrigger>
+              <AccordionContent>
+                <p className="text-muted-foreground italic">[Locations Placeholder]</p>
+              </AccordionContent>
+            </AccordionItem>
+
             <AccordionItem value="events">
               <AccordionTrigger>Events</AccordionTrigger>
               <AccordionContent>
@@ -226,30 +265,53 @@ export default async function ChapterPage({ params }: { params: { slug: string }
                 events={events}
                 isApprovedMember={isApprovedMember}
                 slug={slug}
-              />
-
+                />
               </AccordionContent>
             </AccordionItem>
+
             <AccordionItem value="members">
               <AccordionTrigger>Members</AccordionTrigger>
               <AccordionContent>
-                <p className="text-muted-foreground italic">[Members Placeholder]</p>
+                <MembersTabContent 
+                chapterId={chapter.id}
+                userChapterMember={userChapterMember}
+              />
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="locations">
-              <AccordionTrigger>Locations</AccordionTrigger>
-              <AccordionContent>
-                <p className="text-muted-foreground italic">[Locations Placeholder]</p>
-              </AccordionContent>
-            </AccordionItem>
-            {isApprovedMember && 
-              <AccordionItem value="membership">
-                <AccordionTrigger>My Membership</AccordionTrigger>
+            
+            {userChapterMember.mgrMember && 
+            <>
+              <AccordionItem value="applicants">
+                <AccordionTrigger>Applicants</AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground italic">[Membership Placeholder]</p>
+                  <ApplicantsTabContent 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                  />
                 </AccordionContent>
               </AccordionItem>
-            }
+              
+              <AccordionItem value="restricted">
+                <AccordionTrigger>Restricted</AccordionTrigger>
+                <AccordionContent>
+                  <RestrictedTabContent 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </>
+          }
+
+          {isApprovedMember && 
+            <AccordionItem value="membership">
+              <AccordionTrigger>My Membership</AccordionTrigger>
+              <AccordionContent>
+                <p className="text-muted-foreground italic">[Membership Placeholder]</p>
+              </AccordionContent>
+            </AccordionItem>
+          }
+
           </Accordion>
         </div>
       </div>

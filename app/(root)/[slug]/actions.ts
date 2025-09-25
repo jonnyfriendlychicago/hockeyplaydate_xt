@@ -66,9 +66,6 @@ export async function joinChapterAction(formData: FormData) {
     revalidatePath(`/${chapterSlug}`)
 }
 
-// 2025sep14: NOT touching below until above is 100%
-
-
 export async function cancelJoinRequestAction(formData: FormData) {
   // Get authenticated user
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
