@@ -3,58 +3,53 @@
 'use client';
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
 
-interface ChapterMember {
-  id: number;
-  chapterId: number;
-  userProfileId: number;
-  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
-  joinedAt: Date;
-  userProfile: {
-    id: number;
-    givenName: string | null;
-    familyName: string | null;
-    authUser: {
-      picture: string | null;
-    } | null;
-  };
-}
+// interface ChapterMember {
+//   id: number;
+//   chapterId: number;
+//   userProfileId: number;
+//   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+//   joinedAt: Date;
+//   userProfile: {
+//     id: number;
+//     givenName: string | null;
+//     familyName: string | null;
+//     authUser: {
+//       picture: string | null;
+//     } | null;
+//   };
+// }
 
 interface ChapterMemberManagementModalProps {
-  member: ChapterMember | null;
+  // member: ChapterMember | null;
+  member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-function getMaskedRole(role: string): string {
-  switch (role) {
-    case 'APPLICANT': return 'Applicant';
-    case 'MEMBER': return 'Member';
-    case 'MANAGER': return 'Manager';
-    case 'BLOCKED': return 'Blocked';
-    case 'REMOVED': return 'Removed';
-    default: return role;
-  }
-}
+// function getMaskedRole(role: string): string {
+//   switch (role) {
+//     case 'APPLICANT': return 'Applicant';
+//     case 'MEMBER': return 'Member';
+//     case 'MANAGER': return 'Manager';
+//     case 'BLOCKED': return 'Blocked';
+//     case 'REMOVED': return 'Removed';
+//     default: return role;
+//   }
+// }
 
-function getDisplayName(givenName: string | null, familyName: string | null): string {
-  const first = givenName || '';
-  const last = familyName || '';
-  return `${first} ${last}`.trim() || 'Unknown User';
-}
+// function getDisplayName(givenName: string | null, familyName: string | null): string {
+//   const first = givenName || '';
+//   const last = familyName || '';
+//   return `${first} ${last}`.trim() || 'Unknown User';
+// }
 
 function getAvailableActions(currentRole: string): string[] {
   const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED'];
-  
   // Don't show current role or APPLICANT (can't go back to applicant)
   return allRoles.filter(role => role !== currentRole);
 }

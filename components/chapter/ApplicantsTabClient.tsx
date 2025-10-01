@@ -2,39 +2,42 @@
 
 'use client';
 
-
 import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
 import { ChapterMemberCard } from "./ChapterMemberCard";
 import { ChapterMemberManagementModal } from "./ChapterMemberManagementModal";
 import { useState } from "react";
+import { ChapterMemberWithProfile } from "@/lib/types/chapterMember";
 
-interface ChapterMember {
-  id: number;
-  chapterId: number;
-  userProfileId: number;
-  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
-  joinedAt: Date;
-  userProfile: {
-    id: number;
-    givenName: string | null;
-    familyName: string | null;
-    authUser: {
-      picture: string | null;
-    } | null;
-  };
-}
+// interface ChapterMember {
+//   id: number;
+//   chapterId: number;
+//   userProfileId: number;
+//   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+//   joinedAt: Date;
+//   userProfile: {
+//     id: number;
+//     givenName: string | null;
+//     familyName: string | null;
+//     authUser: {
+//       picture: string | null;
+//     } | null;
+//   };
+// }
 
 interface ApplicantsTabClientProps {
-  applicants: ChapterMember[];
+  // applicants: ChapterMember[];
+  applicants: ChapterMemberWithProfile[];
   userChapterMember: UserChapterStatus;
 }
 
 export function ApplicantsTabClient({ applicants, userChapterMember }: ApplicantsTabClientProps) {
 
-  const [selectedMember, setSelectedMember] = useState<ChapterMember | null>(null);
+  // const [selectedMember, setSelectedMember] = useState<ChapterMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<ChapterMemberWithProfile | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleEdit = (member: ChapterMember) => {
+  // const handleEdit = (member: ChapterMember) => {
+  const handleEdit = (member: ChapterMemberWithProfile) => {
     setSelectedMember(member);
     setIsModalOpen(true);
   };

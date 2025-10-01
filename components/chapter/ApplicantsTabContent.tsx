@@ -15,9 +15,15 @@ async function getChapterApplicants(chapterId: number) {
       chapterId: chapterId,
       memberRole: 'APPLICANT'
     },
+
     include: {
       userProfile: {
-        include: {
+        select: {
+          id: true,
+          givenName: true,
+          familyName: true,
+          slugDefault: true,
+          slugVanity: true,
           authUser: {
             select: {
               picture: true
@@ -26,6 +32,20 @@ async function getChapterApplicants(chapterId: number) {
         }
       }
     },
+
+    // include: {
+    //   userProfile: {
+    //     include: {
+    //       authUser: {
+    //         select: {
+    //           picture: true
+    //         }
+    //       }
+    //     }
+    //   }
+    // },
+
+
     orderBy: {
       createdAt: 'desc'
     }
