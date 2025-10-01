@@ -1,5 +1,5 @@
 // app/(root)/[slug]/actions.ts 
-// devNotes: this file refereced by the forms on the JoinChapterButton component
+// devNotes: this file referenced by the forms on the JoinChapterButton component
 
 'use server'
 
@@ -102,6 +102,82 @@ export async function cancelJoinRequestAction(formData: FormData) {
     where: { id: userStatus.membership!.id },
     data: {
       memberRole: 'REMOVED',
+      updatedBy: authenticatedUserProfile.id
+    }
+  })
+
+  revalidatePath(`/${chapterSlug}`)
+}
+
+export async function updateMemberRoleAction(formData: FormData) {
+  // 0 - validate user, part 1: authenticated not-dupe user? 
+  const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+  if (!authenticatedUserProfile) {
+    redirect('/api/auth/login')
+  }
+
+  // bounce if duplicate user
+  if (authenticatedUserProfile.authUser.duplicateOfId) {
+    redirect('/')
+  }
+
+  // 1 - validate chapter exists
+  const chapterSlug = formData.get('chapterSlug') as string
+  const chapter = await prisma.chapter.findUnique({
+    where: { slug: chapterSlug }
+  })
+  
+  if (!chapter) {
+    throw new Error('Chapter not found')
+  }
+  
+  // 2 - verify acting user is a chapter manager
+  const actingUserStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
+  
+  if (!actingUserStatus.mgrMember) {
+    throw new Error('Only managers can update member roles')
+  }
+  
+  // 3 - validate chapterMember exists
+  const chapterMemberId = parseInt(formData.get('chapterMemberId') as string)
+  const targetMember = await prisma.chapterMember.findUnique({
+    where: { id: chapterMemberId }
+  })
+
+  if (!targetMember) {
+    throw new Error('Member not found')
+  }
+
+  // 4 - prevent self-management
+  // 2025oct01: 
+  // probably best to leave this here; we will soon have a self management module, 
+  // which could theoretically use this same action, but right now, thinking that it's best
+  // to have a separate self-manager server action that is laser focused on rules related to self-management: 
+  // one button on the gui, with one valid funtion: set yourself as 'removed', which errors only if you are the owner of the chapter
+
+  if (targetMember.userProfileId === authenticatedUserProfile.id) {
+    throw new Error('You cannot manage your own membership')
+  }
+
+  // 5 - validate newRole is valid
+  const newRole = formData.get('newRole') as string
+
+  const validRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']
+  if (!validRoles.includes(newRole)) {
+    throw new Error('Invalid role')
+  }
+
+  // below is extraneous: already checked for value new role above; 
+  // 6 - Business rule: cannot change back to APPLICANT
+  // if (newRole === 'APPLICANT') {
+  //   throw new Error('Cannot change member back to applicant status')
+  // }
+
+  // 6 - validation passed: update the chapterMember record
+  await prisma.chapterMember.update({
+    where: { id: chapterMemberId },
+    data: {
+      memberRole: newRole as 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED',
       updatedBy: authenticatedUserProfile.id
     }
   })

@@ -146,7 +146,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
       </div>
 
       {/* ===================== */}
-      {/* ZONE 3: Tabs or Accordion */}
+      {/* ZONE 3: Desktop Tabs v Mobile Accordion */}
       {/* ===================== */}
 
       <div className="w-full space-y-2">

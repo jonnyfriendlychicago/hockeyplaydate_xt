@@ -1,5 +1,22 @@
 // components/chapter/ChapterMemberManagementModal.tsx
 
+// 2025oct01: 
+// strongly feel like we want to enhance this modal to be situationally specific.  For example, 
+// if current memberRole = applicant, then options should be masked as "approve" (for set to member) or "ignore" (set to remove) or "block" (basically leave as is), 
+// and should not show options for setting to manager.  that's just setting up the reviewer for errors, i.e., moving applicant to manager instead of applicant to member.
+// similarly, set to manager should only appear if current status = member; we don't want a user accidentally going from removed or BLOCKED to manager; major security hole.  
+// initial sketch: 
+
+// current role | options: 
+// applicant | member "approve"; removed "ignore"; blocked "block"; 
+// member | manager ("promote to manager"); removed "remove from group"; blocked "block"
+// blocked | member ("unblock and make member"); removed ("unblock - do not make member"); DO NOT show manager option.
+// removed | block; member ("set as member")
+// now if currently manager,  wait, problem: can't enable a manager fight.  One member needs to be designated as owner; only owner can demote/remove/block a manager or make someone else the owner. 
+// so, if not owner, do not allow edits to someone who is currently a manager.  IF owner, do below:
+// manager | member ("demote to member"); removed "ignore"; blocked "block"; 
+// also about above: future state, will need a method for owners to set someone else as owner, thus allowing them to retire.  make that tab called "chapter admin"?  make email funtion for now? 
+
 'use client';
 
 import { useState } from "react";
