@@ -21,9 +21,6 @@ import { CreateEventButton } from "@/components/chapter/CreateEventButton";
 import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
-// import { MembersTabContent } from '@/components/chapter/MembersTabContent';
-// import { ApplicantsTabContent } from '@/components/chapter/ApplicantsTabContent';
-// import { RestrictedTabContent } from '@/components/chapter/RestrictedTabContent';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
@@ -69,8 +66,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
     chapter.id, 
     authenticatedUserProfile
   );
-
-  console.log(userChapterMember) // 2025sep24: to-do: wrap this in a check-env if statement
 
   // 3 - Display logic for obfuscated organizer names if unauthenticated
   // const organizerNames = chapter.members.map((m) => {
@@ -154,7 +149,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
         {/* Desktop Tabs */}
         <div className="hidden md:block">
-          <Tabs defaultValue="events" className="w-full space-y-2">
+          <Tabs defaultValue="locations" className="w-full space-y-2">
 
             {/* Shared row: Tabs left, Join right */}
             <div className="flex items-center justify-between w-full">
@@ -176,22 +171,22 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
               </TabsList>
 
-              {/* Action button(s) sit left of the tabs */}
+              {/* Action button(s) sit right of the tabs */}
 
               <div className="ml-auto flex gap-2">
               
                 <JoinChapterButton 
                   userChapterMember={userChapterMember}
-                  // chapterId={chapter.id}
                   chapterSlug={slug}
                 />
 
                 {/* note: above button/userProfile component and below are mutually exclusive */}
+
                 <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug}  />
               </div>
             </div>
 
-            {/* tabs content      */}
+            {/* tabs content */}
 
             <TabsContent value="locations">
               <p className="text-muted-foreground italic">[Locations Placeholder]</p>
@@ -206,10 +201,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             </TabsContent>
 
             <TabsContent value="members">
-              {/* <MembersTabContent 
-                chapterId={chapter.id}
-                userChapterMember={userChapterMember}
-              /> */}
               <ChapterMembersList 
                 chapterId={chapter.id}
                 userChapterMember={userChapterMember}
@@ -219,15 +210,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
             {userChapterMember.mgrMember && 
               <>
-                {/* <TabsContent value="applicants">
-                  <ApplicantsTabContent 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  />
-                </TabsContent> */}
-
-                {/* above replaced by below */}
-
                 <TabsContent value="applicants">
                   <ChapterMembersList 
                     chapterId={chapter.id}
@@ -237,10 +219,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
                 </TabsContent>
                 
                 <TabsContent value="restricted">
-                  {/* <RestrictedTabContent 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  /> */}
                   <ChapterMembersList 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
@@ -293,10 +271,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <AccordionItem value="members">
               <AccordionTrigger>Members</AccordionTrigger>
               <AccordionContent>
-                {/* <MembersTabContent 
-                chapterId={chapter.id}
-                userChapterMember={userChapterMember}
-                /> */}
                 <ChapterMembersList 
                 chapterId={chapter.id}
                 userChapterMember={userChapterMember}
@@ -310,10 +284,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               <AccordionItem value="applicants">
                 <AccordionTrigger>Applicants</AccordionTrigger>
                 <AccordionContent>
-                  {/* <ApplicantsTabContent 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  /> */}
                   <ChapterMembersList 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
@@ -325,10 +295,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               <AccordionItem value="restricted">
                 <AccordionTrigger>Restricted</AccordionTrigger>
                 <AccordionContent>
-                  {/* <RestrictedTabContent 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  /> */}
                   <ChapterMembersList 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
