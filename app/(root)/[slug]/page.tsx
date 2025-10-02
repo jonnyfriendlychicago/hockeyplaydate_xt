@@ -278,7 +278,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               />
               </AccordionContent>
             </AccordionItem>
-            
+
             {userChapterMember.mgrMember && 
             <>
               <AccordionItem value="applicants">
