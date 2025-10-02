@@ -8,29 +8,13 @@ import { ChapterMemberManagementModal } from "./ChapterMemberManagementModal";
 import { useState } from "react";
 import { ChapterMemberWithProfile } from "@/lib/types/chapterMember";
 
-// interface ChapterMember {
-//   id: number;
-//   chapterId: number;
-//   userProfileId: number;
-//   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
-//   joinedAt: Date;
-//   userProfile: {
-//     id: number;
-//     givenName: string | null;
-//     familyName: string | null;
-//     authUser: {
-//       picture: string | null;
-//     } | null;
-//   };
-// }
-
 interface ApplicantsTabClientProps {
-  // applicants: ChapterMember[];
   applicants: ChapterMemberWithProfile[];
   userChapterMember: UserChapterStatus;
+  chapterSlug: string;
 }
 
-export function ApplicantsTabClient({ applicants, userChapterMember }: ApplicantsTabClientProps) {
+export function ApplicantsTabClient({ applicants, userChapterMember , chapterSlug}: ApplicantsTabClientProps) {
 
   // const [selectedMember, setSelectedMember] = useState<ChapterMember | null>(null);
   const [selectedMember, setSelectedMember] = useState<ChapterMemberWithProfile | null>(null);
@@ -73,6 +57,7 @@ export function ApplicantsTabClient({ applicants, userChapterMember }: Applicant
         member={selectedMember}
         isOpen={isModalOpen}
         onClose={handleModalClose}
+        chapterSlug={chapterSlug} 
       />
     </div>
   );

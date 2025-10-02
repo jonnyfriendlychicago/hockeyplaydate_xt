@@ -15,7 +15,6 @@ async function getChapterApplicants(chapterId: number) {
       chapterId: chapterId,
       memberRole: 'APPLICANT'
     },
-
     include: {
       userProfile: {
         select: {
@@ -32,20 +31,6 @@ async function getChapterApplicants(chapterId: number) {
         }
       }
     },
-
-    // include: {
-    //   userProfile: {
-    //     include: {
-    //       authUser: {
-    //         select: {
-    //           picture: true
-    //         }
-    //       }
-    //     }
-    //   }
-    // },
-
-
     orderBy: {
       createdAt: 'desc'
     }
@@ -55,10 +40,17 @@ async function getChapterApplicants(chapterId: number) {
 export async function ApplicantsTabContent({ chapterId, userChapterMember }: ApplicantsTabContentProps) {
   const applicants = await getChapterApplicants(chapterId);
 
+  // Get chapter slug
+  const chapter = await prisma.chapter.findUnique({
+    where: { id: chapterId },
+    select: { slug: true }
+  });
+
   return (
     <ApplicantsTabClient 
       applicants={applicants}
       userChapterMember={userChapterMember}
+      chapterSlug={chapter?.slug || ''}
     />
   );
 }

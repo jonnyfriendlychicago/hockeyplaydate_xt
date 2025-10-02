@@ -24,46 +24,14 @@ import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} fro
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
-
-// interface ChapterMember {
-//   id: number;
-//   chapterId: number;
-//   userProfileId: number;
-//   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
-//   joinedAt: Date;
-//   userProfile: {
-//     id: number;
-//     givenName: string | null;
-//     familyName: string | null;
-//     authUser: {
-//       picture: string | null;
-//     } | null;
-//   };
-// }
+import { updateMemberRoleAction } from "@/app/(root)/[slug]/actions";
 
 interface ChapterMemberManagementModalProps {
-  // member: ChapterMember | null;
   member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
+  chapterSlug: string; // not sure why this needed now that making modal hit server actions. investigate.
 }
-
-// function getMaskedRole(role: string): string {
-//   switch (role) {
-//     case 'APPLICANT': return 'Applicant';
-//     case 'MEMBER': return 'Member';
-//     case 'MANAGER': return 'Manager';
-//     case 'BLOCKED': return 'Blocked';
-//     case 'REMOVED': return 'Removed';
-//     default: return role;
-//   }
-// }
-
-// function getDisplayName(givenName: string | null, familyName: string | null): string {
-//   const first = givenName || '';
-//   const last = familyName || '';
-//   return `${first} ${last}`.trim() || 'Unknown User';
-// }
 
 function getAvailableActions(currentRole: string): string[] {
   const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED'];
@@ -71,7 +39,9 @@ function getAvailableActions(currentRole: string): string[] {
   return allRoles.filter(role => role !== currentRole);
 }
 
-export function ChapterMemberManagementModal({ member, isOpen, onClose }: ChapterMemberManagementModalProps) {
+export function ChapterMemberManagementModal({ member, isOpen, onClose 
+  , chapterSlug // again, why now? 
+}: ChapterMemberManagementModalProps) {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
   if (!member) return null;
@@ -84,11 +54,19 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose }: Chapte
     setSelectedAction(action);
   };
 
-  const handleSubmit = () => {
+  // const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedAction) return;
     
-    // TODO: Call server action to update member role
     console.log(`Updating ${member.id} to role: ${selectedAction}`);
+    
+    // below: Call server action to update member role
+    const formData = new FormData();
+    formData.append('chapterSlug', chapterSlug);
+    formData.append('chapterMemberId', member.id.toString());
+    formData.append('newRole', selectedAction);
+
+    await updateMemberRoleAction(formData);
     
     // Reset and close
     setSelectedAction(null);
