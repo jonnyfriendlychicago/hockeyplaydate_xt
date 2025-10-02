@@ -21,9 +21,10 @@ import { CreateEventButton } from "@/components/chapter/CreateEventButton";
 import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
-import { MembersTabContent } from '@/components/chapter/MembersTabContent';
-import { ApplicantsTabContent } from '@/components/chapter/ApplicantsTabContent';
-import { RestrictedTabContent } from '@/components/chapter/RestrictedTabContent';
+// import { MembersTabContent } from '@/components/chapter/MembersTabContent';
+// import { ApplicantsTabContent } from '@/components/chapter/ApplicantsTabContent';
+// import { RestrictedTabContent } from '@/components/chapter/RestrictedTabContent';
+import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -205,25 +206,45 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             </TabsContent>
 
             <TabsContent value="members">
-              <MembersTabContent 
+              {/* <MembersTabContent 
                 chapterId={chapter.id}
                 userChapterMember={userChapterMember}
+              /> */}
+              <ChapterMembersList 
+                chapterId={chapter.id}
+                userChapterMember={userChapterMember}
+                filter="members"
               />
             </TabsContent>
 
             {userChapterMember.mgrMember && 
               <>
-                <TabsContent value="applicants">
+                {/* <TabsContent value="applicants">
                   <ApplicantsTabContent 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
                   />
+                </TabsContent> */}
+
+                {/* above replaced by below */}
+
+                <TabsContent value="applicants">
+                  <ChapterMembersList 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                    filter="applicants"
+                  />
                 </TabsContent>
                 
                 <TabsContent value="restricted">
-                  <RestrictedTabContent 
+                  {/* <RestrictedTabContent 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
+                  /> */}
+                  <ChapterMembersList 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                    filter="restricted"
                   />
                 </TabsContent>
               </>
@@ -272,9 +293,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <AccordionItem value="members">
               <AccordionTrigger>Members</AccordionTrigger>
               <AccordionContent>
-                <MembersTabContent 
+                {/* <MembersTabContent 
                 chapterId={chapter.id}
                 userChapterMember={userChapterMember}
+                /> */}
+                <ChapterMembersList 
+                chapterId={chapter.id}
+                userChapterMember={userChapterMember}
+                filter="members"
               />
               </AccordionContent>
             </AccordionItem>
@@ -284,9 +310,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               <AccordionItem value="applicants">
                 <AccordionTrigger>Applicants</AccordionTrigger>
                 <AccordionContent>
-                  <ApplicantsTabContent 
+                  {/* <ApplicantsTabContent 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
+                  /> */}
+                  <ChapterMembersList 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                    filter="applicants"
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -294,9 +325,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
               <AccordionItem value="restricted">
                 <AccordionTrigger>Restricted</AccordionTrigger>
                 <AccordionContent>
-                  <RestrictedTabContent 
+                  {/* <RestrictedTabContent 
                     chapterId={chapter.id}
                     userChapterMember={userChapterMember}
+                  /> */}
+                  <ChapterMembersList 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                    filter="restricted"
                   />
                 </AccordionContent>
               </AccordionItem>
