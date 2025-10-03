@@ -78,7 +78,8 @@ export default async function ChaptersPage() {
       where: {
         userProfileId: authenticatedUserProfile.id,
         memberRole: {
-          not: 'BLOCKED'
+          // not: 'BLOCKED'
+          in: ['MEMBER', 'MANAGER']  
         }
       },
       select: {

@@ -184,3 +184,58 @@ export async function updateMemberRoleAction(formData: FormData) {
 
   revalidatePath(`/${chapterSlug}`)
 }
+
+export async function leaveChapterAction(formData: FormData) {
+  // 0 - Validate user, part 1: authenticated not-dupe user? 
+  const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+  if (!authenticatedUserProfile) {
+    redirect('/api/auth/login')
+  }
+
+  // Bounce if duplicate user
+  if (authenticatedUserProfile.authUser.duplicateOfId) {
+    redirect('/')
+  }
+
+  // 1 - Load chapter
+  const chapterSlug = formData.get('chapterSlug') as string
+  const chapter = await prisma.chapter.findUnique({
+    where: { slug: chapterSlug }
+  })
+
+  if (!chapter) {
+    throw new Error('Chapter not found')
+  }
+
+  // 2 - Get user's membership
+  const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
+
+  if (!userStatus.membership) {
+    throw new Error('You are not a member of this chapter')
+  }
+
+  // 3 - Prevent sole manager from leaving
+  if (userStatus.mgrMember) {
+    const managerCount = await prisma.chapterMember.count({
+      where: {
+        chapterId: chapter.id,
+        memberRole: 'MANAGER'
+      }
+    });
+
+    if (managerCount === 1) {
+      throw new Error('Cannot leave - you are the only manager. Promote another member first.')
+    }
+  }
+
+  // 4 - Update to REMOVED
+  await prisma.chapterMember.update({
+    where: { id: userStatus.membership.id },
+    data: {
+      memberRole: 'REMOVED',
+      updatedBy: authenticatedUserProfile.id
+    }
+  })
+
+  revalidatePath(`/${chapterSlug}`)
+}

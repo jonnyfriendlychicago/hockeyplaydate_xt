@@ -22,6 +22,7 @@ import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
+import { MembershipTab } from '@/components/chapter/MembershipTab';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -230,7 +231,13 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
             {isApprovedMember && 
               <TabsContent value="membership">
-                <p className="text-muted-foreground italic">[Membership Placeholder]</p>
+                {/* <p className="text-muted-foreground italic">[Membership Placeholder]</p> */}
+                <TabsContent value="membership">
+                  <MembershipTab 
+                    chapterId={chapter.id}
+                    userChapterMember={userChapterMember}
+                  />
+                </TabsContent>
               </TabsContent>
             }
           </Tabs>
@@ -309,7 +316,11 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <AccordionItem value="membership">
               <AccordionTrigger>My Membership</AccordionTrigger>
               <AccordionContent>
-                <p className="text-muted-foreground italic">[Membership Placeholder]</p>
+                {/* <p className="text-muted-foreground italic">[Membership Placeholder]</p> */}
+                <MembershipTab
+                  chapterId={chapter.id}
+                  userChapterMember={userChapterMember}
+                />
               </AccordionContent>
             </AccordionItem>
           }
