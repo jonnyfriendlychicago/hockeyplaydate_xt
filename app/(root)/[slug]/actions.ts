@@ -9,9 +9,13 @@ import { revalidatePath } from 'next/cache'
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 
+// 2025oct07: every one of these server action functions needs to be remodeled as a 'try/else' just like joinChapterAction below.  
+// this might be a necessary update on other functions in this app.  review all.  
+
 export async function joinChapterAction(formData: FormData) {
-  
-    // 0 - Validate user, part 1: authenticated not-dupe user? 
+  try {
+
+    // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
         redirect('/api/auth/login')
@@ -22,9 +26,9 @@ export async function joinChapterAction(formData: FormData) {
         redirect('/')
     }
 
-    // 1 - load chapter 
+    // 1 - validate chapter 
     const chapterSlug = formData.get('chapterSlug') as string
-  
+
     const chapter = await prisma.chapter.findUnique({
     where: { slug: chapterSlug }
     })
@@ -33,7 +37,7 @@ export async function joinChapterAction(formData: FormData) {
     throw new Error('Chapter not found')
     }
 
-    // 2 - Validate user, part 2: requisite chapterMember permissions? 
+    // 2 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
     const canJoin = userStatus.authVisitor || userStatus.removedMember
@@ -41,30 +45,75 @@ export async function joinChapterAction(formData: FormData) {
       throw new Error('Invalid action for current membership status')
     }
 
-    // 3 - Run the update/insert
-    if (userStatus.removedMember) {
-    // Update existing REMOVED record to APPLICANT
-    await prisma.chapterMember.update({
-        where: { id: userStatus.membership!.id },
+    // 3 Set up time/count variables 
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const existingWindowStart = userStatus.membership?.joinRequestWindowStart;
+    const existingCount = userStatus.membership?.joinRequestCount || 0;
+
+    const newWindowStart = (!existingWindowStart || existingWindowStart < twentyFourHoursAgo) 
+      ? now  // if no existing value, or existing is too long ago, reset as now.
+      : existingWindowStart; // else, leave as-was windowStart value alone.
+
+    const newCount = (!existingWindowStart || existingWindowStart < twentyFourHoursAgo) 
+    ? 1 // if no existing window start value, or existing is too long ago, reset the count as 1, i.e., first join request
+    : existingCount + 1; // else, up-count the value by 1.  yes, this might mean that 'newCount' is greater than our max allowed attempts; this is validated in next step
+
+    // 4 - validate join attempt counts
+
+          // if (newCount >3 ) {
+          //   throw new Error('Too many join requests. Please try again in 24 hours.');
+          // }
+
+    // devNotes: 
+    //  Server actions that throw errors (like code above) result in red/black/grey Next.js error screens shown to end users. yikes. 
+    //  Instead, use error states instead of throwing errors; catch errors and return them gracefully to the UI, like below. 
+
+    if (newCount > 3) {
+        return { 
+          success: false, 
+          error: 'Too many join requests. Please try again in 24 hours.' 
+        };
+      }
+
+    // 5 - Run the update/insert, including newWindowStart and newCount values derived above
+    if (userStatus.removedMember && userStatus.membership) {
+      await prisma.chapterMember.update({
+        where: { id: userStatus.membership.id },
         data: {
-        memberRole: 'APPLICANT',
-        updatedBy: authenticatedUserProfile.id
+          memberRole: 'APPLICANT',
+          joinRequestWindowStart: newWindowStart,
+          joinRequestCount: newCount, 
+          updatedBy: authenticatedUserProfile.id,
         }
-    })
+      });
     } else {
-    // Create new record for authVisitor
-    await prisma.chapterMember.create({
+      // Create new record for first-time joiner
+      await prisma.chapterMember.create({
         data: {
-        chapterId: chapter.id,
-        userProfileId: authenticatedUserProfile.id,
-        memberRole: 'APPLICANT',
-        updatedBy: authenticatedUserProfile.id
+          chapterId: chapter.id,
+          userProfileId: authenticatedUserProfile.id,
+          memberRole: 'APPLICANT',
+          joinRequestWindowStart: newWindowStart,
+          joinRequestCount: newCount, 
+          updatedBy: authenticatedUserProfile.id,
         }
-    })
+      });
     }
 
     revalidatePath(`/${chapterSlug}`)
-}
+
+    return { success: true };
+      
+  } catch (error) {
+    console.error('Join chapter error:', error)
+    return { 
+      success: false, 
+      error: 'Something went wrong action TS. Please try again.' 
+      
+    };
+  }
+} 
 
 export async function cancelJoinRequestAction(formData: FormData) {
   // Get authenticated user
@@ -110,6 +159,8 @@ export async function cancelJoinRequestAction(formData: FormData) {
 }
 
 export async function updateMemberRoleAction(formData: FormData) {
+
+  // 2025oct07: reminder for self: update program so we have a single designated owner for each chapter, who is the only person that can manage the managers.  
   // 0 - validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
   if (!authenticatedUserProfile) {

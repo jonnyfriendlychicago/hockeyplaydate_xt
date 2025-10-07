@@ -156,10 +156,14 @@ model ChapterMember {
   createdAt       DateTime?         @default(now()) @map("created_at")
   updatedAt       DateTime?         @updatedAt @map("updated_at")
   updatedBy       Int?              @map("updated_by")
+
+  // Rate limiting fields
+  joinRequestCount     Int?        @default(0) @map("join_request_count")
+  lastJoinRequestAt    DateTime?   @map("last_join_request_at") // this is a deprecated field, dead before we even started using it. 
+  joinRequestWindowStart    DateTime?   @map("join_request_window_start")
   
   chapter         Chapter          @relation(fields: [chapterId], references: [id])
   userProfile     UserProfile      @relation(fields: [userProfileId], references: [id])
-
   updatedByUser   UserProfile?     @relation("ChapterMemberUpdatedBy", fields: [updatedBy], references: [id])
 
   @@unique([chapterId, userProfileId]) // each user_profile can only appear once per chapter

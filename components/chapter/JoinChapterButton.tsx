@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle, X } from "lucide-react";
@@ -15,10 +16,12 @@ interface JoinChapterButtonProps {
   chapterSlug: string;
 }
 
-export function JoinChapterButton({ userChapterMember, 
-  // chapterId, 
+export function JoinChapterButton({ 
+  userChapterMember, 
   chapterSlug 
 }: JoinChapterButtonProps) {
+
+  const [error, setError] = useState<string | null>(null);
   
   // declare who's allowed to initiate the join process. Handy shortcut on whether to display/not 
   const allowedToJoin = 
@@ -45,21 +48,51 @@ export function JoinChapterButton({ userChapterMember,
     );
   }
 
+  const handleJoinSubmit = async (formData: FormData) => {
+    setError(null);
+    const result = await joinChapterAction(formData);
+    if (!result.success) {
+      setError(result.error || 'Something went wrong JTC');
+    }
+  };
+
+
   // Authenticated visitors and removed members - show join button
   if (userChapterMember.authVisitor || userChapterMember.removedMember) {
     return (
       // <form action={`/api/chapters/${chapterSlug}/join`} method="POST">
       //   <input type="hidden" name="chapterSlug" value={chapterSlug} />
       // above replaced by below, embracing server action design over traditional REST api design
-      <form action={joinChapterAction}>
-        <input type="hidden" name="chapterSlug" value={chapterSlug} />
-        <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Join Chapter
-        </Button>
-      </form>
+
+      // <form action={joinChapterAction}>
+      //   <input type="hidden" name="chapterSlug" value={chapterSlug} />
+      //   <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
+      //     <PlusCircle className="w-4 h-4 mr-2" />
+      //     Join Chapter
+      //   </Button>
+      // </form>
+
+      // above replaced by below, for smooth error handling
+
+      // RIGHT HERE, PUT ANOTHER IF: check how many requests already made in 24 hours, and if maxed out, display proactive message and disable form button
+
+      <div className="space-y-2">
+        {error && (
+          <p className="text-red-600 text-sm">{error}</p>
+        )}
+        <form action={handleJoinSubmit}>
+          <input type="hidden" name="chapterSlug" value={chapterSlug} />
+          <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Join Chapter
+          </Button>
+        </form>
+      </div>
+
     );
   }
+
+  
 
   // Applicants - show cancel button with pending message
   if (userChapterMember.applicant) {

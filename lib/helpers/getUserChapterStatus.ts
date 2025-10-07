@@ -18,6 +18,8 @@ type ChapterMembership = {
   // memberRole: 'MEMBER' | 'MANAGER' | 'BLOCKED';
   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
   joinedAt: Date;
+  joinRequestCount: number | null; 
+  joinRequestWindowStart: Date | null; 
 };
 
 export type UserChapterStatus = {
