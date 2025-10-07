@@ -78,17 +78,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
     }).format(date);
   };
 
-  // const formatDuration = (minutes: number | null) => {
-  //   if (!minutes) return '';
-  //   const hours = Math.floor(minutes / 60);
-  //   const mins = minutes % 60;
-  //   if (hours > 0) {
-  //     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  //   }
-  //   return `${mins}m`;
-  // };
-
-  // NEW CODE - format end time instead of duration
+  // format end time (instead of duration)
 const formatEndTime = (endDate: Date | null) => {
   if (!endDate) return '';
   return new Intl.DateTimeFormat('en-US', {
@@ -280,21 +270,6 @@ const formatEndTime = (endDate: Date | null) => {
       {/* Bottom Row: Calendar Integration + Location Map (Placeholders) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Calendar Integration */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Add to Calendar</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              [Placeholder: Google Calendar integration]
-            </p>
-            <Button variant="outline" className="w-full" disabled>
-              Add to Google Calendar
-            </Button>
-          </CardContent>
-        </Card> */}
-        {/* above replaced by below */}
         <Card>
           <CardHeader>
             <CardTitle>Add to Calendar</CardTitle>
@@ -313,25 +288,6 @@ const formatEndTime = (endDate: Date | null) => {
             />
           </CardContent>
         </Card>
-
-
-
-
-
-
-        {/* Location Map */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Location</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-48 bg-gray-100 rounded-md flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                [Placeholder: Google Maps integration]
-              </p>
-            </div>
-          </CardContent>
-        </Card> */}
 
         {/* Location Map */}
         <Card>

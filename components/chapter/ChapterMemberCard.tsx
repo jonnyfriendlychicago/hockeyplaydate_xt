@@ -11,52 +11,11 @@ import {
   getActionButtonText 
 } from "@/lib/types/chapterMember";
 
-// interface ChapterMember {
-//   id: number;
-//   chapterId: number;
-//   userProfileId: number;
-//   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
-//   joinedAt: Date;
-//   userProfile: {
-//     id: number;
-//     givenName: string | null;
-//     familyName: string | null;
-//     slugDefault: string; 
-//     slugVanity: string; 
-//     authUser: {
-//       picture: string | null;
-//     } | null;
-//   };
-// }
-
 interface ChapterMemberCardProps {
-  // member: ChapterMember;
   member: ChapterMemberWithProfile;
   showEditButton: boolean;
-  // onEdit?: (member: ChapterMember) => void;
   onEdit?: (member: ChapterMemberWithProfile) => void;
 }
-
-// function getMaskedRole(role: string): string {
-//   switch (role) {
-//     case 'APPLICANT': return 'Applicant';
-//     case 'MEMBER': return 'Member';
-//     case 'MANAGER': return 'Manager';
-//     case 'BLOCKED': return 'Blocked';
-//     case 'REMOVED': return 'Removed';
-//     default: return role;
-//   }
-// }
-
-// function getDisplayName(givenName: string | null, familyName: string | null): string {
-//   const first = givenName || '';
-//   const last = familyName || '';
-//   return `${first} ${last}`.trim() || 'Unknown User';
-// }
-
-// function getActionButtonText(role: string): string {
-//   return role === 'APPLICANT' ? 'Respond' : 'Manage';
-// }
 
 export function ChapterMemberCard({ member, showEditButton, onEdit }: ChapterMemberCardProps) {
   const displayName = getDisplayName(member.userProfile.givenName, member.userProfile.familyName);

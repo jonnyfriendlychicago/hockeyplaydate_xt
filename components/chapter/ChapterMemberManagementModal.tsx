@@ -34,8 +34,7 @@ interface ChapterMemberManagementModalProps {
 }
 
 function getAvailableActions(currentRole: string): string[] {
-  const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED'];
-  // Don't show current role or APPLICANT (can't go back to applicant)
+  const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']; // Don't show current role or APPLICANT (can't go back to applicant)
   return allRoles.filter(role => role !== currentRole);
 }
 
@@ -54,7 +53,6 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
     setSelectedAction(action);
   };
 
-  // const handleSubmit = () => {
   const handleSubmit = async () => {
     if (!selectedAction) return;
     

@@ -231,7 +231,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
             {isApprovedMember && 
               <TabsContent value="membership">
-                {/* <p className="text-muted-foreground italic">[Membership Placeholder]</p> */}
                 <TabsContent value="membership">
                   <MembershipTab 
                     chapterId={chapter.id}
@@ -316,7 +315,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             <AccordionItem value="membership">
               <AccordionTrigger>My Membership</AccordionTrigger>
               <AccordionContent>
-                {/* <p className="text-muted-foreground italic">[Membership Placeholder]</p> */}
                 <MembershipTab
                   chapterId={chapter.id}
                   userChapterMember={userChapterMember}

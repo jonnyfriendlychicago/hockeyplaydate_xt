@@ -12,20 +12,6 @@ interface ChapterMembersListProps {
   filter: MemberFilter;
 }
 
-// function getQueryFilter(filter: MemberFilter) {
-//   switch (filter) {
-//     case 'applicants':
-//       // return { memberRole: 'APPLICANT' as const };
-//       return { memberRole: 'APPLICANT' };
-//     case 'members':
-//       // return { memberRole: { in: ['MEMBER', 'MANAGER'] as const } };
-//       return { memberRole: { in: ['MEMBER', 'MANAGER'] } };
-//     case 'restricted':
-//       // return { memberRole: { in: ['BLOCKED', 'REMOVED'] as const } };
-//       return { memberRole: { in: ['BLOCKED', 'REMOVED'] } };
-//   }
-// }
-
 function getEmptyMessage(filter: MemberFilter): string {
   switch (filter) {
     case 'applicants': return 'No pending applications';
@@ -42,37 +28,7 @@ function getTitle(filter: MemberFilter, count: number): string {
   }
 }
 
-// async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
-//   const queryFilter = getQueryFilter(filter);
-//   return await prisma.chapterMember.findMany({
-//     where: {
-//       chapterId,
-//       // ...getQueryFilter(filter)
-//       ...queryFilter
-//     },
-//     include: {
-//       userProfile: {
-//         select: {
-//           id: true,
-//           givenName: true,
-//           familyName: true,
-//           slugDefault: true,
-//           slugVanity: true,
-//           authUser: {
-//             select: {
-//               picture: true
-//             }
-//           }
-//         }
-//       }
-//     },
-//     orderBy: filter === 'members' 
-//       ? [{ memberRole: 'desc' }, { createdAt: 'asc' }]
-//       : { createdAt: 'desc' }
-//   });
-// }
-
-// above is slick, but overly ambitious: just not gonna work easily in typescript. Replaced by below. 
+// devNote: we originally tried to have a single query that would accept a parameter, so one prisma query instead of three. But that just not gonna work easily in typescript. So embrace below. 
 
 async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
   if (filter === 'applicants') {
@@ -153,9 +109,7 @@ async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
   });
 }
 
-
 export async function ChapterMembersList({ chapterId, userChapterMember, filter }: ChapterMembersListProps) {
-  // Members tab: non-members see message
   if (filter === 'members' && !userChapterMember.genMember && !userChapterMember.mgrMember) {
     return (
       <div className="text-center py-8">

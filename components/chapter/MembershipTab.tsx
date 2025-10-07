@@ -11,7 +11,7 @@ interface MembershipTabProps {
 
 export async function MembershipTab({ chapterId, userChapterMember }: MembershipTabProps) {
   // Only members and managers should see this tab
-  // 2025oct02: below is bogus.  only members/mgrs seeing this tab b/c of logic on parent page.  let's clean up later. 
+  // 2025oct02: below is bogus.  only members/mgrs seeing this tab b/c of logic on parent file.  let's clean up later. 
   if (!userChapterMember.membership) {
     return null;
   }
@@ -33,22 +33,15 @@ export async function MembershipTab({ chapterId, userChapterMember }: Membership
   // Get chapter slug for the server action
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
-    // select: { slug: true }
     select: { slug: true, name: true }
   });
 
   return (
-    // <MembershipTabClient 
-    //   membership={userChapterMember.membership}
-    //   isSoleManager={isSoleManager}
-    //   chapterSlug={chapter?.slug || ''}
-    // />
-
     <MembershipTabClient 
       membership={userChapterMember.membership}
       isSoleManager={isSoleManager}
       chapterSlug={chapter?.slug || ''}
-      chapterName={chapter?.name || ''}  // Add this line
+      chapterName={chapter?.name || ''}  
     />
   );
 }

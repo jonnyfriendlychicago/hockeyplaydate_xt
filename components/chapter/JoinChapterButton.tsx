@@ -1,5 +1,4 @@
 // components/chapter/JoinChapterButton.tsx 
-// recall that exported React components must be PascalCase, or just won't work.  So, name file same for clarity.
 
 'use client';
 
@@ -12,7 +11,6 @@ import { joinChapterAction, cancelJoinRequestAction } from '@/app/(root)/[slug]/
 
 interface JoinChapterButtonProps {
   userChapterMember: UserChapterStatus;
-  // chapterId: number;
   chapterSlug: string;
 }
 
@@ -56,26 +54,9 @@ export function JoinChapterButton({
     }
   };
 
-
   // Authenticated visitors and removed members - show join button
   if (userChapterMember.authVisitor || userChapterMember.removedMember) {
     return (
-      // <form action={`/api/chapters/${chapterSlug}/join`} method="POST">
-      //   <input type="hidden" name="chapterSlug" value={chapterSlug} />
-      // above replaced by below, embracing server action design over traditional REST api design
-
-      // <form action={joinChapterAction}>
-      //   <input type="hidden" name="chapterSlug" value={chapterSlug} />
-      //   <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
-      //     <PlusCircle className="w-4 h-4 mr-2" />
-      //     Join Chapter
-      //   </Button>
-      // </form>
-
-      // above replaced by below, for smooth error handling
-
-      // RIGHT HERE, PUT ANOTHER IF: check how many requests already made in 24 hours, and if maxed out, display proactive message and disable form button
-
       <div className="space-y-2">
         {error && (
           <p className="text-red-600 text-sm">{error}</p>
@@ -92,18 +73,14 @@ export function JoinChapterButton({
     );
   }
 
-  
-
   // Applicants - show cancel button with pending message
+  // devNote: todo: clean up gui / message display.  clunky presently. 
   if (userChapterMember.applicant) {
     return (
       <div className="text-center space-y-2">
         <p className="text-orange-600 text-sm">
           Request pending approval from organizers
         </p>
-        {/* <form action={`/api/chapters/${chapterSlug}/cancel`} method="POST">
-          <input type="hidden" name="chapterSlug" value={chapterSlug} /> */}
-        {/* above replaced by below, embracing server action design over traditional REST api design   */}
         <form action={cancelJoinRequestAction}>
           <input type="hidden" name="chapterSlug" value={chapterSlug} />  
           <Button type="submit" variant="outline" className="h-10 px-6 text-base">
@@ -117,37 +94,3 @@ export function JoinChapterButton({
 
   return null;
 }
-
-// below was original placeholder; wholly replaced by above
-// 'use client'; // future form logic will likely need it
-
-// import { Button } from "@/components/ui/button";
-// import Link from "next/link";
-// import { PlusCircle } from "lucide-react";
-
-// interface JoinChapterButtonProps {
-//   anonVisitor: boolean;
-//   authVisitor: boolean;
-// }
-
-// export function JoinChapterButton({ anonVisitor, authVisitor }: JoinChapterButtonProps) {
-//   if (!anonVisitor && !authVisitor) return null;
-
-//   if (anonVisitor) {
-//     return (
-//       <Link href="/auth/login">
-//         <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
-//           <PlusCircle className="w-4 h-4 mr-2" />
-//           Join Chapter
-//         </Button>
-//       </Link>
-//     );
-//   }
-//   // future state: replace with form submission
-//   return (
-//     <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md" >
-//       <PlusCircle className="w-4 h-4 mr-2" />
-//       Join Chapter
-//     </Button>
-//   );
-// }

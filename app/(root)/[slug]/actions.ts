@@ -1,5 +1,5 @@
 // app/(root)/[slug]/actions.ts 
-// devNotes: this file referenced by the forms on the JoinChapterButton component
+// devNotes: this file referenced by the forms on the JoinChapterButton component, as well as other chapter components.
 
 'use server'
 
@@ -217,12 +217,6 @@ export async function updateMemberRoleAction(formData: FormData) {
   if (!validRoles.includes(newRole)) {
     throw new Error('Invalid role')
   }
-
-  // below is extraneous: already checked for value new role above; 
-  // 6 - Business rule: cannot change back to APPLICANT
-  // if (newRole === 'APPLICANT') {
-  //   throw new Error('Cannot change member back to applicant status')
-  // }
 
   // 6 - validation passed: update the chapterMember record
   await prisma.chapterMember.update({
