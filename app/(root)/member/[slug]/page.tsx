@@ -22,10 +22,9 @@ export default async function MemberPage({ params }: { params: { slug: string } 
   // 0 - authenticate user
   const  authenticatedUser = await getAuthenticatedUser(); 
 
-  // OTHER THINGS WE WANT TO DO IN THIS FILE.... 
-  // if presentedUserProfile is not in a group with authenticatedUser, redirect.
+  // note: duplicateUser will be redirected to homepage based on above.
 
-  // (1) essential variables
+  // 1- validate target user profile
   const presentedUserProfile = await prisma.userProfile.findFirst({
     where: {
       OR: [
@@ -33,17 +32,120 @@ export default async function MemberPage({ params }: { params: { slug: string } 
         { slugDefault: params.slug },
       ],
     },
-    include: { // this include here means: get sibling authUser object? yes!
+    include: { // devNote: this include here means: get sibling authUser object? yes!
       authUser: true, 
     },
   });
 
-  // (2) redirect if user not found in db via look-up above.  
-  // Note: by having this check at this point in file, TS is satisfied that presentedUserProfile exists, so the downstream references of 'presentedUserProfile' don't need to resolve possible null situation.  
+  // redirect if target user not found in db via look-up above.  
+  // devNote: by having this check at this point in file, TS is satisfied that presentedUserProfile exists, so the downstream references of 'presentedUserProfile' don't need to resolve possible null situation.  
   if (!presentedUserProfile) notFound(); // this is essential, b/c profile record comes from slug, which comes from URL param, which could be junk, ergo: display notfound page
-  if (!presentedUserProfile?.authUser) notFound(); // no such thing as a valid profile without a linked authUser.  This line resolves typescript errors. 
+  if (!presentedUserProfile?.authUser) notFound(); // no such thing as a valid profile without a linked authUser, but this line resolves TS errors. 
 
-  // (3) more essential variables
+  // 2 - validate permission to view target profile: shared chapter(s) with authenticated user?
+  if (authenticatedUser.authUser.auth0Id !== presentedUserProfile.authUser.auth0Id) { // Not viewing own profile, so check shared chapters
+
+    // 2.1 - get chapters where auth user is MEMBER or MANAGER
+    const authUserChapters = await prisma.chapterMember.findMany({
+      where: {
+        userProfileId: authenticatedUser.id,
+        memberRole: { in: ['MEMBER', 'MANAGER'] }
+      },
+      select: { chapterId: true }
+    });
+    
+    // 2.2 - create array of IDs of those chapters
+    const authUserChapterIds = authUserChapters.map(cm => cm.chapterId);
+
+    // // 2.3 - check if presented user is in any of those chapters as MEMBER or MANAGER
+    // const sharedChapter = await prisma.chapterMember.findFirst({ // doing 'findFirst' b/c as soon as even one is found, then BOOM, they are chapter siblings.
+    //   where: {
+    //     userProfileId: presentedUserProfile.id,
+    //     chapterId: { in: authUserChapterIds },
+    //     memberRole: { in: ['MEMBER', 'MANAGER'] }
+    //   }
+    // });
+
+    // // No shared chapters - deny access
+    // if (!sharedChapter) {
+    //   // return notFound();
+    //   return (
+    //     <section className="max-w-6xl mx-auto p-6 text-center py-12">
+    //       <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
+    //       <p className="text-muted-foreground mb-4">
+    //         Sorry, you do not have permission to view this profile.
+    //       </p>
+    //       <p className="text-sm text-muted-foreground">
+    //         You can only view profiles of members in your chapters.
+    //       </p>
+    //     </section>
+    //   );
+
+    // above replaced by below; above wrongly prevented managers from seeing applicants/removeds/blocks
+
+    // 2.3 - check if presented user shares any chapters with auth user
+    // Two scenarios allow viewing:
+    // (a) Both users are active members (MEMBER or MANAGER) in same chapter
+    // (b) Auth user is MANAGER and presented user has ANY status in that chapter
+
+    const sharedChapter = await prisma.chapterMember.findFirst({
+      where: {
+        userProfileId: presentedUserProfile.id,
+        chapterId: { in: authUserChapterIds },
+        // Presented user can have any role - we'll check auth user's role below
+      }
+    });
+
+    // If no shared chapter at all, deny access
+    if (!sharedChapter) {
+      return (
+        <section className="max-w-6xl mx-auto p-6 text-center py-12">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-muted-foreground mb-4">
+            Sorry, you do not have permission to view this profile.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            You can only view profiles of members in your chapters.
+          </p>
+        </section>
+      );
+    }
+
+    // Now verify auth user's permission level for this shared chapter
+    const authUserChapterRole = await prisma.chapterMember.findFirst({
+      where: {
+        userProfileId: authenticatedUser.id,
+        chapterId: sharedChapter.chapterId
+      },
+      select: { memberRole: true }
+    });
+
+    // Auth user must be either:
+    // - MANAGER (can see anyone in their chapter), OR
+    // - Active member (MEMBER/MANAGER) viewing another active member
+    const isManager = authUserChapterRole?.memberRole === 'MANAGER';
+    const bothActiveMembers = 
+      ['MEMBER', 'MANAGER'].includes(authUserChapterRole?.memberRole || '') &&
+      ['MEMBER', 'MANAGER'].includes(sharedChapter.memberRole);
+
+    if (!isManager && !bothActiveMembers) {
+      return (
+        <section className="max-w-6xl mx-auto p-6 text-center py-12">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-muted-foreground mb-4">
+            Sorry, you do not have permission to view this profile.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            You can only view profiles of active members in your chapters.
+          </p>
+        </section>
+      );
+    }
+
+    }
+  
+
+  // 3 - essential display variables
 
   // quick note: we previously used this method: 
 
