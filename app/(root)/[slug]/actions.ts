@@ -102,7 +102,6 @@ export async function joinChapterAction(formData: FormData) {
     }
 
     revalidatePath(`/${chapterSlug}`)
-
     return { success: true };
       
   } catch (error) {
@@ -116,47 +115,59 @@ export async function joinChapterAction(formData: FormData) {
 } 
 
 export async function cancelJoinRequestAction(formData: FormData) {
-  // Get authenticated user
-  const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
-  if (!authenticatedUserProfile) {
-    redirect('/api/auth/login')
-  }
+  try {
 
-  // Redirect if duplicate user
-  if (authenticatedUserProfile.authUser.duplicateOfId) {
-    redirect('/')
-  }
-
-  const chapterSlug = formData.get('chapterSlug') as string
-  
-  // Get chapter by slug
-  const chapter = await prisma.chapter.findUnique({
-    where: { slug: chapterSlug }
-  })
-
-  if (!chapter) {
-    throw new Error('Chapter not found')
-  }
-
-  // Check user's current status with this chapter
-  const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
-
-  // Security check: Only allow cancel if user is currently an applicant
-  if (!userStatus.applicant) {
-    throw new Error('Invalid action for current membership status')
-  }
-
-  // Update to REMOVED
-  await prisma.chapterMember.update({
-    where: { id: userStatus.membership!.id },
-    data: {
-      memberRole: 'REMOVED',
-      updatedBy: authenticatedUserProfile.id
+    // Get authenticated user
+    const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+    if (!authenticatedUserProfile) {
+      redirect('/api/auth/login')
     }
-  })
 
-  revalidatePath(`/${chapterSlug}`)
-}
+    // Redirect if duplicate user
+    if (authenticatedUserProfile.authUser.duplicateOfId) {
+      redirect('/')
+    }
+
+    const chapterSlug = formData.get('chapterSlug') as string
+    
+    // Get chapter by slug
+    const chapter = await prisma.chapter.findUnique({
+      where: { slug: chapterSlug }
+    })
+
+    if (!chapter) {
+      throw new Error('Chapter not found')
+    }
+
+    // Check user's current status with this chapter
+    const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
+
+    // Security check: Only allow cancel if user is currently an applicant
+    if (!userStatus.applicant) {
+      throw new Error('Invalid action for current membership status')
+    }
+
+    // Update to REMOVED
+    await prisma.chapterMember.update({
+      where: { id: userStatus.membership!.id },
+      data: {
+        memberRole: 'REMOVED',
+        updatedBy: authenticatedUserProfile.id
+      }
+    })
+
+    revalidatePath(`/${chapterSlug}`)
+    return { success: true };
+    
+  } catch (error) {
+    console.error('Cancel join error:', error);
+    return { 
+      success: false, 
+      error: 'Unable to cancel request'
+    };
+  }
+
+} // end cancelJoinRequestAction
 
 export async function updateMemberRoleAction(formData: FormData) {
 
