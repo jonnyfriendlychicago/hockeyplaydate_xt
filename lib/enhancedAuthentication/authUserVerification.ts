@@ -30,6 +30,9 @@ type FullUserProfile = UserProfile & {
     authUser: AuthUser;
   };
 
+// devNote: 
+// This first function should be renamed getAuthenticatedUserOrRedirect, 
+// and it's used to strictly prohibit unauthenticated users from accessing specific pages, such as user profiles pages.
 export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUserProfileOrRedirect
   
 // 1 - if not authenticated, redirect to login
@@ -78,11 +81,14 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   }
 
   // FINAL: 
-  // failure to redirect based on scenarios above mean all goo, so return full userProfile object (for consumption/used by parent file)
-  return userProfile as FullUserProfile; // 2025jul09: replaces above to avert newfound Ts issue with nullable userProfile.authUser
+  // failure to redirect based on scenarios above mean all good, so return full userProfile object (for consumption/use by parent file)
+  return userProfile as FullUserProfile; 
 
 }
 
+// devNote: 
+// This second function is used to when a page will allow either authenticated or unauthenticated users, 
+// and will handle each differently.  
 export async function getAuthenticatedUserProfileOrNull() {
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user;
@@ -105,6 +111,8 @@ export async function getAuthenticatedUserProfileOrNull() {
       authUser: true,
     },
   });
+
+  // any reason we can't have the duplicate authUser check here, so as to redirect when not null?  
 
   return dbUserProfile as FullUserProfile;
 }

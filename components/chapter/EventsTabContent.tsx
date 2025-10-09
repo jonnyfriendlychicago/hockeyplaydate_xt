@@ -6,13 +6,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp} from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Event

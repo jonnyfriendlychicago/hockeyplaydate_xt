@@ -1,20 +1,41 @@
-// components/chapter/JoinChapterButton.tsx // recall that exported React components must be PascalCase, or just won't work.  So, name file same for clarity.
+// components/chapter/JoinChapterButton.tsx 
 
-'use client'; // future form logic will likely need it
+'use client';
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
+import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
+import { joinChapterAction, cancelJoinRequestAction } from '@/app/(root)/[slug]/actions';
 
 interface JoinChapterButtonProps {
-  anonVisitor: boolean;
-  authVisitor: boolean;
+  userChapterMember: UserChapterStatus;
+  chapterSlug: string;
 }
 
-export function JoinChapterButton({ anonVisitor, authVisitor }: JoinChapterButtonProps) {
-  if (!anonVisitor && !authVisitor) return null;
+export function JoinChapterButton({ 
+  userChapterMember, 
+  chapterSlug 
+}: JoinChapterButtonProps) {
 
-  if (anonVisitor) {
+  const [error, setError] = useState<string | null>(null);
+  
+  // declare who's allowed to initiate the join process. Handy shortcut on whether to display/not 
+  const allowedToJoin = 
+  userChapterMember.anonVisitor || 
+  userChapterMember.authVisitor || 
+  userChapterMember.removedMember || 
+  userChapterMember.applicant; 
+
+
+  // Don't show button if not allowed to request membership
+  if (!allowedToJoin) {
+    return null;
+  }
+
+  // Anonymous visitors - redirect to login
+  if (userChapterMember.anonVisitor) {
     return (
       <Link href="/auth/login">
         <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
@@ -24,11 +45,52 @@ export function JoinChapterButton({ anonVisitor, authVisitor }: JoinChapterButto
       </Link>
     );
   }
-  // future state: replace with form submission
-  return (
-    <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md" >
-      <PlusCircle className="w-4 h-4 mr-2" />
-      Join Chapter
-    </Button>
-  );
+
+  const handleJoinSubmit = async (formData: FormData) => {
+    setError(null);
+    const result = await joinChapterAction(formData);
+    if (!result.success) {
+      setError(result.error || 'Something went wrong JTC');
+    }
+  };
+
+  // Authenticated visitors and removed members - show join button
+  if (userChapterMember.authVisitor || userChapterMember.removedMember) {
+    return (
+      <div className="space-y-2">
+        {error && (
+          <p className="text-red-600 text-sm">{error}</p>
+        )}
+        <form action={handleJoinSubmit}>
+          <input type="hidden" name="chapterSlug" value={chapterSlug} />
+          <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Join Chapter
+          </Button>
+        </form>
+      </div>
+
+    );
+  }
+
+  // Applicants - show cancel button with pending message
+  // devNote: todo: clean up gui / message display.  clunky presently. 
+  if (userChapterMember.applicant) {
+    return (
+      <div className="text-center space-y-2">
+        <p className="text-orange-600 text-sm">
+          Request pending approval from organizers
+        </p>
+        <form action={cancelJoinRequestAction}>
+          <input type="hidden" name="chapterSlug" value={chapterSlug} />  
+          <Button type="submit" variant="outline" className="h-10 px-6 text-base">
+            <X className="w-4 h-4 mr-2" />
+            Cancel Request
+          </Button>
+        </form>
+      </div>
+    );
+  }
+
+  return null;
 }

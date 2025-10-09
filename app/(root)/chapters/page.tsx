@@ -78,7 +78,8 @@ export default async function ChaptersPage() {
       where: {
         userProfileId: authenticatedUserProfile.id,
         memberRole: {
-          not: 'BLOCKED'
+          // not: 'BLOCKED'
+          in: ['MEMBER', 'MANAGER']  
         }
       },
       select: {
@@ -111,7 +112,7 @@ export default async function ChaptersPage() {
           New to Hockey Playdate?
           <br className="sm:hidden" />
           <span className="sm:ml-1">
-            <Link href="/getting-started" className="text-blue-600 hover:text-blue-800 underline font-medium">
+            <Link href="/how-it-works" className="text-blue-600 hover:text-blue-800 underline font-medium">
               Learn how it works
             </Link>
           </span>
@@ -160,7 +161,7 @@ export default async function ChaptersPage() {
       {/* All Chapters Section */}
       <div>
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          {userChapters.length > 0 ? 'Browse All Chapters' : 'Browse Chapters'}
+          {userChapters.length > 0 ? 'Browse Other Chapters' : 'Browse Chapters'}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {otherChapters.map((chapter) => (
