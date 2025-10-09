@@ -49,8 +49,28 @@ export function JoinChapterButton({
   const handleJoinSubmit = async (formData: FormData) => {
     setError(null);
     const result = await joinChapterAction(formData);
+
+    if (!result) {
+    setError('Unable to process request. Please try again.');
+    return;
+  }
+  
     if (!result.success) {
       setError(result.error || 'Something went wrong JTC');
+    }
+  };
+
+  const handleCancelSubmit = async (formData: FormData) => {
+    setError(null);
+    const result = await cancelJoinRequestAction(formData);
+    
+    if (!result) {
+      setError('Unable to process request. Please try again.');
+      return;
+    }
+    
+    if (!result.success) {
+      setError(result.error || 'Something went wrong cancelling request');
     }
   };
 
@@ -78,10 +98,14 @@ export function JoinChapterButton({
   if (userChapterMember.applicant) {
     return (
       <div className="text-center space-y-2">
+        {error && (
+        <p className="text-red-600 text-sm">{error}</p>
+        )}
         <p className="text-orange-600 text-sm">
           Request pending approval from organizers
         </p>
-        <form action={cancelJoinRequestAction}>
+        <form action={handleCancelSubmit}>
+        {/* <form action={cancelJoinRequestAction}> */}
           <input type="hidden" name="chapterSlug" value={chapterSlug} />  
           <Button type="submit" variant="outline" className="h-10 px-6 text-base">
             <X className="w-4 h-4 mr-2" />
