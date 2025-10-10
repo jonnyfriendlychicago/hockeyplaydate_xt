@@ -71,7 +71,7 @@ export async function joinChapterAction(formData: FormData) {
     //  Server actions that throw errors (like code above) result in red/black/grey Next.js error screens shown to end users. yikes. 
     //  Instead, use error states instead of throwing errors; catch errors and return them gracefully to the UI, like below. 
 
-    if (newCount > 3) {
+    if (newCount > 100) { // change 100 here back to 3.  it's at 100 now for prod testing / bug resolution
         return { 
           success: false, 
           error: 'Too many join requests. Please try again in 24 hours.' 
@@ -103,9 +103,9 @@ export async function joinChapterAction(formData: FormData) {
       });
     }
 
-    // revalidatePath(`/${chapterSlug}`)
+    revalidatePath(`/${chapterSlug}`)
     // return { success: true };
-    // redirect(`/${chapterSlug}`)
+    redirect(`/${chapterSlug}`)
       
   } catch (error) {
 
@@ -128,11 +128,13 @@ export async function joinChapterAction(formData: FormData) {
   }
 
   // const chapterSlug = formData.get('chapterSlug') as string
-  redirect(`/${chapterSlug}`)
+  // redirect(`/${chapterSlug}`)
 
 } // end joinChapterAction
 
 export async function cancelJoinRequestAction(formData: FormData) {
+  const chapterSlug = formData.get('chapterSlug') as string
+
   try {
 
     // Get authenticated user
@@ -146,7 +148,7 @@ export async function cancelJoinRequestAction(formData: FormData) {
       redirect('/')
     }
 
-    const chapterSlug = formData.get('chapterSlug') as string
+    // const chapterSlug = formData.get('chapterSlug') as string
     
     // Get chapter by slug
     const chapter = await prisma.chapter.findUnique({
@@ -174,11 +176,25 @@ export async function cancelJoinRequestAction(formData: FormData) {
       }
     })
 
-    // revalidatePath(`/${chapterSlug}`)
+    revalidatePath(`/${chapterSlug}`)
     // return { success: true };
     redirect(`/${chapterSlug}`)
     
   } catch (error) {
+
+    // console.error('Cancel join error:', error);
+    // return { 
+    //   success: false, 
+    //   error: 'Unable to cancel request'
+    // };
+
+    // below replaces above
+
+     // Handle redirect errors
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
     console.error('Cancel join error:', error);
     return { 
       success: false, 

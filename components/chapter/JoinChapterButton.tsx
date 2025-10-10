@@ -76,17 +76,34 @@ export function JoinChapterButton({ userChapterMember, chapterSlug }: JoinChapte
   };
 
   const handleCancelSubmit = async (formData: FormData) => {
+    // setError(null);
+    // const result = await cancelJoinRequestAction(formData);
+    
+    // if (!result) {
+    //   setError('Unable to process request. Please try again.');
+    //   return;
+    // }
+    
+    // if (!result.success) {
+    //   setError(result.error || 'Something went wrong cancelling request');
+    // }
+
+    // above replaced by below
+
     setError(null);
-    const result = await cancelJoinRequestAction(formData);
-    
-    if (!result) {
-      setError('Unable to process request. Please try again.');
-      return;
+    try {
+      const result = await cancelJoinRequestAction(formData);
+      
+      // If we get here, it means the action returned an error (didn't redirect)
+      if (result && !result.success) {
+        setError(result.error || 'Something went wrong cancelling request');
+      }
+    } catch (error) {
+      console.log(error)
+      // Redirect throws - this is expected, let it happen
+      // Only catch real errors
     }
-    
-    if (!result.success) {
-      setError(result.error || 'Something went wrong cancelling request');
-    }
+
   };
 
   // Authenticated visitors and removed members - show join button
