@@ -14,10 +14,7 @@ interface JoinChapterButtonProps {
   chapterSlug: string;
 }
 
-export function JoinChapterButton({ 
-  userChapterMember, 
-  chapterSlug 
-}: JoinChapterButtonProps) {
+export function JoinChapterButton({ userChapterMember, chapterSlug }: JoinChapterButtonProps) {
 
   const [error, setError] = useState<string | null>(null);
   
@@ -46,17 +43,35 @@ export function JoinChapterButton({
     );
   }
 
+  // const handleJoinSubmit = async (formData: FormData) => {
+  //   setError(null);
+  //   const result = await joinChapterAction(formData);
+
+  //   if (!result) {
+  //   setError('Unable to process request. Please try again.');
+  //   return;
+  // }
+  
+  //   if (!result.success) {
+  //     setError(result.error || 'Something went wrong JTC');
+  //   }
+  // };
+
+  // above replaced by below
+
   const handleJoinSubmit = async (formData: FormData) => {
     setError(null);
-    const result = await joinChapterAction(formData);
-
-    if (!result) {
-    setError('Unable to process request. Please try again.');
-    return;
-  }
-  
-    if (!result.success) {
-      setError(result.error || 'Something went wrong JTC');
+    try {
+      const result = await joinChapterAction(formData);
+      
+      // If we get here, it means the action returned an error (didn't redirect)
+      if (result && !result.success) {
+        setError(result.error || 'Something went wrong');
+      }
+    } catch (error) {
+      console.log(error)
+      // Redirect throws - this is expected, let it happen
+      // Only catch real errors
     }
   };
 
