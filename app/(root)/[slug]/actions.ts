@@ -101,18 +101,34 @@ export async function joinChapterAction(formData: FormData) {
       });
     }
 
-    revalidatePath(`/${chapterSlug}`)
-    return { success: true };
+    // revalidatePath(`/${chapterSlug}`)
+    // return { success: true };
+    // redirect(`/${chapterSlug}`)
       
   } catch (error) {
+
+    // console.error('Join chapter error:', error)
+    // return { 
+    //   success: false, 
+    //   error: 'Something went wrong action TS. Please try again.' 
+    // };
+
+    // above replaced by below
+
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;  // Re-throw redirects
+    }
     console.error('Join chapter error:', error)
     return { 
       success: false, 
-      error: 'Something went wrong action TS. Please try again.' 
-      
+      error: 'Something went wrong. Please try again. TS action join' 
     };
   }
-} 
+
+  const chapterSlug = formData.get('chapterSlug') as string
+  redirect(`/${chapterSlug}`)
+
+} // end joinChapterAction
 
 export async function cancelJoinRequestAction(formData: FormData) {
   try {
@@ -156,8 +172,9 @@ export async function cancelJoinRequestAction(formData: FormData) {
       }
     })
 
-    revalidatePath(`/${chapterSlug}`)
-    return { success: true };
+    // revalidatePath(`/${chapterSlug}`)
+    // return { success: true };
+    redirect(`/${chapterSlug}`)
     
   } catch (error) {
     console.error('Cancel join error:', error);
@@ -234,7 +251,9 @@ export async function updateMemberRoleAction(formData: FormData) {
     where: { id: chapterMemberId },
     data: {
       memberRole: newRole as 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED',
-      updatedBy: authenticatedUserProfile.id
+      updatedBy: authenticatedUserProfile.id, 
+      joinRequestWindowStart: null, 
+      joinRequestCount: 0
     }
   })
 
