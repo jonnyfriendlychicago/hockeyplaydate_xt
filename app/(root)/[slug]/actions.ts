@@ -13,6 +13,8 @@ import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 // this might be a necessary update on other functions in this app.  review all.  
 
 export async function joinChapterAction(formData: FormData) {
+  const chapterSlug = formData.get('chapterSlug') as string
+
   try {
 
     // 0 - validate user, part 1: authenticated not-dupe user? 
@@ -27,7 +29,7 @@ export async function joinChapterAction(formData: FormData) {
     }
 
     // 1 - validate chapter 
-    const chapterSlug = formData.get('chapterSlug') as string
+    // const chapterSlug = formData.get('chapterSlug') as string
 
     const chapter = await prisma.chapter.findUnique({
     where: { slug: chapterSlug }
@@ -125,7 +127,7 @@ export async function joinChapterAction(formData: FormData) {
     };
   }
 
-  const chapterSlug = formData.get('chapterSlug') as string
+  // const chapterSlug = formData.get('chapterSlug') as string
   redirect(`/${chapterSlug}`)
 
 } // end joinChapterAction
