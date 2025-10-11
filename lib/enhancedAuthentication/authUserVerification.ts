@@ -36,10 +36,16 @@ type FullUserProfile = UserProfile & {
 export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUserProfileOrRedirect
   
 // 1 - if not authenticated, redirect to login
+
+  console.log(' Step 1: Checking auth session...');
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user;
+  console.log(' Auth session exists:', !!authSession);
+  console.log(' Auth session user exists:', !!authSessionUser);
+  console.log(' Auth session user sub:', authSessionUser?.sub);
 
   if (!authSessionUser) {
+    console.log(' No auth session user - redirecting to /auth/login');
     redirect('/auth/login');
   }
 
@@ -47,11 +53,16 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   // this scenario should never occur, as authUser record is created for each user upon very first authentication/login, and repeated/synced for each subsequent login.  
   // below this is a safe guard / double check
   // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
+  console.log('Step 2: Looking up authUser in DB for sub:', authSessionUser.sub);
   const dbAuthUser = await prisma.authUser.findUnique({
     where: { auth0Id: authSessionUser.sub },
   });
+  console.log(' DB AuthUser found:', !!dbAuthUser);
+  console.log(' DB AuthUser id:', dbAuthUser?.id);
+
 
   if (!dbAuthUser) {
+    console.log('No DB authUser - redirecting to /auth/login');
     redirect('/auth/login');
   }
 
@@ -59,29 +70,40 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   // this scenario should never occur, as userProfile record is created for each user upon very first authentication/login. 
   // below this is a safe guard / double check
   // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
+  console.log('Step 3: Looking up userProfile in DB for userId:', dbAuthUser.id);
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
     include: {
       authUser: true,
     },
   });
-
+  console.log('UserProfile found:', !!userProfile);
+  console.log('UserProfile.authUser exists:', !!userProfile?.authUser);
+  
   // if (!userProfile) {redirect('/');}
   if (!userProfile) {
+    console.log(' No userProfile - redirecting to /auth/login');
     redirect('/auth/login');
   }
 
   // 2025jul29: no idea why below line is needed, this seems entirely redundant with code above; leaving in for now, what harm? 
-  if (!userProfile.authUser) {redirect('/');} // added 2025jul09 to avert newfound Ts issue with nullable userProfile.authUser
+  if (!userProfile.authUser) {
+    console.log(' No userProfile.authUser - redirecting to /');
+    redirect('/');
+  } // added 2025jul09 to avert newfound Ts issue with nullable userProfile.authUser
+  console.log('Step 4: Checking for duplicate...');
+  console.log('duplicateOfId:', dbAuthUser.duplicateOfId);
   
   // 4 - if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, so redirect. 
   // this prevents all system interaction for duplicate authUsers
   if (dbAuthUser.duplicateOfId) {
+    console.log('User is duplicate - redirecting to /');
     redirect('/');
   }
 
   // FINAL: 
   // failure to redirect based on scenarios above mean all good, so return full userProfile object (for consumption/use by parent file)
+  console.log('All checks passed - returning userProfile');
   return userProfile as FullUserProfile; 
 
 }
