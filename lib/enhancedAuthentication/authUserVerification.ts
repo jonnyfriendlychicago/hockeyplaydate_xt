@@ -38,11 +38,35 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
 // 1 - if not authenticated, redirect to login
 
   console.log(' Step 1: Checking auth session...');
-  const authSession = await auth0.getSession();
-  const authSessionUser = authSession?.user;
+
+
+
+  // const authSession = await auth0.getSession();
+  // const authSessionUser = authSession?.user;
+
+  // 2025oct11: above replaced by below; RETRY LOGIC: Try to get session up to 3 times.  doing this b/c in production, randomly not getting session/user and being redirected back to homepage.
+  let authSession = null;
+  let authSessionUser = null;
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts && !authSessionUser) {
+    attempts++;
+    console.log(`🔍 Attempt ${attempts} to get session...`);
+    
+    authSession = await auth0.getSession();
+    authSessionUser = authSession?.user;
+    
+    if (!authSessionUser && attempts < maxAttempts) {
+      // Wait 50ms before retrying
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  }
+
   console.log(' Auth session exists:', !!authSession);
   console.log(' Auth session user exists:', !!authSessionUser);
   console.log(' Auth session user sub:', authSessionUser?.sub);
+  console.log(' Total attempts needed:', attempts);
 
   if (!authSessionUser) {
     console.log(' No auth session user - redirecting to /auth/login');
@@ -59,7 +83,6 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   });
   console.log(' DB AuthUser found:', !!dbAuthUser);
   console.log(' DB AuthUser id:', dbAuthUser?.id);
-
 
   if (!dbAuthUser) {
     console.log('No DB authUser - redirecting to /auth/login');
