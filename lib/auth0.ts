@@ -32,6 +32,31 @@ type OAuth2Error = {
 };
   
 export const auth0 = new Auth0Client({
+
+  // 2025oct11: Session configuration to fix intermittent auth failures
+
+
+  // session: {
+  //   rolling: true,           // Extends session on each request
+  //   rollingDuration: 86400,  // 24 hours in seconds
+  //   absoluteDuration: 604800, // 7 days in seconds
+  //   cookie: {
+  //     sameSite: 'lax',       // Required for HTTPS in production
+  //     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  //   },
+  // },
+
+  // session: {
+  // rolling: true,
+  // rollingDuration: 60 * 60 * 24, // 24 hours in seconds
+  // absoluteDuration: 60 * 60 * 24 * 7, // 7 days in seconds
+  // },
+
+  // above had unresolvable red squiggle errors
+  session: {
+  rolling: true,
+  },
+
   async onCallback(error) {
     // 101: sections below use NextResponse, which requires full URL; redirect from 'next/navigation' (which we've used elsewhere) does not.  That's why below we begin building the URLs we'll redirect to.
     // Step 0 - establish env-specific urls, and blow up the whole app flow if env variable not available. 
