@@ -15,12 +15,39 @@ import { UserAvatar } from '@/components/shared/user-avatar';
 import { Pencil } from 'lucide-react';
 import { EmailBlock } from '@/components/UserProfile/EmailBlock';
 import { CopyText } from '@/components/shared/copyText';
-import { getAuthenticatedUser } from '@/lib/enhancedAuthentication/authUserVerification';
+// import { getAuthenticatedUser } from '@/lib/enhancedAuthentication/authUserVerification';
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
+import { redirect } from 'next/navigation';
 
 export default async function MemberPage({ params }: { params: { slug: string } }) {
   
   // 0 - authenticate user
-  const  authenticatedUser = await getAuthenticatedUser(); 
+  // const  authenticatedUser = await getAuthenticatedUser(); 
+  // 2025oct12: above replaced by below
+  const  authenticatedUser = await getAuthenticatedUserProfileOrNull(); 
+
+   if (!authenticatedUser) {
+      // return (
+      //   <section className="max-w-6xl mx-auto p-6 text-center py-12">
+      //     <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
+      //     <p className="text-muted-foreground mb-4">
+      //       Ok, this is embarrassing. Our app encountered a random error on this page. 
+      //     </p>
+      //     <p className="text-sm text-muted-foreground">
+      //       Kindly refresh your browswer?  If this problem continues, please contact TECH SUPPORT PLACEHODLER EMAIL.
+      //     </p>
+      //   </section>
+      // );
+      // If not authenticated, redirect to login
+      console.log("no authenticated user - redirect to login")
+      redirect('/auth/login');
+    }
+  
+    if (authenticatedUser?.authUser.duplicateOfId) {
+      console.log("dupe authenticated user - redirect home")
+         redirect('/');
+         // devNotes: please do not type above line as `return redirect('/');`  Such will work in development but not ubuntu server in production.
+      }
 
   // note: duplicateUser will be redirected to homepage based on above.
 
