@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -18,10 +18,10 @@ export default async function ChaptersPage() {
   // Authentication check
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();
 
-  // Bounce if duplicate user
-  if (authenticatedUserProfile?.authUser.duplicateOfId) {
-    return redirect('/');
-  }
+  // // Bounce if duplicate user
+  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
+  //   return redirect('/');
+  // }
 
   // Fetch all chapters with aggregated data
   const chaptersData = await prisma.chapter.findMany({

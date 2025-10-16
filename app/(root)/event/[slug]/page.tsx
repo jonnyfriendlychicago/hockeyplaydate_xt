@@ -23,19 +23,16 @@ export default async function EventPage({ params }: { params: { slug: string } }
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 
   // 0.1 // redirect not authenticated / anon user
-  if (!authenticatedUserProfile) {
-      // If not authenticated, redirect to login
-      console.log("no authenticated user - redirect to login")
-      // redirect('/auth/login');
+  if (!authenticatedUserProfile) { 
       const returnTo = `/event/${params.slug}`;
       redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
-  // 0.2 - bounce home if dupe user 
-  // devNotes: this is an 'every site page' kind of thing.  can this be incorporated into getAuthenticatedUserProfileOrNull ? 
-  if (authenticatedUserProfile?.authUser.duplicateOfId) {
-    return redirect('/');
-  }
+  // // 0.2 - bounce home if dupe user 
+  // // devNotes: this is an 'every site page' kind of thing.  can this be incorporated into getAuthenticatedUserProfileOrNull ? 
+  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
+  //   return redirect('/');
+  // }
 
   // 1 - find the event 
   // devNotes: we don't import that from the prisma schema. does anyone care?  doesn't seem to make a difference

@@ -38,7 +38,7 @@ export async function getAuthenticatedUserProfileOrNull() {
 
   // 4 - if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, so redirect. This prevents all system interaction for duplicate authUsers
   if (dbAuthUser.duplicateOfId) {
-    redirect('/');
+    redirect('/duplicate-user');
   }
 
   return dbUserProfile as FullUserProfile;

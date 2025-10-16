@@ -18,7 +18,7 @@ import { JoinChapterButton } from '@/components/chapter/JoinChapterButton';
 import { BlockedNotice } from '@/components/chapter/BlockedNotice';
 import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
-import { redirect } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
@@ -34,10 +34,11 @@ export default async function ChapterPage({ params }: { params: { slug: string }
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
   // bounce if dupe user 
-  if (authenticatedUserProfile?.authUser.duplicateOfId) {
-     redirect('/');
-     // devNotes: please do not type above line as `return redirect('/');`  Such will work in development but not ubuntu server in production.
-  }
+  // below is now redundant to getAuthenticatedUserProfileOrNull()
+  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
+  //    redirect('/');
+  //    // devNotes: please do not type above line as `return redirect('/');`  Such will work in development but not ubuntu server in production.
+  // }
   
   // 1 - load chapter v. notFound
   const slug = params.slug;
