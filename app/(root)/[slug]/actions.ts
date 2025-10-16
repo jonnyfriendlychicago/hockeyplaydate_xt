@@ -71,7 +71,7 @@ export async function joinChapterAction(formData: FormData) {
     //  Server actions that throw errors (like code above) result in red/black/grey Next.js error screens shown to end users. yikes. 
     //  Instead, use error states instead of throwing errors; catch errors and return them gracefully to the UI, like below. 
 
-    if (newCount > 100) { // change 100 here back to 3.  it's at 100 now for prod testing / bug resolution
+    if (newCount > 3) { // change this to a number >3 if ever needed for testing/troubleshooting
         return { 
           success: false, 
           error: 'Too many join requests. Please try again in 24 hours.' 
