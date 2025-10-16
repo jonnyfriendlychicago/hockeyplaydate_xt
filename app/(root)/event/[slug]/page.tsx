@@ -22,7 +22,16 @@ export default async function EventPage({ params }: { params: { slug: string } }
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 
-  // bounce if dupe user 
+  // 0.1 // redirect not authenticated / anon user
+  if (!authenticatedUserProfile) {
+      // If not authenticated, redirect to login
+      console.log("no authenticated user - redirect to login")
+      // redirect('/auth/login');
+      const returnTo = `/event/${params.slug}`;
+      redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+
+  // 0.2 - bounce home if dupe user 
   // devNotes: this is an 'every site page' kind of thing.  can this be incorporated into getAuthenticatedUserProfileOrNull ? 
   if (authenticatedUserProfile?.authUser.duplicateOfId) {
     return redirect('/');
@@ -56,10 +65,28 @@ export default async function EventPage({ params }: { params: { slug: string } }
     authenticatedUserProfile
   );
 
+
+
   if (!(userStatus.mgrMember || userStatus.genMember)) {
     // devNotes: above reads very simple: if not (this OR that), then do such and such
     // way more intuitive than if not this and not that, then do such and such
-    notFound();
+    // notFound();
+    // above replaced by below
+    return (
+      <section className="max-w-6xl mx-auto p-6 text-center py-12">
+        <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
+        <p className="text-muted-foreground mb-4">
+          Sorry, you do not have permission to view this event.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          You can only view events of sponsored by chapter you belong to.
+        </p>
+        <p className="text-muted-foreground mb-4 py-4">
+          Explore chapters to find a good fit for your family.
+        </p>
+      </section>
+    );
+
   }
 
   // 3 - data presention helpers

@@ -40,7 +40,9 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       // );
       // If not authenticated, redirect to login
       console.log("no authenticated user - redirect to login")
-      redirect('/auth/login');
+      // redirect('/auth/login');
+      const returnTo = `/member/${params.slug}`;
+      redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
   
     if (authenticatedUser?.authUser.duplicateOfId) {
