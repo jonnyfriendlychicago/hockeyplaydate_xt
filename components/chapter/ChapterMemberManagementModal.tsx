@@ -56,7 +56,7 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
   const handleSubmit = async () => {
     if (!selectedAction) return;
     
-    console.log(`Updating ${member.id} to role: ${selectedAction}`);
+    // console.log(`Updating ${member.id} to role: ${selectedAction}`);
     
     // below: Call server action to update member role
     const formData = new FormData();
