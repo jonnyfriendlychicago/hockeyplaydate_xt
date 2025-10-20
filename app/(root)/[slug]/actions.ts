@@ -27,7 +27,7 @@ export async function joinChapterAction(formData: FormData) {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
-        redirect('/api/auth/login')
+        redirect('/auth/login')
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
@@ -156,7 +156,7 @@ export async function cancelJoinRequestAction(formData: FormData) {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
-      redirect('/api/auth/login')
+      redirect('/auth/login')
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
@@ -239,7 +239,7 @@ export async function leaveChapterAction(formData: FormData) {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
-      redirect('/api/auth/login')
+      redirect('/auth/login')
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
@@ -344,7 +344,7 @@ export async function updateMemberRoleAction(formData: FormData) {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
-      redirect('/api/auth/login')
+      redirect('/auth/login')
     }
 
     // 1 - Parse and validate ALL inputs
