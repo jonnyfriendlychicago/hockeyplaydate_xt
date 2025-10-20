@@ -14,12 +14,25 @@ import { chapterSlugSchema, updateMemberRoleSchema
 // **********************************
 // joinChapterAction
 // **********************************
+// export type ActionState = {
+//   success: boolean;
+//   error?: string;
+// };
 
 export async function joinChapterAction(formData: FormData) {
   // const chapterSlug = formData.get('chapterSlug') as string
   // above replaced by the parseResult section below
 
+// above replaced by below to embarce useStateForm
+// export async function joinChapterAction(
+//   prevState: ActionState,
+//   formData: FormData
+// ): Promise<ActionState> {
   try {
+
+    // Right at the start of the try block:
+    // console.log('[Action] joinChapterAction called');
+
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
@@ -32,10 +45,22 @@ export async function joinChapterAction(formData: FormData) {
     });
 
     if (!parseResult.success) {
+      console.log('[Action] Validation failed, returning error');
       return {
         success: false,
         error: 'Invalid request data'
       };
+      // return {
+      //   success: false,
+      //   error: 'Invalid request data'
+      // } as ActionState;  // ADD this type assertion
+
+      // const errorState: ActionState = {
+      //   success: false,
+      //   error: 'Invalid request data'
+      // };
+      // console.log('[Action] Returning:', errorState);  // Add this to debug
+      // return errorState;
     }
 
     const { chapterSlug } = parseResult.data;
@@ -83,7 +108,7 @@ export async function joinChapterAction(formData: FormData) {
     //  Server actions that throw errors (like code above) result in red/black/grey Next.js error screens shown to end users. yikes. 
     //  Instead, use error states instead of throwing errors; catch errors and return them gracefully to the UI, like below. 
 
-    if (newCount > 3) { // change this to a number >3 if ever needed for testing/troubleshooting
+    if (newCount > 100) { // change this to a number >3 if ever needed for testing/troubleshooting
         return { 
           success: false, 
           error: 'Too many join requests. Please try again in 24 hours.' 
@@ -140,6 +165,10 @@ export async function cancelJoinRequestAction(formData: FormData) {
   // const chapterSlug = formData.get('chapterSlug') as string
   // above replaced by the parseResult section below
 
+// export async function cancelJoinRequestAction(
+//   prevState: ActionState,
+//   formData: FormData
+// ): Promise<ActionState> {
   try {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
@@ -167,14 +196,24 @@ export async function cancelJoinRequestAction(formData: FormData) {
     })
 
     if (!chapter) {
-      throw new Error('Chapter not found')
+      // throw new Error('Chapter not found')
+      // Don't leak information about chapter existence
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
     if (!userStatus.applicant) {
-      throw new Error('Invalid action for current membership status')
+      // throw new Error('Invalid action for current membership status')
+      // Don't leak membership status details
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 4 - Run the update/insert, including newWindowStart and newCount values derived above

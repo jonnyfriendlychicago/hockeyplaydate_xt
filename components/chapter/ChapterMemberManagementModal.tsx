@@ -30,7 +30,7 @@ interface ChapterMemberManagementModalProps {
   member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
-  chapterSlug: string; // not sure why this needed now that making modal hit server actions. investigate.
+  chapterSlug: string; 
 }
 
 function getAvailableActions(currentRole: string): string[] {
@@ -38,10 +38,14 @@ function getAvailableActions(currentRole: string): string[] {
   return allRoles.filter(role => role !== currentRole);
 }
 
-export function ChapterMemberManagementModal({ member, isOpen, onClose 
-  , chapterSlug // again, why now? 
+export function ChapterMemberManagementModal({ 
+  member, 
+  isOpen, 
+  onClose, 
+  chapterSlug // again, why now? 
 }: ChapterMemberManagementModalProps) {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);  
 
   if (!member) return null;
 
@@ -54,21 +58,38 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
   };
 
   const handleSubmit = async () => {
-    if (!selectedAction) return;
-    
-    // console.log(`Updating ${member.id} to role: ${selectedAction}`);
-    
-    // below: Call server action to update member role
-    const formData = new FormData();
-    formData.append('chapterSlug', chapterSlug);
-    formData.append('chapterMemberId', member.id.toString());
-    formData.append('newRole', selectedAction);
+    // if (!selectedAction) return;
+    if (!selectedAction || isSubmitting) return;  // ADD isSubmitting CHECK
 
-    await updateMemberRoleAction(formData);
-    
-    // Reset and close
-    setSelectedAction(null);
-    onClose();
+    setIsSubmitting(true);  
+
+    try {
+      // call server action to update member role
+      const formData = new FormData();
+      formData.append('chapterSlug', chapterSlug);
+      formData.append('chapterMemberId', member.id.toString());
+      formData.append('newRole', selectedAction);
+
+      const result = await updateMemberRoleAction(formData);
+
+      // check if action failed
+      if (result && !result.success) {
+        // Handle error - show toast or error message
+        console.error('Failed to update role:', result.error);
+        // Don't close modal on error
+        return;
+      }
+      
+      // Reset and close only on success
+      setSelectedAction(null);
+      onClose();
+
+    } catch (error) {
+      // Handle unexpected errors
+      console.error('Unexpected error:', error);
+    } finally {
+      setIsSubmitting(false);  // this line always resets the loading state
+    }
   };
 
   const handleCancel = () => {
@@ -105,6 +126,7 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
                   variant={selectedAction === action ? "default" : "outline"}
                   onClick={() => handleActionSelect(action)}
                   className="justify-start"
+                  disabled={isSubmitting}
                 >
                   {getMaskedRole(action)}
                 </Button>
@@ -114,14 +136,20 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
+            Cancel
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={!selectedAction}
+              // disabled={!selectedAction}
+              disabled={!selectedAction || isSubmitting}      
             >
-              Update Status
+              {/* Update Status */}
+              {isSubmitting ? 'Updating...' : 'Update Status'}
             </Button>
           </div>
         </div>
