@@ -11,27 +11,18 @@ import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { chapterSlugSchema, updateMemberRoleSchema
 } from '@/lib/validation/chapterMembershipValSchema';
 
+// devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
+// Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
+// works great for forms that show validation errors on the same page, but breaks with redirects (required in our current architecture) because the component unmounts.
+// Only workable solution (for now?) seems to be this SessionStorage solution shown below.  Notably, to extent useStateForm could work, it's time is limited: 
+// useFormState is being phased out; useActionState is the current recommended approach for React 19, etc. 
+
 // **********************************
 // joinChapterAction
 // **********************************
-// export type ActionState = {
-//   success: boolean;
-//   error?: string;
-// };
 
 export async function joinChapterAction(formData: FormData) {
-  // const chapterSlug = formData.get('chapterSlug') as string
-  // above replaced by the parseResult section below
-
-// above replaced by below to embarce useStateForm
-// export async function joinChapterAction(
-//   prevState: ActionState,
-//   formData: FormData
-// ): Promise<ActionState> {
   try {
-
-    // Right at the start of the try block:
-    // console.log('[Action] joinChapterAction called');
 
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
@@ -50,24 +41,11 @@ export async function joinChapterAction(formData: FormData) {
         success: false,
         error: 'Invalid request data'
       };
-      // return {
-      //   success: false,
-      //   error: 'Invalid request data'
-      // } as ActionState;  // ADD this type assertion
-
-      // const errorState: ActionState = {
-      //   success: false,
-      //   error: 'Invalid request data'
-      // };
-      // console.log('[Action] Returning:', errorState);  // Add this to debug
-      // return errorState;
     }
 
     const { chapterSlug } = parseResult.data;
 
     // 2 - validate chapter 
-    // const chapterSlug = formData.get('chapterSlug') as string
-
     const chapter = await prisma.chapter.findUnique({
     where: { slug: chapterSlug }
     })
@@ -108,7 +86,7 @@ export async function joinChapterAction(formData: FormData) {
     //  Server actions that throw errors (like code above) result in red/black/grey Next.js error screens shown to end users. yikes. 
     //  Instead, use error states instead of throwing errors; catch errors and return them gracefully to the UI, like below. 
 
-    if (newCount > 100) { // change this to a number >3 if ever needed for testing/troubleshooting
+    if (newCount > 3) { // change this to a number >3 if ever needed for extensive testing/troubleshooting
         return { 
           success: false, 
           error: 'Too many join requests. Please try again in 24 hours.' 
@@ -162,13 +140,6 @@ export async function joinChapterAction(formData: FormData) {
 // **********************************
 
 export async function cancelJoinRequestAction(formData: FormData) {
-  // const chapterSlug = formData.get('chapterSlug') as string
-  // above replaced by the parseResult section below
-
-// export async function cancelJoinRequestAction(
-//   prevState: ActionState,
-//   formData: FormData
-// ): Promise<ActionState> {
   try {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
@@ -197,7 +168,7 @@ export async function cancelJoinRequestAction(formData: FormData) {
 
     if (!chapter) {
       // throw new Error('Chapter not found')
-      // Don't leak information about chapter existence
+      // Don't leak information about chapter existence, although this is meaningless since chapter URLS are public
       return {
         success: false,
         error: 'Unable to process request'
@@ -407,14 +378,6 @@ export async function updateMemberRoleAction(formData: FormData) {
               error: 'You cannot manage your own membership'
             }
     }
-
-    // x - validate newRole is valid
-    // const newRole = formData.get('newRole') as string
-
-    // const validRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']
-    // if (!validRoles.includes(newRole)) {
-    //   throw new Error('Invalid role')
-    // }
 
     // 6 - validation passed: update the chapterMember record
     await prisma.chapterMember.update({
