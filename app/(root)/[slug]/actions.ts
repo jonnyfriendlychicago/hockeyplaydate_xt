@@ -31,12 +31,11 @@ export async function joinChapterAction(formData: FormData) {
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
-    const parseResult = chapterSlugSchema.safeParse({
+    const parseResult = chapterSlugSchema.safeParse({ // chapterSlugSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug')
     });
 
     if (!parseResult.success) {
-      console.log('[Action] Validation failed, returning error');
       return {
         success: false,
         error: 'Invalid request data'
@@ -51,7 +50,12 @@ export async function joinChapterAction(formData: FormData) {
     })
 
     if (!chapter) {
-    throw new Error('Chapter not found')
+      // throw new Error('Chapter not found')
+      // CHANGED: Don't reveal whether chapter exists, even tho these are public, so who cares, really? 
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
@@ -59,7 +63,12 @@ export async function joinChapterAction(formData: FormData) {
 
     const canJoin = userStatus.authVisitor || userStatus.removedMember
     if (!canJoin) {
-      throw new Error('Invalid action for current membership status')
+      // throw new Error('Invalid action for current membership status')
+      // CHANGED: Don't reveal membership status details
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 4 - Set up time/count variables 
@@ -126,7 +135,10 @@ export async function joinChapterAction(formData: FormData) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error;  // Re-throw redirects
     }
-    console.error('Join chapter error:', error)
+
+    // Log the actual error server-side for debugging
+    console.error('Join chapter error:', error);
+
     return { 
       success: false, 
       error: 'Unable to join chapter. Please try again.'
@@ -148,7 +160,7 @@ export async function cancelJoinRequestAction(formData: FormData) {
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
-    const parseResult = chapterSlugSchema.safeParse({
+    const parseResult = chapterSlugSchema.safeParse({ // chapterSlugSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug')
     });
 
@@ -205,8 +217,10 @@ export async function cancelJoinRequestAction(formData: FormData) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error;
     }
-    
+
+    // for server side debugging
     console.error('Cancel join error:', error);
+
     return { 
       success: false, 
       error: 'Unable to cancel request'
@@ -229,7 +243,7 @@ export async function leaveChapterAction(formData: FormData) {
     }
 
     // 1 - Parse and validate input FIRST, before any other operations
-    const parseResult = chapterSlugSchema.safeParse({
+    const parseResult = chapterSlugSchema.safeParse({  // chapterSlugSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug')
     });
 
@@ -248,14 +262,24 @@ export async function leaveChapterAction(formData: FormData) {
     })
 
     if (!chapter) {
-      throw new Error('Chapter not found')
+      // throw new Error('Chapter not found')
+      // CHANGE THIS:
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
     if (!userStatus.membership) {
-      throw new Error('You are not a member of this chapter')
+      // throw new Error('You are not a member of this chapter')
+      // CHANGE THIS:
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 4 - Prevent sole manager from leaving
@@ -296,8 +320,10 @@ export async function leaveChapterAction(formData: FormData) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error;
     }
-    
+
+    //server side logging for debugging
     console.error('Leave chapter error:', error);
+
     return { 
       success: false, 
       error: 'Unable to leave chapter. Please try again.'
@@ -322,7 +348,7 @@ export async function updateMemberRoleAction(formData: FormData) {
     }
 
     // 1 - Parse and validate ALL inputs
-    const parseResult = updateMemberRoleSchema.safeParse({
+    const parseResult = updateMemberRoleSchema.safeParse({ // updateMemberRoleSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug'),
       chapterMemberId: formData.get('chapterMemberId'),
       newRole: formData.get('newRole')
@@ -344,14 +370,24 @@ export async function updateMemberRoleAction(formData: FormData) {
     })
     
     if (!chapter) {
-      throw new Error('Chapter not found')
+      // throw new Error('Chapter not found')
+      // CHANGE THIS:
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
     
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const actingUserStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
     
     if (!actingUserStatus.mgrMember) {
-      throw new Error('Only managers can update member roles')
+      // throw new Error('Only managers can update member roles')
+      // CHANGE THIS:
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
     
     // 4 - validate chapterMember exists
@@ -361,7 +397,11 @@ export async function updateMemberRoleAction(formData: FormData) {
     })
 
     if (!targetMember) {
-      throw new Error('Member not found')
+      // throw new Error('Member not found')
+      return {
+        success: false,
+        error: 'Unable to process request'
+      };
     }
 
     // 5 - prevent self-management
@@ -374,9 +414,9 @@ export async function updateMemberRoleAction(formData: FormData) {
     if (targetMember.userProfileId === authenticatedUserProfile.id) {
       // throw new Error('You cannot manage your own membership')
       return {
-              success: false,
-              error: 'You cannot manage your own membership'
-            }
+        success: false,
+        error: 'You cannot manage your own membership'
+      }
     }
 
     // 6 - validation passed: update the chapterMember record
@@ -398,8 +438,10 @@ export async function updateMemberRoleAction(formData: FormData) {
   if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
     throw error;
   }
+
+  // server side debugging
+    console.error('Update member role error:', error);
   
-  console.error('Update member role error:', error);
   return { 
     success: false, 
     error: 'Unable to update member role. Please try again.'

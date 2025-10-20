@@ -163,7 +163,7 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             {/* Shared row: Tabs left, Join right */}
             {/* <div className="flex items-center justify-between w-full"> */}
             {/* 2025oct18: above div helped space out the tabs from the button, but we're not doing that anymore, so nevermind */}
-              <TabsList className="flex flex-wrap gap-2">
+              <TabsList className="flex flex-wrap gap-2 justify-start">
 
                 <TabsTrigger value="locations">Locations</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
@@ -236,12 +236,10 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
             {isApprovedMember && 
               <TabsContent value="membership">
-                <TabsContent value="membership">
-                  <MembershipTab 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  />
-                </TabsContent>
+                <MembershipTab 
+                  chapterId={chapter.id}
+                  userChapterMember={userChapterMember}
+                />
               </TabsContent>
             }
           </Tabs>

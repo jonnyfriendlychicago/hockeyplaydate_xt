@@ -75,7 +75,7 @@ export function ChapterMemberManagementModal({
       // check if action failed
       if (result && !result.success) {
         // Handle error - show toast or error message
-        console.error('Failed to update role:', result.error);
+        // console.error('Failed to update role:', result.error);
         // Don't close modal on error
         return;
       }
