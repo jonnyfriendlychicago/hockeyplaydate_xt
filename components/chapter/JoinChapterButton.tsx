@@ -67,7 +67,8 @@ export function JoinChapterButton({
   // Anonymous visitors - redirect to login
   if (userChapterMember.anonVisitor) {
     return (
-      <Link href="/auth/login">
+      // <Link href="/auth/login">
+      <Link href={`/auth/login?returnTo=/${chapterSlug}`}>
         <Button className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
           <PlusCircle className="w-4 h-4 mr-2" />
           Login/signup to Join Chapter
