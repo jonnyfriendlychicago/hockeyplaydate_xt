@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from "react";
+// import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle, X } from "lucide-react";
@@ -30,24 +30,37 @@ export function JoinChapterButton({
 }: JoinChapterButtonProps) {
   
   // sessionStorage workaround to step re-rendering
-  const [error, setError] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('joinChapterError');
-      if (saved) {
-        sessionStorage.removeItem('joinChapterError'); // Clear after reading
-        return saved;
-      }
-    }
-    return null;
-  });
 
-  const setErrorWithPersist = (value: string | null) => {
-    setError(value);
+  // Below removed: use updated sessionStorage instead
+      // const [error, setError] = useState<string | null>(() => {
+      //   if (typeof window !== 'undefined') {
+      //     const saved = sessionStorage.getItem('joinChapterError');
+      //     if (saved) {
+      //       sessionStorage.removeItem('joinChapterError'); // Clear after reading
+      //       return saved;
+      //     }
+      //   }
+      //   return null;
+      // });
+
+      // const setErrorWithPersist = (value: string | null) => {
+      //   setError(value);
+      //   if (typeof window !== 'undefined') {
+      //     if (value) {
+      //       sessionStorage.setItem('joinChapterError', value);
+      //     } else {
+      //       sessionStorage.removeItem('joinChapterError');
+      //     }
+      //   }
+      // };
+
+  // NEW: Helper to persist errors for ChapterErrorDisplay
+  const setErrorWithPersist = (value: string | null, errorKey: string) => {
     if (typeof window !== 'undefined') {
       if (value) {
-        sessionStorage.setItem('joinChapterError', value);
+        sessionStorage.setItem(errorKey, value);
       } else {
-        sessionStorage.removeItem('joinChapterError');
+        sessionStorage.removeItem(errorKey);
       }
     }
   };
@@ -80,7 +93,9 @@ export function JoinChapterButton({
   const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // ADD THIS - prevent default form submission
 
-    setErrorWithPersist(null); 
+    // Clear any previous errors
+    // setErrorWithPersist(null); 
+    setErrorWithPersist(null, 'joinChapterError');
 
     const formData = new FormData(e.currentTarget); // Get formData from the form
 
@@ -88,17 +103,25 @@ export function JoinChapterButton({
       const result = await joinChapterAction(formData);
       
       if (result && !result.success) {
-        setErrorWithPersist(result.error || 'Something went wrong');
+        // setErrorWithPersist(result.error || 'Something went wrong');
+        // NEW: Persist to sessionStorage so ChapterErrorDisplay picks it up
+        setErrorWithPersist(result.error || 'Something went wrong', 'joinChapterError');
       }
     } catch (error) {
-      console.log('Caught error:', error);
+      // console.log('Caught error:', error);
+      if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
+        console.log('Caught error:', error);
+        setErrorWithPersist('Something went wrong', 'joinChapterError');
+      }
     }
   };
 
   const handleCancelSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setErrorWithPersist(null);
+    // setErrorWithPersist(null);
+    // Clear any previous errors
+    setErrorWithPersist(null, 'cancelJoinRequestError');
 
     const formData = new FormData(e.currentTarget);
 
@@ -106,10 +129,16 @@ export function JoinChapterButton({
       const result = await cancelJoinRequestAction(formData);
       
       if (result && !result.success) {
-         setErrorWithPersist(result.error || 'Something went wrong cancelling request'); 
+        //  setErrorWithPersist(result.error || 'Something went wrong cancelling request'); 
+         // NEW: Persist to sessionStorage
+        setErrorWithPersist(result.error || 'Something went wrong', 'cancelJoinRequestError');
       }
     } catch (error) {
-      console.log(error)
+      // console.log(error)
+      if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
+        console.log(error);
+        setErrorWithPersist('Something went wrong', 'cancelJoinRequestError');
+      }
     }
   };
 
@@ -117,9 +146,10 @@ export function JoinChapterButton({
   if (userChapterMember.authVisitor || userChapterMember.removedMember) {
     return (
       <div className="space-y-2">
-        {error && (
+
+        {/* {error && (
           <p className="text-red-600 text-sm">{error}</p>
-        )}
+        )} */}
 
         <form onSubmit={handleJoinSubmit}> 
           <input type="hidden" name="chapterSlug" value={chapterSlug} />
@@ -141,9 +171,9 @@ export function JoinChapterButton({
     return (
       <div className="text-center space-y-2">
 
-        {error && (
+        {/* {error && (
         <p className="text-red-600 text-sm">{error}</p>
-        )}
+        )} */}
 
         <p className="text-orange-600 text-sm">
           Request pending approval from organizers

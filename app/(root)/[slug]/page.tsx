@@ -23,6 +23,7 @@ import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
 import { MembershipTab } from '@/components/chapter/MembershipTab';
+import { ChapterErrorDisplay } from '@/components/chapter/ChapterErrorDisplay';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
@@ -98,9 +99,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
           </Link>
         )}
       </div>
+      
+      {/* ===================== */}
+      {/* ZONE 1.1: Global Error Display */}
+      {/* ===================== */}
+      <ChapterErrorDisplay />
 
       {/* ===================== */}
-      {/* ZONE 1.5: Blocked Notice */}
+      {/* ZONE 1.2: Blocked Notice */}
       {/* ===================== */}
       {userChapterMember.blockedMember && 
        <BlockedNotice nameString={authenticatedUserProfileNameString} />
