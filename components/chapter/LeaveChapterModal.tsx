@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { leaveChapterAction } from "@/app/(root)/[slug]/actions";
+import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
 
 interface LeaveChapterModalProps {
   isOpen: boolean;
@@ -25,9 +26,11 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   // CHANGED: Replace simple useState with sessionStorage-backed state
   const [error, setError] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('leaveChapterError');
+      // const saved = sessionStorage.getItem('leaveChapterError');
+      const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
       if (saved) {
-        sessionStorage.removeItem('leaveChapterError');
+        // sessionStorage.removeItem('leaveChapterError');
+        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
         return saved;
       }
     }
@@ -39,9 +42,11 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
     setError(value);
     if (typeof window !== 'undefined') {
       if (value) {
-        sessionStorage.setItem('leaveChapterError', value);
+        // sessionStorage.setItem('leaveChapterError', value);
+        sessionStorage.setItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER, value);
       } else {
-        sessionStorage.removeItem('leaveChapterError');
+        // sessionStorage.removeItem('leaveChapterError');
+        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
       }
     }
   };
@@ -95,19 +100,6 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-    {/* //  {/* <Dialog open={isOpen} onOpenChange={(open) => {
-    //   if (!open && !isSubmitting) {  // Only allow closing if not submitting
-    //     onClose();
-    //   }}}
-    // > */} 
-
-    {/* <Dialog open={isOpen} onOpenChange={(open) => {
-    // Only allow manual closing via handleCancel or successful submission
-      if (!open) {
-        // console.log('Dialog trying to close itself');
-        // Don't call onClose here - let our buttons control it
-      }}}
-    > */}
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

@@ -4,47 +4,36 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { ERROR_ACTION_DESCRIPTIONS } from '@/lib/constants/errorKeys';
 
 // Map error keys to user-friendly descriptions
-const errorDescriptions: Record<string, string> = {
-  'memberManagementError': 'update user membership status',
-  'joinChapterError': 'join the chapter',
-  'leaveChapterError': 'leave the chapter',
-  'cancelJoinRequestError': 'cancel your join request'  // Add this key if needed
-};
+// const errorDescriptions: Record<string, string> = {
+//   'memberManagementError': 'update user membership status',
+//   'joinChapterError': 'join the chapter',
+//   'leaveChapterError': 'leave the chapter',
+//   'cancelJoinRequestError': 'cancel your join request'  
+// };
 
 export function ChapterErrorDisplay() {
-//   const [error, setError] = useState<string | null>(null);
 
-//   useEffect(() => {
-//     // Check for memberManagementError on mount and when storage changes
-//     const checkError = () => {
-//       const memberError = sessionStorage.getItem('memberManagementError');
-//       if (memberError) {
-//         setError(memberError);
-//         sessionStorage.removeItem('memberManagementError');
-//       }
-//     };
+  const [error, setError] = useState<{ message: string; action: string } | null>(null);
 
-//     checkError();
-
-    const [error, setError] = useState<{ message: string; action: string } | null>(null);
-
-    useEffect(() => {
-        const checkErrors = () => {
-        // Check all error types
-        for (const [key, action] of Object.entries(errorDescriptions)) {
-            const errorMessage = sessionStorage.getItem(key);
-            if (errorMessage) {
-            setError({ message: errorMessage, action });
-            sessionStorage.removeItem(key);
-            return; // Show first error found
-            }
+  useEffect(() => {
+    const checkErrors = () => {
+    // Check all error types
+    // for (const [key, action] of Object.entries(errorDescriptions)) {
+    for (const [key, action] of Object.entries(ERROR_ACTION_DESCRIPTIONS)) {
+        const errorMessage = sessionStorage.getItem(key);
+        if (errorMessage) {
+        setError({ message: errorMessage, action });
+        sessionStorage.removeItem(key);
+        return; // Show first error found
         }
-        };
+    }
+    };
 
-        checkErrors();
-    
+    checkErrors();
+  
     // Listen for storage events (when error is set from modal)
     // window.addEventListener('storage', checkError);
     window.addEventListener('storage', checkErrors);
@@ -64,7 +53,6 @@ export function ChapterErrorDisplay() {
 
   return (
     <div className="bg-red-50 border-2 border-red-400 text-red-800 px-6 py-4 rounded-lg mb-4">
-      {/* <div className="flex justify-between items-center"> */}
       <div className="flex justify-between items-start">
         <div>
           <p className="font-medium mb-1">Action Failed</p>
@@ -79,11 +67,8 @@ export function ChapterErrorDisplay() {
           </p>
         </div>
         
-        {/* <p className="font-medium">{error}</p> */}
-        
         <button 
           onClick={() => setError(null)}
-        //   className="text-red-600 hover:text-red-800 ml-4"
           className="text-red-600 hover:text-red-800 ml-4 flex-shrink-0"
         >
           <X className="w-5 h-5" />

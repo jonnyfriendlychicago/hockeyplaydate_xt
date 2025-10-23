@@ -12,6 +12,7 @@ import { joinChapterAction, cancelJoinRequestAction
 } from '@/app/(root)/[slug]/actions';
 // import { useEffect } from 'react';
 // import { useFormState } from 'react-dom';
+import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
@@ -95,7 +96,8 @@ export function JoinChapterButton({
 
     // Clear any previous errors
     // setErrorWithPersist(null); 
-    setErrorWithPersist(null, 'joinChapterError');
+    // setErrorWithPersist(null, 'joinChapterError');
+    setErrorWithPersist(null, CHAPTER_ERROR_KEYS.JOIN_CHAPTER);
 
     const formData = new FormData(e.currentTarget); // Get formData from the form
 
@@ -105,13 +107,15 @@ export function JoinChapterButton({
       if (result && !result.success) {
         // setErrorWithPersist(result.error || 'Something went wrong');
         // NEW: Persist to sessionStorage so ChapterErrorDisplay picks it up
-        setErrorWithPersist(result.error || 'Something went wrong', 'joinChapterError');
+        // setErrorWithPersist(result.error || 'Something went wrong', 'joinChapterError');
+        setErrorWithPersist(result.error || 'Something went wrong', CHAPTER_ERROR_KEYS.JOIN_CHAPTER);
       }
     } catch (error) {
       // console.log('Caught error:', error);
       if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
         console.log('Caught error:', error);
-        setErrorWithPersist('Something went wrong', 'joinChapterError');
+        // setErrorWithPersist('Something went wrong', 'joinChapterError');
+        setErrorWithPersist('Something went wrong', CHAPTER_ERROR_KEYS.JOIN_CHAPTER);
       }
     }
   };
@@ -121,7 +125,8 @@ export function JoinChapterButton({
 
     // setErrorWithPersist(null);
     // Clear any previous errors
-    setErrorWithPersist(null, 'cancelJoinRequestError');
+    // setErrorWithPersist(null, 'cancelJoinRequestError');
+    setErrorWithPersist(null, CHAPTER_ERROR_KEYS.CANCEL_JOIN_REQUEST);
 
     const formData = new FormData(e.currentTarget);
 
@@ -131,13 +136,15 @@ export function JoinChapterButton({
       if (result && !result.success) {
         //  setErrorWithPersist(result.error || 'Something went wrong cancelling request'); 
          // NEW: Persist to sessionStorage
-        setErrorWithPersist(result.error || 'Something went wrong', 'cancelJoinRequestError');
+        // setErrorWithPersist(result.error || 'Something went wrong', 'cancelJoinRequestError');
+        setErrorWithPersist(result.error || 'Something went wrong', CHAPTER_ERROR_KEYS.CANCEL_JOIN_REQUEST);
       }
     } catch (error) {
       // console.log(error)
       if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
         console.log(error);
-        setErrorWithPersist('Something went wrong', 'cancelJoinRequestError');
+        // setErrorWithPersist('Something went wrong', 'cancelJoinRequestError');
+        setErrorWithPersist('Something went wrong', CHAPTER_ERROR_KEYS.CANCEL_JOIN_REQUEST);
       }
     }
   };

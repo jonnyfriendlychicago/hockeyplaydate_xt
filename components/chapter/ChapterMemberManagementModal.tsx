@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
 import { updateMemberRoleAction } from "@/app/(root)/[slug]/actions";
+import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
 
 interface ChapterMemberManagementModalProps {
   member: ChapterMemberWithProfile | null;
@@ -46,13 +47,14 @@ export function ChapterMemberManagementModal({
 }: ChapterMemberManagementModalProps) {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);  
-  // const [error, setError] = useState<string | null>(null);
-  // Replace the simple useState for error with sessionStorage-backed version:
+  // instead of the simple useState for error, use sessionStorage-backed version:
   const [error, setError] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('memberManagementError');
+      // const saved = sessionStorage.getItem('memberManagementError');
+      const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
       if (saved) {
-        sessionStorage.removeItem('memberManagementError');
+        // sessionStorage.removeItem('memberManagementError');
+        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
         return saved;
       }
     }
@@ -70,21 +72,21 @@ export function ChapterMemberManagementModal({
     setError(value);
     if (typeof window !== 'undefined') {
       if (value) {
-        sessionStorage.setItem('memberManagementError', value);
+        // sessionStorage.setItem('memberManagementError', value);
+        sessionStorage.setItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT, value);
       } else {
-        sessionStorage.removeItem('memberManagementError');
+        // sessionStorage.removeItem('memberManagementError');
+        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
       }
     }
   };
 
   const handleActionSelect = (action: string) => {
     setSelectedAction(action);
-    // setError(null);  // Clear any previous errors
     setErrorWithPersist(null)
   };
 
   const handleSubmit = async () => {
-    // if (!selectedAction) return;
     if (!selectedAction || isSubmitting) return;  // ADD isSubmitting CHECK
 
     setIsSubmitting(true);  
@@ -92,22 +94,18 @@ export function ChapterMemberManagementModal({
     try {
       // call server action to update member role
       const formData = new FormData();
-      formData.append('chapterSlug', chapterSlug);
-      formData.append('chapterMemberId', member.id.toString());
-      formData.append('newRole', selectedAction);
-      // below for testing
       // formData.append('chapterSlug', chapterSlug);
-      // formData.append('chapterMemberId', 'INVALID-ID');
+      // formData.append('chapterMemberId', member.id.toString());
       // formData.append('newRole', selectedAction);
+      // below for testing
+      formData.append('chapterSlug', chapterSlug);
+      formData.append('chapterMemberId', 'INVALID-ID');
+      formData.append('newRole', selectedAction);
 
       const result = await updateMemberRoleAction(formData);
 
       // check if action failed
       if (result && !result.success) {
-        // Handle error - show toast or error message
-        // console.error('Failed to update role:', result.error);
-        // Don't close modal on error
-        // setError(result.error || 'Unable to update member role');
         setErrorWithPersist(result.error || 'Unable to update member role');
         setSelectedAction(null);  // ADD THIS - clear selection on error
         setIsSubmitting(false);
@@ -119,13 +117,8 @@ export function ChapterMemberManagementModal({
       onClose();
 
     } catch (error) {
-      // Handle unexpected errors
-      // console.error('Unexpected error:', error);
-      // above replaced by below
-      // Handle unexpected errors (redirect throws are expected)
       if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
         console.error('Unexpected error:', error);
-        // setError('Something went wrong. Please try again.');
         setErrorWithPersist('Something went wrong. Please try again.');
       }
 
@@ -136,7 +129,6 @@ export function ChapterMemberManagementModal({
 
   const handleCancel = () => {
     setSelectedAction(null);
-    // setError(null);  // Clear any errors
     setErrorWithPersist(null)
     onClose();
   };
@@ -194,7 +186,6 @@ export function ChapterMemberManagementModal({
             </Button>
             <Button 
               onClick={handleSubmit}
-              // disabled={!selectedAction}
               disabled={!selectedAction || isSubmitting}      
             >
               {/* Update Status */}
