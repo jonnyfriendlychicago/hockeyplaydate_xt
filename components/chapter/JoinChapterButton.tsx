@@ -152,9 +152,9 @@ export function JoinChapterButton({
         )} */}
 
         <form onSubmit={handleJoinSubmit}> 
-          <input type="hidden" name="chapterSlug" value={chapterSlug} />
+          {/* <input type="hidden" name="chapterSlug" value={chapterSlug} /> */}
           {/* below: temporary bogus values for backend testing */}
-          {/* <input type="hidden" name="chapterSlug" value="BAD-SLUG!!!" />  */}
+          <input type="hidden" name="chapterSlug" value="BAD-SLUG!!!" /> 
           <Button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white h-10 px-6 text-base shadow-md">
             <PlusCircle className="w-4 h-4 mr-2" />
             Join Chapter
