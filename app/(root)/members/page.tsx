@@ -4,19 +4,20 @@
 
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
-import { redirect } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 import { MembersDirectoryClient } from '@/components/Members/MembersDirectoryClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MembersDirectoryPage() {
-  // Get authenticated user
+  
+  // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();
   
-  // Bounce if duplicate user
-  if (authenticatedUserProfile?.authUser.duplicateOfId) {
-    redirect('/');
-  }
+  // // Bounce if duplicate user
+  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
+  //   redirect('/');
+  // }
 
   // If not authenticated, show sign-in message
   if (!authenticatedUserProfile) {

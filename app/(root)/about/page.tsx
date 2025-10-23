@@ -1,6 +1,13 @@
 // app/(root)/about/page.tsx
 
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
+
 export default async function About() {
+
+    // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
+    const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
+
+    console.log(authenticatedUserProfile)
 
     return ( 
         <main>

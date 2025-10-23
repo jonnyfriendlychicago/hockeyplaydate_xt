@@ -19,27 +19,96 @@ interface LeaveChapterModalProps {
 export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }: LeaveChapterModalProps) {
   const [confirmText, setConfirmText] = useState('');
   const isConfirmed = confirmText.toLowerCase() === 'leave';
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // const [error, setError] = useState<string | null>(null);
+  // CHANGED: Replace simple useState with sessionStorage-backed state
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('leaveChapterError');
+      if (saved) {
+        sessionStorage.removeItem('leaveChapterError');
+        return saved;
+      }
+    }
+    return null;
+  });
+
+  // ADDED: Helper function to persist error through remounts
+  const setErrorWithPersist = (value: string | null) => {
+    setError(value);
+    if (typeof window !== 'undefined') {
+      if (value) {
+        sessionStorage.setItem('leaveChapterError', value);
+      } else {
+        sessionStorage.removeItem('leaveChapterError');
+      }
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!isConfirmed) return;
+    // if (!isConfirmed) return;
+    if (!isConfirmed || isSubmitting) return;
+    setIsSubmitting(true);
+    // setError(null);
+    setErrorWithPersist(null); 
     
-    const formData = new FormData();
-    formData.append('chapterSlug', chapterSlug);
-    
-    await leaveChapterAction(formData);
-    
-    // Reset and close
-    setConfirmText('');
-    onClose();
+    try {
+      const formData = new FormData();
+      formData.append('chapterSlug', chapterSlug);
+      // below for testing
+      // console.log(chapterSlug)
+      // const bogusChapterSlug = 'some-baloney!$'
+      // formData.append('chapterSlug', bogusChapterSlug);
+      
+      // await leaveChapterAction(formData);
+      const result = await leaveChapterAction(formData);
+
+      if (result && !result.success) {
+        // setError(result.error || 'Unable to leave chapter');
+        setErrorWithPersist(result.error || 'Unable to leave chapter');  // CHANGED: Use setError
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Reset and close
+      setConfirmText('');
+      onClose();
+    } catch (error) {
+      // Handle unexpected errors (redirects throw and that's ok)
+        if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
+          console.error('Leave chapter error:', error);
+          // setError('Something went wrong. Please try again.');
+          setErrorWithPersist('Something went wrong. Please try again.');
+          setIsSubmitting(false);
+        }
+    } 
+    setIsSubmitting(false);
   };
 
   const handleCancel = () => {
     setConfirmText('');
+    // setError(null);
+    setErrorWithPersist(null); 
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+    {/* //  {/* <Dialog open={isOpen} onOpenChange={(open) => {
+    //   if (!open && !isSubmitting) {  // Only allow closing if not submitting
+    //     onClose();
+    //   }}}
+    // > */} 
+
+    {/* <Dialog open={isOpen} onOpenChange={(open) => {
+    // Only allow manual closing via handleCancel or successful submission
+      if (!open) {
+        // console.log('Dialog trying to close itself');
+        // Don't call onClose here - let our buttons control it
+      }}}
+    > */}
+
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-red-800">Leave Chapter</DialogTitle>
@@ -49,6 +118,10 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
         </DialogHeader>
 
         <div className="space-y-4">
+          {error && (
+            <p className="text-red-600 text-sm">{error}</p>
+          )}
+
           <p className="text-sm text-muted-foreground">
             If you leave this chapter:
           </p>
@@ -68,20 +141,27 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="Type 'leave' here"
+              disabled={isSubmitting}
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button 
               variant="destructive"
               onClick={handleSubmit}
-              disabled={!isConfirmed}
+              // disabled={!isConfirmed}
+              disabled={!isConfirmed || isSubmitting}
               className="bg-red-600 hover:bg-red-700"
             >
-              Leave Chapter
+              {/* Leave Chapter */}
+              {isSubmitting ? 'Leaving...' : 'Leave Chapter'}
             </Button>
           </div>
         </div>

@@ -30,7 +30,7 @@ interface ChapterMemberManagementModalProps {
   member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
-  chapterSlug: string; // not sure why this needed now that making modal hit server actions. investigate.
+  chapterSlug: string; 
 }
 
 function getAvailableActions(currentRole: string): string[] {
@@ -38,10 +38,26 @@ function getAvailableActions(currentRole: string): string[] {
   return allRoles.filter(role => role !== currentRole);
 }
 
-export function ChapterMemberManagementModal({ member, isOpen, onClose 
-  , chapterSlug // again, why now? 
+export function ChapterMemberManagementModal({ 
+  member, 
+  isOpen, 
+  onClose, 
+  chapterSlug // again, why now? 
 }: ChapterMemberManagementModalProps) {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);  
+  // const [error, setError] = useState<string | null>(null);
+  // Replace the simple useState for error with sessionStorage-backed version:
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('memberManagementError');
+      if (saved) {
+        sessionStorage.removeItem('memberManagementError');
+        return saved;
+      }
+    }
+    return null;
+  });
 
   if (!member) return null;
 
@@ -49,30 +65,79 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
   const currentStatus = getMaskedRole(member.memberRole);
   const availableActions = getAvailableActions(member.memberRole);
 
+  // helper function to persist error:
+  const setErrorWithPersist = (value: string | null) => {
+    setError(value);
+    if (typeof window !== 'undefined') {
+      if (value) {
+        sessionStorage.setItem('memberManagementError', value);
+      } else {
+        sessionStorage.removeItem('memberManagementError');
+      }
+    }
+  };
+
   const handleActionSelect = (action: string) => {
     setSelectedAction(action);
+    // setError(null);  // Clear any previous errors
+    setErrorWithPersist(null)
   };
 
   const handleSubmit = async () => {
-    if (!selectedAction) return;
-    
-    console.log(`Updating ${member.id} to role: ${selectedAction}`);
-    
-    // below: Call server action to update member role
-    const formData = new FormData();
-    formData.append('chapterSlug', chapterSlug);
-    formData.append('chapterMemberId', member.id.toString());
-    formData.append('newRole', selectedAction);
+    // if (!selectedAction) return;
+    if (!selectedAction || isSubmitting) return;  // ADD isSubmitting CHECK
 
-    await updateMemberRoleAction(formData);
-    
-    // Reset and close
-    setSelectedAction(null);
-    onClose();
+    setIsSubmitting(true);  
+
+    try {
+      // call server action to update member role
+      const formData = new FormData();
+      formData.append('chapterSlug', chapterSlug);
+      formData.append('chapterMemberId', member.id.toString());
+      formData.append('newRole', selectedAction);
+      // below for testing
+      // formData.append('chapterSlug', chapterSlug);
+      // formData.append('chapterMemberId', 'INVALID-ID');
+      // formData.append('newRole', selectedAction);
+
+      const result = await updateMemberRoleAction(formData);
+
+      // check if action failed
+      if (result && !result.success) {
+        // Handle error - show toast or error message
+        // console.error('Failed to update role:', result.error);
+        // Don't close modal on error
+        // setError(result.error || 'Unable to update member role');
+        setErrorWithPersist(result.error || 'Unable to update member role');
+        setSelectedAction(null);  // ADD THIS - clear selection on error
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Reset and close only on success
+      setSelectedAction(null);
+      onClose();
+
+    } catch (error) {
+      // Handle unexpected errors
+      // console.error('Unexpected error:', error);
+      // above replaced by below
+      // Handle unexpected errors (redirect throws are expected)
+      if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
+        console.error('Unexpected error:', error);
+        // setError('Something went wrong. Please try again.');
+        setErrorWithPersist('Something went wrong. Please try again.');
+      }
+
+    } finally {
+      setIsSubmitting(false);  // this line always resets the loading state
+    }
   };
 
   const handleCancel = () => {
     setSelectedAction(null);
+    // setError(null);  // Clear any errors
+    setErrorWithPersist(null)
     onClose();
   };
 
@@ -84,6 +149,11 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
           <DialogDescription>
             Update the status for {displayName}
           </DialogDescription>
+
+          {error && (
+            <p className="text-red-600 text-sm mt-2">{error}</p>
+          )}
+
         </DialogHeader>
 
         <div className="space-y-4">
@@ -105,6 +175,7 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
                   variant={selectedAction === action ? "default" : "outline"}
                   onClick={() => handleActionSelect(action)}
                   className="justify-start"
+                  disabled={isSubmitting}
                 >
                   {getMaskedRole(action)}
                 </Button>
@@ -114,14 +185,20 @@ export function ChapterMemberManagementModal({ member, isOpen, onClose
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
+            Cancel
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={!selectedAction}
+              // disabled={!selectedAction}
+              disabled={!selectedAction || isSubmitting}      
             >
-              Update Status
+              {/* Update Status */}
+              {isSubmitting ? 'Updating...' : 'Update Status'}
             </Button>
           </div>
         </div>

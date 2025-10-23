@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { getMaskedRole } from "@/lib/types/chapterMember";
 import { format } from "date-fns";
 import { LeaveChapterModal } from "./LeaveChapterModal";
+// import { useEffect } from 'react';
 
 interface MembershipTabClientProps {
   membership: {
@@ -22,7 +23,43 @@ interface MembershipTabClientProps {
 }
 
 export function MembershipTabClient({ membership, isSoleManager, chapterSlug, chapterName }: MembershipTabClientProps) {
+
+  // Inside the component:
+  // useEffect(() => {
+  //   console.log('MembershipTabClient mounted');
+  //   return () => {
+  //     console.log('MembershipTabClient UNMOUNTING!');
+  //   };
+  // }, []);
+  
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
+  // Check for persisted error on mount
+  const [modalError, setModalError] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('leaveChapterError');
+      if (saved) {
+        sessionStorage.removeItem('leaveChapterError');
+        return saved;
+      }
+    }
+    return null;
+  });
+
+  // Clear error when opening modal
+  const openModal = () => {
+    setModalError(null);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('leaveChapterError');
+    }
+    setIsLeaveModalOpen(true);
+  };
+
+  // // Add debugging
+  // const closeModal = () => {
+  //   console.log('Modal close called - stack trace:', new Error().stack);
+  //   setIsLeaveModalOpen(false);
+  // };
 
   return (
     <div className="space-y-6">
@@ -53,6 +90,11 @@ export function MembershipTabClient({ membership, isSoleManager, chapterSlug, ch
           <CardDescription>Irreversible actions</CardDescription>
         </CardHeader>
         <CardContent>
+
+          {modalError && (
+            <p className="text-red-600 text-sm mb-2">{modalError}</p>
+          )}
+
           {isSoleManager ? (
             <div>
               <Button disabled className="bg-gray-400 text-white cursor-not-allowed">
@@ -67,7 +109,8 @@ export function MembershipTabClient({ membership, isSoleManager, chapterSlug, ch
               <Button 
                 variant="destructive"
                 className="bg-red-600 hover:bg-red-700"
-                onClick={() => setIsLeaveModalOpen(true)}
+                // onClick={() => setIsLeaveModalOpen(true)}
+                onClick={openModal}  // Use openModal instead
               >
                 Leave Chapter
               </Button>
@@ -82,6 +125,7 @@ export function MembershipTabClient({ membership, isSoleManager, chapterSlug, ch
       <LeaveChapterModal
         isOpen={isLeaveModalOpen}
         onClose={() => setIsLeaveModalOpen(false)}
+        // onClose={closeModal}  // Use the debug version
         chapterSlug={chapterSlug}
         chapterName={chapterName}
       />

@@ -1,14 +1,17 @@
 // app/(root)/page.tsx
 // everything session related here derived from https://auth0.com/docs/quickstart/webapp/nextjs/interactive
 // additional documentation: https://github.com/auth0/nextjs-auth0
-import { auth0 } from "@/lib/auth0"; // from Auth0
+
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 
 export default async function Home() {
-  // Fetch the user session
-  const session = await auth0.getSession();
+  // // Fetch the user session
+  // const session = await auth0.getSession();
 
-  // If no session... 
-  if (!session) {
+  // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
+  const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
+
+  if (!authenticatedUserProfile) {
     return (
       <main>
        <h1>Hello!</h1>
@@ -17,7 +20,6 @@ export default async function Home() {
     );
   }
 
-  // If session ... 
   return ( 
     <main>
     <h1>Hello!</h1>

@@ -5,6 +5,53 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { UserProfile, AuthUser } from '@prisma/client';
 
+//  prereq: Declare custom type for the joined profile with authUser relation included
+type FullUserProfile = UserProfile & {
+    authUser: AuthUser;
+  };
+
+// 2025oct15: this is the new standard authentication function for all pages/routes. 
+export async function getAuthenticatedUserProfileOrNull() {
+  const authSession = await auth0.getSession();
+  const authSessionUser = authSession?.user;
+
+  // 1 - ensure foundational attributes exist
+  if (!authSession || !authSessionUser || !authSessionUser.sub) { // note: I don't think it's possible in auth0 to get session but no .sub, but double check is fine
+    return null;
+  }
+
+  // 2 - get the authUser record
+  const dbAuthUser = await prisma.authUser.findUnique({
+    where: { auth0Id: authSessionUser.sub },
+  });
+
+  if (!dbAuthUser) {
+    return null; 
+  }
+  // 3 - get the userProfile record related to that dbAuthUser record (and include the original authUser record as child object)
+  const dbUserProfile = await prisma.userProfile.findUnique({
+    where: { userId: dbAuthUser.id },
+    include: {
+      authUser: true,
+    },
+  });
+
+  // 4 - if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, so redirect. This prevents all system interaction for duplicate authUsers
+  if (dbAuthUser.duplicateOfId) {
+    redirect('/duplicate-user');
+  }
+
+  return dbUserProfile as FullUserProfile;
+}
+
+
+// 2025oct15: 
+// I think this entire getAuthenticatedUser funct should be deprecated then deleted, b/c redirect for login should not be here; the redirecting code must exist on the originating page itself, so that 
+// that such page's url/string can be submitted as part of the login redirect, thus ensuring that the user is redircted to such page after successful login (instead of being redirected to a static homepage)
+
+// This first function should be renamed getAuthenticatedUserOrRedirect, 
+// and it's used to strictly prohibit unauthenticated users from accessing specific pages, such as user profiles pages.
+
 // ********** OVERVIEW: BEGIN ************************
 // This file validates: 
 // (1) user is authenticated
@@ -24,27 +71,12 @@ import { UserProfile, AuthUser } from '@prisma/client';
 
 // ********** OVERVIEW: END ************************
 
-
-//  prereq: Declare custom type for the joined profile with authUser relation included
-type FullUserProfile = UserProfile & {
-    authUser: AuthUser;
-  };
-
-// devNote: 
-// This first function should be renamed getAuthenticatedUserOrRedirect, 
-// and it's used to strictly prohibit unauthenticated users from accessing specific pages, such as user profiles pages.
 export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we are gonnna rename this: getAuthenticatedUserProfileOrRedirect
   
 // 1 - if not authenticated, redirect to login
 
-  console.log(' Step 1: Checking auth session...');
-
-
-
-  // const authSession = await auth0.getSession();
-  // const authSessionUser = authSession?.user;
-
   // 2025oct11: above replaced by below; RETRY LOGIC: Try to get session up to 3 times.  doing this b/c in production, randomly not getting session/user and being redirected back to homepage.
+  // 2025oct15: that error above was isolated to problems in the auth0.ts file.  This "3 tries" stuff is garbage. Leaving it alone, not worth resetting code to former state. 
   let authSession = null;
   let authSessionUser = null;
   let attempts = 0;
@@ -52,21 +84,14 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   
   while (attempts < maxAttempts && !authSessionUser) {
     attempts++;
-    console.log(`🔍 Attempt ${attempts} to get session...`);
     
     authSession = await auth0.getSession();
     authSessionUser = authSession?.user;
     
-    if (!authSessionUser && attempts < maxAttempts) {
-      // Wait 50ms before retrying
-      await new Promise(resolve => setTimeout(resolve, 50));
+    if (!authSessionUser && attempts < maxAttempts) { 
+      await new Promise(resolve => setTimeout(resolve, 50)); // Wait 50ms before retrying
     }
   }
-
-  console.log(' Auth session exists:', !!authSession);
-  console.log(' Auth session user exists:', !!authSessionUser);
-  console.log(' Auth session user sub:', authSessionUser?.sub);
-  console.log(' Total attempts needed:', attempts);
 
   if (!authSessionUser) {
     console.log(' No auth session user - redirecting to /auth/login');
@@ -77,15 +102,11 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   // this scenario should never occur, as authUser record is created for each user upon very first authentication/login, and repeated/synced for each subsequent login.  
   // below this is a safe guard / double check
   // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
-  console.log('Step 2: Looking up authUser in DB for sub:', authSessionUser.sub);
   const dbAuthUser = await prisma.authUser.findUnique({
     where: { auth0Id: authSessionUser.sub },
   });
-  console.log(' DB AuthUser found:', !!dbAuthUser);
-  console.log(' DB AuthUser id:', dbAuthUser?.id);
 
   if (!dbAuthUser) {
-    console.log('No DB authUser - redirecting to /auth/login');
     redirect('/auth/login');
   }
 
@@ -93,15 +114,12 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
   // this scenario should never occur, as userProfile record is created for each user upon very first authentication/login. 
   // below this is a safe guard / double check
   // 2025jul29: this entire check seems like silly overkill, but leave it for now, seemingly doesn't hurt
-  console.log('Step 3: Looking up userProfile in DB for userId:', dbAuthUser.id);
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId: dbAuthUser.id },
     include: {
       authUser: true,
     },
   });
-  console.log('UserProfile found:', !!userProfile);
-  console.log('UserProfile.authUser exists:', !!userProfile?.authUser);
   
   // if (!userProfile) {redirect('/');}
   if (!userProfile) {
@@ -111,57 +129,21 @@ export async function getAuthenticatedUser(): Promise<FullUserProfile> { // we a
 
   // 2025jul29: no idea why below line is needed, this seems entirely redundant with code above; leaving in for now, what harm? 
   if (!userProfile.authUser) {
-    console.log(' No userProfile.authUser - redirecting to /');
     redirect('/');
   } // added 2025jul09 to avert newfound Ts issue with nullable userProfile.authUser
-  console.log('Step 4: Checking for duplicate...');
-  console.log('duplicateOfId:', dbAuthUser.duplicateOfId);
   
   // 4 - if this authUser has a value in duplicateOfId, i.e., this is a dupe authUser, so redirect. 
   // this prevents all system interaction for duplicate authUsers
   if (dbAuthUser.duplicateOfId) {
-    console.log('User is duplicate - redirecting to /');
     redirect('/');
   }
 
   // FINAL: 
   // failure to redirect based on scenarios above mean all good, so return full userProfile object (for consumption/use by parent file)
-  console.log('All checks passed - returning userProfile');
   return userProfile as FullUserProfile; 
-
 }
 
-// devNote: 
-// This second function is used to when a page will allow either authenticated or unauthenticated users, 
-// and will handle each differently.  
-export async function getAuthenticatedUserProfileOrNull() {
-  const authSession = await auth0.getSession();
-  const authSessionUser = authSession?.user;
-
-  if (!authSession || !authSessionUser || !authSessionUser.sub) { // note: I don't think it's possible in auth0 to get session but no .sub, but double check is fine
-    return null;
-  }
-
-  const dbAuthUser = await prisma.authUser.findUnique({
-    where: { auth0Id: authSessionUser.sub },
-  });
-
-  if (!dbAuthUser) {
-    return null; 
-  }
-
-  const dbUserProfile = await prisma.userProfile.findUnique({
-    where: { userId: dbAuthUser.id },
-    include: {
-      authUser: true,
-    },
-  });
-
-  // any reason we can't have the duplicate authUser check here, so as to redirect when not null?  
-
-  return dbUserProfile as FullUserProfile;
-}
-
+// 2025oct15: no idea if/when/how we'll ever use below.  These functs not called by anything, total placeholder, no specific vision ever to even use them. 
 /**
  * Placeholder: Extend this to verify the authenticated user is an organizer.
  * If not an organizer, redirect to login or access-denied page.

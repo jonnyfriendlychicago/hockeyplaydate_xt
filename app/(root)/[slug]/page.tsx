@@ -18,26 +18,25 @@ import { JoinChapterButton } from '@/components/chapter/JoinChapterButton';
 import { BlockedNotice } from '@/components/chapter/BlockedNotice';
 import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
-import { redirect } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
 import { MembershipTab } from '@/components/chapter/MembershipTab';
+import { ChapterErrorDisplay } from '@/components/chapter/ChapterErrorDisplay';
 
 // import { maskName } from '@/lib/helpers/maskName'; // new helper function you should create
 // import { myMembershipTab } from '@/components/chapter/myMembershipTab';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 export default async function ChapterPage({ params }: { params: { slug: string } }) {
   
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
-  // bounce if dupe user 
-  if (authenticatedUserProfile?.authUser.duplicateOfId) {
-     redirect('/');
-     // devNotes: please do not type above line as `return redirect('/');`  Such will work in development but not ubuntu server in production.
-  }
+
+  // At the very top of ChapterPage function, after getting authenticatedUserProfile:
+  console.log('[ChapterPage] Rendering, user:', authenticatedUserProfile?.id);
   
   // 1 - load chapter v. notFound
   const slug = params.slug;
@@ -100,9 +99,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
           </Link>
         )}
       </div>
+      
+      {/* ===================== */}
+      {/* ZONE 1.1: Global Error Display */}
+      {/* ===================== */}
+      <ChapterErrorDisplay />
 
       {/* ===================== */}
-      {/* ZONE 1.5: Blocked Notice */}
+      {/* ZONE 1.2: Blocked Notice */}
       {/* ===================== */}
       {userChapterMember.blockedMember && 
        <BlockedNotice nameString={authenticatedUserProfileNameString} />
@@ -146,15 +150,26 @@ export default async function ChapterPage({ params }: { params: { slug: string }
       {/* ZONE 3: Desktop Tabs v Mobile Accordion */}
       {/* ===================== */}
 
-      <div className="w-full space-y-2">
+      {/* <div className="w-full space-y-2"> */}
+      <div className="w-full space-y-4">
+
+        {/* Action buttons - ALWAYS visible, only rendered ONCE */}
+        <div className="flex justify-end gap-2">
+          <JoinChapterButton 
+            userChapterMember={userChapterMember}
+            chapterSlug={slug}
+          />
+          <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug} />
+        </div>
 
         {/* Desktop Tabs */}
         <div className="hidden md:block">
           <Tabs defaultValue="locations" className="w-full space-y-2">
 
             {/* Shared row: Tabs left, Join right */}
-            <div className="flex items-center justify-between w-full">
-              <TabsList className="flex flex-wrap gap-2">
+            {/* <div className="flex items-center justify-between w-full"> */}
+            {/* 2025oct18: above div helped space out the tabs from the button, but we're not doing that anymore, so nevermind */}
+              <TabsList className="flex flex-wrap gap-2 justify-start">
 
                 <TabsTrigger value="locations">Locations</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
@@ -169,23 +184,19 @@ export default async function ChapterPage({ params }: { params: { slug: string }
                 {isApprovedMember && 
                   <TabsTrigger value="membership">My Membership</TabsTrigger>
                 }
-
               </TabsList>
 
-              {/* Action button(s) sit right of the tabs */}
+              {/* 2025oct18: Action button(s) WOULD sit right of the tabs if we kept it below, but we're done with that.*/}
 
-              <div className="ml-auto flex gap-2">
-              
+              {/* <div className="ml-auto flex gap-2">
                 <JoinChapterButton 
                   userChapterMember={userChapterMember}
                   chapterSlug={slug}
                 />
-
-                {/* note: above button/userProfile component and below are mutually exclusive */}
-
                 <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug}  />
-              </div>
-            </div>
+              </div> */}
+
+            {/* </div> */}
 
             {/* tabs content */}
 
@@ -231,12 +242,10 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
             {isApprovedMember && 
               <TabsContent value="membership">
-                <TabsContent value="membership">
-                  <MembershipTab 
-                    chapterId={chapter.id}
-                    userChapterMember={userChapterMember}
-                  />
-                </TabsContent>
+                <MembershipTab 
+                  chapterId={chapter.id}
+                  userChapterMember={userChapterMember}
+                />
               </TabsContent>
             }
           </Tabs>
@@ -245,14 +254,14 @@ export default async function ChapterPage({ params }: { params: { slug: string }
         {/* Mobile Accordion */}
 
         <div className="block md:hidden space-y-4">
-          {/* Action button(s) sit above the accordion */}
-          <div className="flex justify-center">
+          {/* 2025oct18: hack up noted above; Action button(s) sit above the accordion */}
+          {/* <div className="flex justify-center">
             <JoinChapterButton 
               userChapterMember={userChapterMember}
               chapterSlug={slug}
             />
             <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug}  />
-          </div>
+          </div> */}
 
           <Accordion type="single" collapsible className="w-full"> 
             
