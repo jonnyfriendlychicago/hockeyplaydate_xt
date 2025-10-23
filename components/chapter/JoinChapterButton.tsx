@@ -179,9 +179,9 @@ export function JoinChapterButton({
           Request pending approval from organizers
         </p>
         <form onSubmit={handleCancelSubmit}> 
-          {/* <input type="hidden" name="chapterSlug" value={chapterSlug} />   */}
+          <input type="hidden" name="chapterSlug" value={chapterSlug} />  
           {/* below: temporary bogus values for backend testing */}
-          <input type="hidden" name="chapterSlug" value="BAD-SLUG!!!" /> 
+          {/* <input type="hidden" name="chapterSlug" value="BAD-SLUG!!!" />  */}
           <Button type="submit" variant="outline" className="h-10 px-6 text-base">
             <X className="w-4 h-4 mr-2" />
             Cancel Request

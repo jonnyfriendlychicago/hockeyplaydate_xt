@@ -55,11 +55,11 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
     
     try {
       const formData = new FormData();
-      // formData.append('chapterSlug', chapterSlug);
+      formData.append('chapterSlug', chapterSlug);
       // below for testing
-      console.log(chapterSlug)
-      const bogusChapterSlug = 'some-baloney!$'
-      formData.append('chapterSlug', bogusChapterSlug);
+      // console.log(chapterSlug)
+      // const bogusChapterSlug = 'some-baloney!$'
+      // formData.append('chapterSlug', bogusChapterSlug);
       
       // await leaveChapterAction(formData);
       const result = await leaveChapterAction(formData);
