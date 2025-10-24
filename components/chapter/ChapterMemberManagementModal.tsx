@@ -94,13 +94,13 @@ export function ChapterMemberManagementModal({
     try {
       // call server action to update member role
       const formData = new FormData();
-      // formData.append('chapterSlug', chapterSlug);
-      // formData.append('chapterMemberId', member.id.toString());
-      // formData.append('newRole', selectedAction);
-      // below for testing
       formData.append('chapterSlug', chapterSlug);
-      formData.append('chapterMemberId', 'INVALID-ID');
+      formData.append('chapterMemberId', member.id.toString());
       formData.append('newRole', selectedAction);
+      // below for testing
+      // formData.append('chapterSlug', chapterSlug);
+      // formData.append('chapterMemberId', 'INVALID-ID');
+      // formData.append('newRole', selectedAction);
 
       const result = await updateMemberRoleAction(formData);
 

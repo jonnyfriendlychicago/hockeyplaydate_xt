@@ -10,6 +10,9 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { chapterSlugSchema, updateMemberRoleSchema
 } from '@/lib/validation/chapterMembershipValSchema';
+import { ActionResult, 
+  // success, // if future actions DO return success data (like creating an event and returning its ID), then we'll need this imported function
+  failure } from '@/lib/types/serverActionResults';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
@@ -21,7 +24,8 @@ import { chapterSlugSchema, updateMemberRoleSchema
 // joinChapterAction
 // **********************************
 
-export async function joinChapterAction(formData: FormData) {
+// export async function joinChapterAction(formData: FormData) {
+export async function joinChapterAction(formData: FormData): Promise<ActionResult> {
   try {
 
     // 0 - validate user, part 1: authenticated not-dupe user? 
@@ -35,11 +39,15 @@ export async function joinChapterAction(formData: FormData) {
       chapterSlug: formData.get('chapterSlug')
     });
 
+    // if (!parseResult.success) {
+    //   return {
+    //     success: false,
+    //     error: 'Invalid request data'
+    //   };
+    // }
+
     if (!parseResult.success) {
-      return {
-        success: false,
-        error: 'Invalid request data'
-      };
+      return failure('Invalid request data');
     }
 
     const { chapterSlug } = parseResult.data;
@@ -49,26 +57,35 @@ export async function joinChapterAction(formData: FormData) {
     where: { slug: chapterSlug }
     })
 
+    // if (!chapter) {
+    //   // throw new Error('Chapter not found')
+    //   // CHANGED: Don't reveal whether chapter exists, even tho these are public, so who cares, really? 
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
+
+    // Below won't reveal chapter non-existence, even tho these are public, so who cares, really? 
     if (!chapter) {
-      // throw new Error('Chapter not found')
-      // CHANGED: Don't reveal whether chapter exists, even tho these are public, so who cares, really? 
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
     const canJoin = userStatus.authVisitor || userStatus.removedMember
+    // if (!canJoin) {
+    //   // throw new Error('Invalid action for current membership status')
+    //   // CHANGED: Don't reveal membership status details
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
+
     if (!canJoin) {
-      // throw new Error('Invalid action for current membership status')
-      // CHANGED: Don't reveal membership status details
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 4 - Set up time/count variables 
@@ -139,10 +156,11 @@ export async function joinChapterAction(formData: FormData) {
     // Log the actual error server-side for debugging
     console.error('Join chapter error:', error);
 
-    return { 
-      success: false, 
-      error: 'Unable to join chapter. Please try again.'
-    };
+    // return { 
+    //   success: false, 
+    //   error: 'Unable to join chapter. Please try again.'
+    // };
+    return failure('Unable to join chapter. Please try again.');
   }
 
 } // end joinChapterAction
@@ -151,7 +169,8 @@ export async function joinChapterAction(formData: FormData) {
 // cancelJoinRequestAction
 // **********************************
 
-export async function cancelJoinRequestAction(formData: FormData) {
+// export async function cancelJoinRequestAction(formData: FormData) {
+export async function cancelJoinRequestAction(formData: FormData): Promise<ActionResult> {
   try {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
@@ -164,11 +183,14 @@ export async function cancelJoinRequestAction(formData: FormData) {
       chapterSlug: formData.get('chapterSlug')
     });
 
+    // if (!parseResult.success) {
+    //   return {
+    //     success: false,
+    //     error: 'Invalid request data'
+    //   };
+    // }
     if (!parseResult.success) {
-      return {
-        success: false,
-        error: 'Invalid request data'
-      };
+      return failure('Invalid request data');
     }
 
     const { chapterSlug } = parseResult.data;
@@ -178,25 +200,31 @@ export async function cancelJoinRequestAction(formData: FormData) {
       where: { slug: chapterSlug }
     })
 
+    // if (!chapter) {
+    //   // throw new Error('Chapter not found')
+    //   // Don't leak information about chapter existence, although this is meaningless since chapter URLS are public
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!chapter) {
-      // throw new Error('Chapter not found')
-      // Don't leak information about chapter existence, although this is meaningless since chapter URLS are public
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
+    // if (!userStatus.applicant) {
+    //   // throw new Error('Invalid action for current membership status')
+    //   // Don't leak membership status details
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!userStatus.applicant) {
-      // throw new Error('Invalid action for current membership status')
-      // Don't leak membership status details
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 4 - Run the update/insert, including newWindowStart and newCount values derived above
@@ -221,10 +249,11 @@ export async function cancelJoinRequestAction(formData: FormData) {
     // for server side debugging
     console.error('Cancel join error:', error);
 
-    return { 
-      success: false, 
-      error: 'Unable to cancel request'
-    };
+    // return { 
+    //   success: false, 
+    //   error: 'Unable to cancel request'
+    // };
+    return failure('Unable to cancel request');
   }
 
 } // end cancelJoinRequestAction
@@ -233,7 +262,8 @@ export async function cancelJoinRequestAction(formData: FormData) {
 // leaveChapterAction
 // **********************************
 
-export async function leaveChapterAction(formData: FormData) {
+export async function leaveChapterAction(formData: FormData): Promise<ActionResult> {
+// export async function leaveChapterAction(formData: FormData) {
   try {
   
     // 0 - validate user, part 1: authenticated not-dupe user? 
@@ -247,11 +277,14 @@ export async function leaveChapterAction(formData: FormData) {
       chapterSlug: formData.get('chapterSlug')
     });
 
+    // if (!parseResult.success) {
+    //   return {
+    //     success: false,
+    //     error: 'Invalid request data'
+    //   };
+    // }
     if (!parseResult.success) {
-      return {
-        success: false,
-        error: 'Invalid request data'
-      };
+      return failure('Invalid request data');
     }
 
     const { chapterSlug } = parseResult.data;
@@ -261,25 +294,31 @@ export async function leaveChapterAction(formData: FormData) {
       where: { slug: chapterSlug }
     })
 
+    // if (!chapter) {
+    //   // throw new Error('Chapter not found')
+    //   // CHANGE THIS:
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!chapter) {
-      // throw new Error('Chapter not found')
-      // CHANGE THIS:
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
+    // if (!userStatus.membership) {
+    //   // throw new Error('You are not a member of this chapter')
+    //   // CHANGE THIS:
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!userStatus.membership) {
-      // throw new Error('You are not a member of this chapter')
-      // CHANGE THIS:
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 4 - Prevent sole manager from leaving
@@ -294,13 +333,16 @@ export async function leaveChapterAction(formData: FormData) {
       // if (managerCount === 1) {
       //   throw new Error('Cannot leave - you are the only manager. Promote another member first.')
       // }
+      // if (managerCount === 1) {
+      //   // Return error instead of throwing
+      //   return {
+      //     success: false,
+      //     error: 'Cannot leave - you are the only manager. Promote another member first.'
+      //   }
+      // }
       if (managerCount === 1) {
-        // Return error instead of throwing
-        return {
-          success: false,
-          error: 'Cannot leave - you are the only manager. Promote another member first.'
+        return failure('Cannot leave - you are the only manager. Promote another member first.');
         }
-      }
     }
 
     // 5 - Update to REMOVED
@@ -324,10 +366,11 @@ export async function leaveChapterAction(formData: FormData) {
     //server side logging for debugging
     console.error('Leave chapter error:', error);
 
-    return { 
-      success: false, 
-      error: 'Unable to leave chapter. Please try again.'
-    };
+    // return { 
+    //   success: false, 
+    //   error: 'Unable to leave chapter. Please try again.'
+    // };
+    return failure('Unable to leave chapter. Please try again.');
   }
 
 } // end leaveChapterAction
@@ -336,10 +379,10 @@ export async function leaveChapterAction(formData: FormData) {
 // updateMemberRoleAction
 // **********************************
 
-export async function updateMemberRoleAction(formData: FormData) {
+export async function updateMemberRoleAction(formData: FormData): Promise<ActionResult> {
+// export async function updateMemberRoleAction(formData: FormData) {
 
   // 2025oct07: reminder for self: update program so we have a single designated owner for each chapter, who is the only person that can manage the managers.  
-  
   try {
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
@@ -354,11 +397,14 @@ export async function updateMemberRoleAction(formData: FormData) {
       newRole: formData.get('newRole')
     });
 
+    // if (!parseResult.success) {
+    //   return {
+    //     success: false,
+    //     error: 'Invalid request data'
+    //   };
+    // }
     if (!parseResult.success) {
-      return {
-        success: false,
-        error: 'Invalid request data'
-      };
+      return failure('Invalid request data');
     }
 
     const { chapterSlug, chapterMemberId, newRole } = parseResult.data; // Note: chapterMemberId is now a number thanks to .transform(Number) in schema
@@ -369,25 +415,31 @@ export async function updateMemberRoleAction(formData: FormData) {
       where: { slug: chapterSlug }
     })
     
+    // if (!chapter) {
+    //   // throw new Error('Chapter not found')
+    //   // CHANGE THIS:
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!chapter) {
-      // throw new Error('Chapter not found')
-      // CHANGE THIS:
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
     
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const actingUserStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
     
+    // if (!actingUserStatus.mgrMember) {
+    //   // throw new Error('Only managers can update member roles')
+    //   // CHANGE THIS:
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!actingUserStatus.mgrMember) {
-      // throw new Error('Only managers can update member roles')
-      // CHANGE THIS:
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
     
     // 4 - validate chapterMember exists
@@ -396,12 +448,15 @@ export async function updateMemberRoleAction(formData: FormData) {
       where: { id: chapterMemberId }
     })
 
+    // if (!targetMember) {
+    //   // throw new Error('Member not found')
+    //   return {
+    //     success: false,
+    //     error: 'Unable to process request'
+    //   };
+    // }
     if (!targetMember) {
-      // throw new Error('Member not found')
-      return {
-        success: false,
-        error: 'Unable to process request'
-      };
+      return failure('Unable to process request');
     }
 
     // 5 - prevent self-management
@@ -413,10 +468,11 @@ export async function updateMemberRoleAction(formData: FormData) {
 
     if (targetMember.userProfileId === authenticatedUserProfile.id) {
       // throw new Error('You cannot manage your own membership')
-      return {
-        success: false,
-        error: 'You cannot manage your own membership'
-      }
+      // return {
+      //   success: false,
+      //   error: 'You cannot manage your own membership'
+      // }
+      return failure('You cannot manage your own membership');
     }
 
     // 6 - validation passed: update the chapterMember record
@@ -442,10 +498,11 @@ export async function updateMemberRoleAction(formData: FormData) {
   // server side debugging
     console.error('Update member role error:', error);
   
-  return { 
-    success: false, 
-    error: 'Unable to update member role. Please try again.'
-  };
+  // return { 
+  //   success: false, 
+  //   error: 'Unable to update member role. Please try again.'
+  // };
+  return failure('Unable to update member role. Please try again.');
 }
 }
 
