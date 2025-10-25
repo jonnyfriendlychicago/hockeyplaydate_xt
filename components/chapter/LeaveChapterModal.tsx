@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { leaveChapterAction } from "@/app/(root)/[slug]/actions";
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
+import { useChapterError } from '@/lib/hooks/useChapterError';
 
 interface LeaveChapterModalProps {
   isOpen: boolean;
@@ -24,39 +25,43 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   
   // const [error, setError] = useState<string | null>(null);
   // CHANGED: Replace simple useState with sessionStorage-backed state
-  const [error, setError] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      // const saved = sessionStorage.getItem('leaveChapterError');
-      const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
-      if (saved) {
-        // sessionStorage.removeItem('leaveChapterError');
-        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
-        return saved;
-      }
-    }
-    return null;
-  });
+  // const [error, setError] = useState<string | null>(() => {
+  //   if (typeof window !== 'undefined') {
+  //     // const saved = sessionStorage.getItem('leaveChapterError');
+  //     const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  //     if (saved) {
+  //       // sessionStorage.removeItem('leaveChapterError');
+  //       sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  //       return saved;
+  //     }
+  //   }
+  //   return null;
+  // });
 
-  // ADDED: Helper function to persist error through remounts
-  const setErrorWithPersist = (value: string | null) => {
-    setError(value);
-    if (typeof window !== 'undefined') {
-      if (value) {
-        // sessionStorage.setItem('leaveChapterError', value);
-        sessionStorage.setItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER, value);
-      } else {
-        // sessionStorage.removeItem('leaveChapterError');
-        sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
-      }
-    }
-  };
+  // // ADDED: Helper function to persist error through remounts
+  // const setErrorWithPersist = (value: string | null) => {
+  //   setError(value);
+  //   if (typeof window !== 'undefined') {
+  //     if (value) {
+  //       // sessionStorage.setItem('leaveChapterError', value);
+  //       sessionStorage.setItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER, value);
+  //     } else {
+  //       // sessionStorage.removeItem('leaveChapterError');
+  //       sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  //     }
+  //   }
+  // };
+  
+  // wow moment: all of above replaced with this one line, b/c of new utility design: 
+  const [error, setError] = useChapterError(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
 
   const handleSubmit = async () => {
     // if (!isConfirmed) return;
     if (!isConfirmed || isSubmitting) return;
     setIsSubmitting(true);
     // setError(null);
-    setErrorWithPersist(null); 
+    // setErrorWithPersist(null); 
+    setError(null);
     
     try {
       const formData = new FormData();
@@ -71,7 +76,8 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
 
       if (result && !result.success) {
         // setError(result.error || 'Unable to leave chapter');
-        setErrorWithPersist(result.error || 'Unable to leave chapter');  // CHANGED: Use setError
+        // setErrorWithPersist(result.error || 'Unable to leave chapter');  // CHANGED: Use setError
+        setError(result.error || 'Unable to leave chapter');
         setIsSubmitting(false);
         return;
       }
@@ -84,7 +90,8 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
         if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
           console.error('Leave chapter error:', error);
           // setError('Something went wrong. Please try again.');
-          setErrorWithPersist('Something went wrong. Please try again.');
+          // setErrorWithPersist('Something went wrong. Please try again.');
+          setError('Something went wrong. Please try again.');
           setIsSubmitting(false);
         }
     } 
@@ -94,7 +101,8 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   const handleCancel = () => {
     setConfirmText('');
     // setError(null);
-    setErrorWithPersist(null); 
+    // setErrorWithPersist(null); 
+    setError(null);
     onClose();
   };
 
