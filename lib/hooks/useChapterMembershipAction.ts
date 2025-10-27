@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ActionResult } from '@/lib/types/serverActionResults';
-import { setChapterError } from './useChapterError'; // TODO: Rename this file to useChapterMembershipError.ts
+import { setChapterError } from './useChapterMembershipError'; 
 import { ChapterErrorKey } from '@/lib/constants/errorKeys';
 
 /**

@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { LeaveChapterModal } from "./LeaveChapterModal";
 // import { useEffect } from 'react';
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys'; 
-import { useChapterError } from '@/lib/hooks/useChapterError';
+import { useChapterError } from '@/lib/hooks/useChapterMembershipError';
 
 interface MembershipTabClientProps {
   membership: {

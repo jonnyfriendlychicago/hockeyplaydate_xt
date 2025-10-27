@@ -1,4 +1,4 @@
-// lib/hooks/useChapterError.ts
+// lib/hooks/useChapterMembershipError.ts
 
 // devNotes: 2025oct25: this file (and related imports in other files) needs to be renamed: useChapterMembershipError.ts
 // TODO: Rename useChapterError.ts → useChapterMembershipError.ts
