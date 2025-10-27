@@ -10,6 +10,8 @@ import { getMaskedRole } from "@/lib/types/chapterMember";
 import { format } from "date-fns";
 import { LeaveChapterModal } from "./LeaveChapterModal";
 // import { useEffect } from 'react';
+import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys'; 
+import { useChapterError } from '@/lib/hooks/useChapterError';
 
 interface MembershipTabClientProps {
   membership: {
@@ -35,25 +37,35 @@ export function MembershipTabClient({ membership, isSoleManager, chapterSlug, ch
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
   // Check for persisted error on mount
-  const [modalError, setModalError] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('leaveChapterError');
-      if (saved) {
-        sessionStorage.removeItem('leaveChapterError');
-        return saved;
-      }
-    }
-    return null;
-  });
+  // const [modalError, setModalError] = useState<string | null>(() => {
+  //   if (typeof window !== 'undefined') {
+  //     // const saved = sessionStorage.getItem('leaveChapterError');
+  //     const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  //     if (saved) {
+  //       // sessionStorage.removeItem('leaveChapterError');
+  //       sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  //       return saved;
+  //     }
+  //   }
+  //   return null;
+  // });
+
+  const [modalError, setModalError] = useChapterError(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
 
   // Clear error when opening modal
+  // const openModal = () => {
+  //   setModalError(null);
+  //   if (typeof window !== 'undefined') {
+  //     // sessionStorage.removeItem('leaveChapterError');
+  //     sessionStorage.removeItem(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER); 
+  //   }
+  //   setIsLeaveModalOpen(true);
+  // };
+
   const openModal = () => {
-    setModalError(null);
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('leaveChapterError');
-    }
-    setIsLeaveModalOpen(true);
-  };
+  setModalError(null);
+  setIsLeaveModalOpen(true);
+};
 
   // // Add debugging
   // const closeModal = () => {
