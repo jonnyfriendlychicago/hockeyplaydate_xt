@@ -16,8 +16,8 @@ export type ChapterErrorKey = typeof CHAPTER_ERROR_KEYS[keyof typeof CHAPTER_ERR
 
 // User-friendly action descriptions for each error key; the quoted material is what displays to the user, make it whatever you want
 export const ERROR_ACTION_DESCRIPTIONS: Record<ChapterErrorKey, string> = {
-  [CHAPTER_ERROR_KEYS.JOIN_CHAPTER]: 'join the chapter COLTRANE',
-  [CHAPTER_ERROR_KEYS.CANCEL_JOIN_REQUEST]: 'cancel your join request COLTRANE',
-  [CHAPTER_ERROR_KEYS.LEAVE_CHAPTER]: 'leave the chapter COLTRANE',
-  [CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT]: 'update user membership status COLTRANE',
+  [CHAPTER_ERROR_KEYS.JOIN_CHAPTER]: 'join the chapter',
+  [CHAPTER_ERROR_KEYS.CANCEL_JOIN_REQUEST]: 'cancel your join request',
+  [CHAPTER_ERROR_KEYS.LEAVE_CHAPTER]: 'leave the chapter',
+  [CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT]: 'update user membership status',
 };
