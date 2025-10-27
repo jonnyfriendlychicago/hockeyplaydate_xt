@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { leaveChapterAction } from "@/app/(root)/[slug]/actions";
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
-import { useChapterError } from '@/lib/hooks/useChapterError';
+// import { useChapterError } from '@/lib/hooks/useChapterError';
+import { useChapterMembershipAction } from '@/lib/hooks/useChapterMembershipAction';
 
 interface LeaveChapterModalProps {
   isOpen: boolean;
@@ -21,7 +22,6 @@ interface LeaveChapterModalProps {
 export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }: LeaveChapterModalProps) {
   const [confirmText, setConfirmText] = useState('');
   const isConfirmed = confirmText.toLowerCase() === 'leave';
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // const [error, setError] = useState<string | null>(null);
   // CHANGED: Replace simple useState with sessionStorage-backed state
@@ -53,56 +53,86 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   // };
   
   // wow moment: all of above replaced with this one line, b/c of new utility design: 
-  const [error, setError] = useChapterError(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  // const [error, setError] = useChapterError(CHAPTER_ERROR_KEYS.LEAVE_CHAPTER);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
-    // if (!isConfirmed) return;
-    if (!isConfirmed || isSubmitting) return;
-    setIsSubmitting(true);
-    // setError(null);
-    // setErrorWithPersist(null); 
-    setError(null);
-    
-    try {
-      const formData = new FormData();
-      formData.append('chapterSlug', chapterSlug);
-      // below for testing
-      // console.log(chapterSlug)
-      // const bogusChapterSlug = 'some-baloney!$'
-      // formData.append('chapterSlug', bogusChapterSlug);
-      
-      // await leaveChapterAction(formData);
-      const result = await leaveChapterAction(formData);
-
-      if (result && !result.success) {
-        // setError(result.error || 'Unable to leave chapter');
-        // setErrorWithPersist(result.error || 'Unable to leave chapter');  // CHANGED: Use setError
-        setError(result.error || 'Unable to leave chapter');
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Reset and close
+  // and now, those two lines are replaced by below, in order to enable new streamlined submit/cancel function
+  // Hook for leave chapter action
+  const { 
+    executeAction, 
+    isSubmitting, 
+    error, 
+    clearError 
+  } = useChapterMembershipAction({
+    errorKey: CHAPTER_ERROR_KEYS.LEAVE_CHAPTER,
+    onSuccess: () => {
       setConfirmText('');
       onClose();
-    } catch (error) {
-      // Handle unexpected errors (redirects throw and that's ok)
-        if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
-          console.error('Leave chapter error:', error);
-          // setError('Something went wrong. Please try again.');
-          // setErrorWithPersist('Something went wrong. Please try again.');
-          setError('Something went wrong. Please try again.');
-          setIsSubmitting(false);
-        }
-    } 
-    setIsSubmitting(false);
+    }
+  });
+
+  // const handleSubmit = async () => {
+  //   // if (!isConfirmed) return;
+  //   if (!isConfirmed || isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   // setError(null);
+  //   // setErrorWithPersist(null); 
+  //   setError(null);
+    
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append('chapterSlug', chapterSlug);
+  //     // below for testing
+  //     // console.log(chapterSlug)
+  //     // const bogusChapterSlug = 'some-baloney!$'
+  //     // formData.append('chapterSlug', bogusChapterSlug);
+      
+  //     // await leaveChapterAction(formData);
+  //     const result = await leaveChapterAction(formData);
+
+  //     if (result && !result.success) {
+  //       // setError(result.error || 'Unable to leave chapter');
+  //       // setErrorWithPersist(result.error || 'Unable to leave chapter');  // CHANGED: Use setError
+  //       setError(result.error || 'Unable to leave chapter');
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+      
+  //     // Reset and close
+  //     setConfirmText('');
+  //     onClose();
+  //   } catch (error) {
+  //     // Handle unexpected errors (redirects throw and that's ok)
+  //       if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
+  //         console.error('Leave chapter error:', error);
+  //         // setError('Something went wrong. Please try again.');
+  //         // setErrorWithPersist('Something went wrong. Please try again.');
+  //         setError('Something went wrong. Please try again.');
+  //         setIsSubmitting(false);
+  //       }
+  //   } 
+  //   setIsSubmitting(false);
+  // };
+
+  const handleSubmit = async () => {
+  if (!isConfirmed || isSubmitting) return;  
+    await executeAction(leaveChapterAction, { chapterSlug });
+    // below is for testing
+    // console.log(chapterSlug); 
+    // await executeAction(leaveChapterAction, { chapterSlug: 'BAD-SLUG' }); 
   };
+
+  // const handleCancel = () => {
+  //   setConfirmText('');
+  //   // setError(null);
+  //   // setErrorWithPersist(null); 
+  //   setError(null);
+  //   onClose();
+  // };
 
   const handleCancel = () => {
     setConfirmText('');
-    // setError(null);
-    // setErrorWithPersist(null); 
-    setError(null);
+    clearError();
     onClose();
   };
 
