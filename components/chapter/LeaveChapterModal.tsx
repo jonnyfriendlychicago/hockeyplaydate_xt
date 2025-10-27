@@ -116,10 +116,10 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
 
   const handleSubmit = async () => {
   if (!isConfirmed || isSubmitting) return;  
-    // await executeAction(leaveChapterAction, { chapterSlug });
+    await executeAction(leaveChapterAction, { chapterSlug });
     // below is for testing
     console.log(chapterSlug); 
-    await executeAction(leaveChapterAction, { chapterSlug: 'BAD-SLUG' }); 
+    // await executeAction(leaveChapterAction, { chapterSlug: 'BAD-SLUG' }); 
   };
 
   // const handleCancel = () => {

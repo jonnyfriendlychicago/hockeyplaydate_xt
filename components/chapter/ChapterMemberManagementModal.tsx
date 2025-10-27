@@ -164,13 +164,13 @@ export function ChapterMemberManagementModal({
   if (!selectedAction || isSubmitting) return;
 
   await executeAction(updateMemberRoleAction, {
-    // chapterSlug,
-    // chapterMemberId: member.id.toString(),
-    // newRole: selectedAction
-  // below forced error for testing
     chapterSlug,
-    chapterMemberId: 'INVALID-ID',
+    chapterMemberId: member.id.toString(),
     newRole: selectedAction
+  // below forced error for testing
+    // chapterSlug,
+    // chapterMemberId: 'INVALID-ID',
+    // newRole: selectedAction
   });
 };
 
