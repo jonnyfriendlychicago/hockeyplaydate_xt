@@ -144,9 +144,9 @@ export function JoinChapterButton({
   // above replaced with these five lines
     const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await executeJoinAction(joinChapterAction, { chapterSlug });
+    // await executeJoinAction(joinChapterAction, { chapterSlug });
     // below forces errors for testing 
-    // await executeJoinAction(joinChapterAction, { chapterSlug: 'BAD-SLUG!!!' }); 
+    await executeJoinAction(joinChapterAction, { chapterSlug: 'BAD-SLUG!!!' }); 
   };
 
 
@@ -184,9 +184,9 @@ export function JoinChapterButton({
   // all of above replaced with these next 5 lines
   const handleCancelSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await executeCancelAction(cancelJoinRequestAction, { chapterSlug });
+    // await executeCancelAction(cancelJoinRequestAction, { chapterSlug });
     // below forces errors for testing 
-    // await executeCancelAction(cancelJoinRequestAction, { chapterSlug: 'bad-slug' });
+    await executeCancelAction(cancelJoinRequestAction, { chapterSlug: 'bad-slug' });
   };
 
   // Authenticated visitors and removed members - show join button
