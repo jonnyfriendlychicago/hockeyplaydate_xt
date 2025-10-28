@@ -11,11 +11,13 @@ import { format } from "date-fns";
 import { LeaveChapterModal } from "./LeaveChapterModal";
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys'; 
 import { useChapterError } from '@/lib/hooks/useChapterMembershipError';
+import { type MemberRoleValue } from '@/lib/constants/membershipEnums';
 
 interface MembershipTabClientProps {
   membership: {
     id: number;
-    memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+    // memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+    memberRole: MemberRoleValue; 
     joinedAt: Date;
   };
   isSoleManager: boolean;

@@ -13,6 +13,7 @@ import { chapterSlugSchema, updateMemberRoleSchema
 import { ActionResult, 
   // success, // if future actions DO return success data (like creating an event and returning its ID), then we'll need this imported function
   failure } from '@/lib/types/serverActionResults';
+  import { MemberRole } from '@/lib/constants/membershipEnums';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
@@ -99,7 +100,8 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
       await prisma.chapterMember.update({
         where: { id: userStatus.membership.id },
         data: {
-          memberRole: 'APPLICANT',
+          // memberRole: 'APPLICANT',
+          memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 
           updatedBy: authenticatedUserProfile.id,
@@ -111,7 +113,8 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
         data: {
           chapterId: chapter.id,
           userProfileId: authenticatedUserProfile.id,
-          memberRole: 'APPLICANT',
+          // memberRole: 'APPLICANT',
+          memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 
           updatedBy: authenticatedUserProfile.id,
@@ -179,7 +182,8 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
     await prisma.chapterMember.update({
       where: { id: userStatus.membership!.id },
       data: {
-        memberRole: 'REMOVED',
+        // memberRole: 'REMOVED',
+        memberRole: MemberRole.REMOVED,
         updatedBy: authenticatedUserProfile.id
       }
     })
@@ -246,7 +250,8 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
       const managerCount = await prisma.chapterMember.count({
         where: {
           chapterId: chapter.id,
-          memberRole: 'MANAGER'
+          // memberRole: 'MANAGER'
+          memberRole: MemberRole.MANAGER 
         }
       });
 
@@ -259,7 +264,8 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
     await prisma.chapterMember.update({
       where: { id: userStatus.membership.id },
       data: {
-        memberRole: 'REMOVED',
+        // memberRole: 'REMOVED',
+        memberRole: MemberRole.REMOVED,
         updatedBy: authenticatedUserProfile.id
       }
     })

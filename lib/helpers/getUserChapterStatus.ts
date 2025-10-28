@@ -2,6 +2,7 @@
 // 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this someday. 
 
 import { prisma } from '@/lib/prisma';
+import { MemberRole, type MemberRoleValue } from '@/lib/constants/membershipEnums';
 
 // prereqs: define types
 
@@ -15,7 +16,8 @@ type ChapterMembership = {
   id: number;
   chapterId: number;
   userProfileId: number;
-  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  // memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  memberRole: MemberRoleValue;
   joinedAt: Date;
   joinRequestCount: number | null; 
   joinRequestWindowStart: Date | null; 
@@ -76,15 +78,26 @@ export async function getUserChapterStatus(
 
      if (!membership) {
       authVisitor = true;
-    } else if (membership.memberRole === 'APPLICANT') {
+    // } else if (membership.memberRole === 'APPLICANT') {
+    //   applicant = true;
+    // } else if (membership.memberRole === 'MEMBER') {
+    //   genMember = true;
+    // } else if (membership.memberRole === 'MANAGER') {
+    //   mgrMember = true;
+    // } else if (membership.memberRole === 'BLOCKED') {
+    //   blockedMember = true;
+    // } else if (membership.memberRole === 'REMOVED') {
+    //   removedMember = true;
+    // }
+    } else if (membership.memberRole === MemberRole.APPLICANT) {
       applicant = true;
-    } else if (membership.memberRole === 'MEMBER') {
+    } else if (membership.memberRole === MemberRole.MEMBER) {
       genMember = true;
-    } else if (membership.memberRole === 'MANAGER') {
+    } else if (membership.memberRole === MemberRole.MANAGER) {
       mgrMember = true;
-    } else if (membership.memberRole === 'BLOCKED') {
+    } else if (membership.memberRole === MemberRole.BLOCKED) {
       blockedMember = true;
-    } else if (membership.memberRole === 'REMOVED') {
+    } else if (membership.memberRole === MemberRole.REMOVED) {
       removedMember = true;
     }
   }

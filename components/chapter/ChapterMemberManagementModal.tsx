@@ -27,6 +27,7 @@ import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/ty
 import { updateMemberRoleAction } from "@/app/(root)/[slug]/actions";
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useChapterMembershipAction } from '@/lib/hooks/useChapterMembershipAction';
+import { MANAGEABLE_ROLES } from '@/lib/constants/membershipEnums';
 
 interface ChapterMemberManagementModalProps {
   member: ChapterMemberWithProfile | null;
@@ -35,9 +36,13 @@ interface ChapterMemberManagementModalProps {
   chapterSlug: string; 
 }
 
+// function getAvailableActions(currentRole: string): string[] {
+//   const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']; // Don't show current role or APPLICANT (can't go back to applicant)
+//   return allRoles.filter(role => role !== currentRole);
+// }
+
 function getAvailableActions(currentRole: string): string[] {
-  const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']; // Don't show current role or APPLICANT (can't go back to applicant)
-  return allRoles.filter(role => role !== currentRole);
+  return MANAGEABLE_ROLES.filter(role => role !== currentRole);
 }
 
 export function ChapterMemberManagementModal({ 
