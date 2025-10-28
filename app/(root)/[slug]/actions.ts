@@ -442,8 +442,9 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
       return failure('Unable to process request');
     }
     
-    // 4 - validate chapterMember exists
+    // 4 - validate chapterMember exists and belongs to target chapter (i.e. chapter that acting user is manager of)
     // const chapterMemberId = parseInt(formData.get('chapterMemberId') as string)
+    // 4.1 - verify record exists
     const targetMember = await prisma.chapterMember.findUnique({
       where: { id: chapterMemberId }
     })
@@ -457,6 +458,14 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
     // }
     if (!targetMember) {
       return failure('Unable to process request');
+    }
+
+    // 4.2 - verify target is applicant/etc. of this chapter
+    if (targetMember.chapterId !== chapter.id) {
+      return { 
+        success: false, 
+        error: 'Unauthorized: Cannot modify members from other chapters' 
+      };
     }
 
     // 5 - prevent self-management
