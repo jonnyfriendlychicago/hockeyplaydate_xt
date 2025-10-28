@@ -52,7 +52,6 @@ interface UseChapterMembershipActionReturn {
    */
   isSubmitting: boolean;
   
-
 }
 
 /**
@@ -104,18 +103,11 @@ export function useChapterMembershipAction(
   } = options;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
-
-  // const clearError = () => {
-  //   setError(null);
-  // };
 
   const executeAction = async (
     action: (formData: FormData) => Promise<ActionResult>,
     data: Record<string, string>
   ): Promise<void> => {
-    // Clear any previous errors
-    // setError(null);
     setIsSubmitting(true);
 
     try {
@@ -131,24 +123,17 @@ export function useChapterMembershipAction(
       // Handle action failure
       if (result && !result.success) {
         const errorMessage = result.error || defaultErrorMessage;
-        console.log('Error detected:', errorMessage);
-        
-        // Set local error state
-        // setError(errorMessage);
         
         // Persist to sessionStorage if errorKey provided
         if (errorKey) {
-          console.log('Persisting error to sessionStorage');
           setChapterError(errorKey, errorMessage);
         }
         
         // Call error callback if provided
         if (onError) {
-          console.log('Calling onError callback');
           onError(errorMessage);
         }
         
-        console.log('About to return (skip onSuccess)');
         setIsSubmitting(false);
         return;
       }
@@ -193,7 +178,5 @@ export function useChapterMembershipAction(
   return {
     executeAction,
     isSubmitting,
-    // error,
-    // clearError
   };
 }

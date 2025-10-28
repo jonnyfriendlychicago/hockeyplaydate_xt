@@ -1,5 +1,5 @@
 // lib/helpers/getUserChapterStatus.ts
-// 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this soon. 
+// 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this someday. 
 
 import { prisma } from '@/lib/prisma';
 
@@ -15,7 +15,6 @@ type ChapterMembership = {
   id: number;
   chapterId: number;
   userProfileId: number;
-  // memberRole: 'MEMBER' | 'MANAGER' | 'BLOCKED';
   memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
   joinedAt: Date;
   joinRequestCount: number | null; 
@@ -75,19 +74,6 @@ export async function getUserChapterStatus(
       },
     });
 
-    // if (!membership) {
-    //   // Logged in but not a member of this chapter
-    //   authVisitor = true;
-    // } else if (membership.memberRole === 'BLOCKED') {
-    //   // Member but blocked
-    //   blockedMember = true;
-    // } else if (membership.memberRole === 'MANAGER') {
-    //   // Manager member
-    //   mgrMember = true;
-    // } else {
-    //   // Regular member (memberRole === 'MEMBER')
-    //   genMember = true;
-    // }
      if (!membership) {
       authVisitor = true;
     } else if (membership.memberRole === 'APPLICANT') {

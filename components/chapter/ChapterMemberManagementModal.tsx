@@ -26,7 +26,6 @@ import { Badge } from "@/components/ui/badge";
 import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
 import { updateMemberRoleAction } from "@/app/(root)/[slug]/actions";
 import { CHAPTER_ERROR_KEYS } from '@/lib/constants/errorKeys';
-// import { useChapterError } from '@/lib/hooks/useChapterError';
 import { useChapterMembershipAction } from '@/lib/hooks/useChapterMembershipAction';
 
 interface ChapterMemberManagementModalProps {
@@ -45,44 +44,21 @@ export function ChapterMemberManagementModal({
   member, 
   isOpen, 
   onClose, 
-  chapterSlug // again, why now? 
+  chapterSlug 
 }: ChapterMemberManagementModalProps) {
   
-  
-  
-  // instead of the simple useState for error, use sessionStorage-backed version:
-  // const [error, setError] = useState<string | null>(() => {
-  //   if (typeof window !== 'undefined') {
-  //     // const saved = sessionStorage.getItem('memberManagementError');
-  //     const saved = sessionStorage.getItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
-  //     if (saved) {
-  //       // sessionStorage.removeItem('memberManagementError');
-  //       sessionStorage.removeItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
-  //       return saved;
-  //     }
-  //   }
-  //   return null;
-  // });
-  
-  // const [error, setError] = useChapterError(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
-  // const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  // const [isSubmitting, setIsSubmitting] = useState(false);  
-
-  // and now, all of above is replaced with new hook program:
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
   const { 
     executeAction, 
     isSubmitting, 
-    // error, 
-    // clearError 
   } = useChapterMembershipAction({
     errorKey: CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT,
     onSuccess: () => {
       setSelectedAction(null);
       onClose();
     }, 
-    onError: () => {  // ← ADD THIS
+    onError: () => {  
       setSelectedAction(null);
       onClose();
     }
@@ -95,99 +71,26 @@ export function ChapterMemberManagementModal({
   const currentStatus = getMaskedRole(member.memberRole);
   const availableActions = getAvailableActions(member.memberRole);
 
-  // helper function to persist error:
-  // const setErrorWithPersist = (value: string | null) => {
-  //   setError(value);
-  //   if (typeof window !== 'undefined') {
-  //     if (value) {
-  //       // sessionStorage.setItem('memberManagementError', value);
-  //       sessionStorage.setItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT, value);
-  //     } else {
-  //       // sessionStorage.removeItem('memberManagementError');
-  //       sessionStorage.removeItem(CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT);
-  //     }
-  //   }
-  // };
-
-
-  // const handleActionSelect = (action: string) => {
-  //   setSelectedAction(action);
-  //   // setErrorWithPersist(null)
-  //   setError(null)
-  // };
-
   const handleActionSelect = (action: string) => {
     setSelectedAction(action);
-    // clearError();
   };
 
-  // const handleSubmit = async () => {
-  //   if (!selectedAction || isSubmitting) return;  // ADD isSubmitting CHECK
-
-  //   setIsSubmitting(true);  
-
-  //   try {
-  //     // call server action to update member role
-  //     const formData = new FormData();
-  //     formData.append('chapterSlug', chapterSlug);
-  //     formData.append('chapterMemberId', member.id.toString());
-  //     formData.append('newRole', selectedAction);
-  //     // below for testing
-  //     // formData.append('chapterSlug', chapterSlug);
-  //     // formData.append('chapterMemberId', 'INVALID-ID');
-  //     // formData.append('newRole', selectedAction);
-
-  //     const result = await updateMemberRoleAction(formData);
-
-  //     // check if action failed
-  //     if (result && !result.success) {
-  //       // setErrorWithPersist(result.error || 'Unable to update member role');
-  //       setError(result.error || 'Unable to update member role');
-  //       setSelectedAction(null);  // ADD THIS - clear selection on error
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-      
-  //     // Reset and close only on success
-  //     setSelectedAction(null);
-  //     onClose();
-
-  //   } catch (error) {
-  //     if (!(error instanceof Error && error.message.includes('NEXT_REDIRECT'))) {
-  //       console.error('Unexpected error:', error);
-  //       // setErrorWithPersist('Something went wrong. Please try again.');
-  //       setError('Something went wrong. Please try again.');
-  //     }
-
-  //   } finally {
-  //     setIsSubmitting(false);  // this line always resets the loading state
-  //   }
-  // };
-
   const handleSubmit = async () => {
-  if (!selectedAction || isSubmitting) return;
+    if (!selectedAction || isSubmitting) return;
 
-  await executeAction(updateMemberRoleAction, {
-    chapterSlug,
-    chapterMemberId: member.id.toString(),
-    newRole: selectedAction
-  // below forced error for testing
-    // chapterSlug,
-    // chapterMemberId: 'INVALID-ID',
-    // newRole: selectedAction
-  });
-};
-
-  // const handleCancel = () => {
-  //   setSelectedAction(null);
-  //   // setErrorWithPersist(null)
-  //   setError(null)
-  //   onClose();
-  // };
+    await executeAction(updateMemberRoleAction, {
+      chapterSlug,
+      chapterMemberId: member.id.toString(),
+      newRole: selectedAction
+      // below forced error for testing
+        // chapterSlug,
+        // chapterMemberId: 'INVALID-ID',
+        // newRole: selectedAction
+      });
+  };
 
   const handleCancel = () => {
     setSelectedAction(null);
-    // clearError();
     onClose();
   };
 
@@ -199,11 +102,6 @@ export function ChapterMemberManagementModal({
           <DialogDescription>
             Update the status for {displayName}
           </DialogDescription>
-
-          {/* {error && (
-            <p className="text-red-600 text-sm mt-2">{error}</p>
-          )} */}
-
         </DialogHeader>
 
         <div className="space-y-4">

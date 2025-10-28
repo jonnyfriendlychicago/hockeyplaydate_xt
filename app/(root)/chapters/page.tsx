@@ -18,11 +18,6 @@ export default async function ChaptersPage() {
   // Authentication check
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();
 
-  // // Bounce if duplicate user
-  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
-  //   return redirect('/');
-  // }
-
   // Fetch all chapters with aggregated data
   const chaptersData = await prisma.chapter.findMany({
     include: {
@@ -78,7 +73,6 @@ export default async function ChaptersPage() {
       where: {
         userProfileId: authenticatedUserProfile.id,
         memberRole: {
-          // not: 'BLOCKED'
           in: ['MEMBER', 'MANAGER']  
         }
       },
