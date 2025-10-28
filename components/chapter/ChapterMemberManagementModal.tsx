@@ -74,11 +74,15 @@ export function ChapterMemberManagementModal({
   const { 
     executeAction, 
     isSubmitting, 
-    error, 
-    clearError 
+    // error, 
+    // clearError 
   } = useChapterMembershipAction({
     errorKey: CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT,
     onSuccess: () => {
+      setSelectedAction(null);
+      onClose();
+    }, 
+    onError: () => {  // ← ADD THIS
       setSelectedAction(null);
       onClose();
     }
@@ -114,7 +118,7 @@ export function ChapterMemberManagementModal({
 
   const handleActionSelect = (action: string) => {
     setSelectedAction(action);
-    clearError();
+    // clearError();
   };
 
   // const handleSubmit = async () => {
@@ -183,7 +187,7 @@ export function ChapterMemberManagementModal({
 
   const handleCancel = () => {
     setSelectedAction(null);
-    clearError();
+    // clearError();
     onClose();
   };
 
@@ -196,9 +200,9 @@ export function ChapterMemberManagementModal({
             Update the status for {displayName}
           </DialogDescription>
 
-          {error && (
+          {/* {error && (
             <p className="text-red-600 text-sm mt-2">{error}</p>
-          )}
+          )} */}
 
         </DialogHeader>
 

@@ -52,15 +52,7 @@ interface UseChapterMembershipActionReturn {
    */
   isSubmitting: boolean;
   
-  /**
-   * Error from the last action execution (if any)
-   */
-  error: string | null;
-  
-  /**
-   * Manually clear the error
-   */
-  clearError: () => void;
+
 }
 
 /**
@@ -77,7 +69,7 @@ interface UseChapterMembershipActionReturn {
  * 
  * @example
  * // In a modal component
- * const { executeAction, isSubmitting, error, clearError } = useChapterMembershipAction({
+ * const { executeAction, isSubmitting } = useChapterMembershipAction({
  *   errorKey: CHAPTER_ERROR_KEYS.LEAVE_CHAPTER,
  *   onSuccess: () => {
  *     setConfirmText('');
@@ -100,6 +92,7 @@ interface UseChapterMembershipActionReturn {
  *   await executeAction(joinChapterAction, { chapterSlug });
  * };
  */
+
 export function useChapterMembershipAction(
   options: UseChapterMembershipActionOptions = {}
 ): UseChapterMembershipActionReturn {
@@ -111,18 +104,18 @@ export function useChapterMembershipAction(
   } = options;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
 
-  const clearError = () => {
-    setError(null);
-  };
+  // const clearError = () => {
+  //   setError(null);
+  // };
 
   const executeAction = async (
     action: (formData: FormData) => Promise<ActionResult>,
     data: Record<string, string>
   ): Promise<void> => {
     // Clear any previous errors
-    setError(null);
+    // setError(null);
     setIsSubmitting(true);
 
     try {
@@ -138,20 +131,24 @@ export function useChapterMembershipAction(
       // Handle action failure
       if (result && !result.success) {
         const errorMessage = result.error || defaultErrorMessage;
+        console.log('Error detected:', errorMessage);
         
         // Set local error state
-        setError(errorMessage);
+        // setError(errorMessage);
         
         // Persist to sessionStorage if errorKey provided
         if (errorKey) {
+          console.log('Persisting error to sessionStorage');
           setChapterError(errorKey, errorMessage);
         }
         
         // Call error callback if provided
         if (onError) {
+          console.log('Calling onError callback');
           onError(errorMessage);
         }
         
+        console.log('About to return (skip onSuccess)');
         setIsSubmitting(false);
         return;
       }
@@ -175,7 +172,7 @@ export function useChapterMembershipAction(
       console.error('Chapter membership action execution error:', error);
       
       const errorMessage = defaultErrorMessage;
-      setError(errorMessage);
+      // setError(errorMessage);
       
       if (errorKey) {
         setChapterError(errorKey, errorMessage);
@@ -196,7 +193,7 @@ export function useChapterMembershipAction(
   return {
     executeAction,
     isSubmitting,
-    error,
-    clearError
+    // error,
+    // clearError
   };
 }

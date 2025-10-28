@@ -61,11 +61,17 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   const { 
     executeAction, 
     isSubmitting, 
-    error, 
-    clearError 
+    // error, 
+    // clearError 
   } = useChapterMembershipAction({
     errorKey: CHAPTER_ERROR_KEYS.LEAVE_CHAPTER,
     onSuccess: () => {
+      console.log('onSuccess called!');
+      setConfirmText('');
+      onClose();
+    },
+    onError: () => {  // ← ADD THIS
+      console.log('onError called!');
       setConfirmText('');
       onClose();
     }
@@ -115,11 +121,19 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
   // };
 
   const handleSubmit = async () => {
-  if (!isConfirmed || isSubmitting) return;  
+    console.log('🔵 handleSubmit called');
+    if (!isConfirmed || isSubmitting) {
+      console.log('Blocked by guard clause');
+      return;  
+    }
+
+    console.log('About to call executeAction');
     await executeAction(leaveChapterAction, { chapterSlug });
     // below is for testing
-    console.log(chapterSlug); 
+    // console.log(chapterSlug); 
     // await executeAction(leaveChapterAction, { chapterSlug: 'BAD-SLUG' }); 
+
+    console.log('executeAction completed');
   };
 
   // const handleCancel = () => {
@@ -132,7 +146,7 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
 
   const handleCancel = () => {
     setConfirmText('');
-    clearError();
+    // clearError();
     onClose();
   };
 
@@ -148,9 +162,9 @@ export function LeaveChapterModal({ isOpen, onClose, chapterSlug, chapterName }:
         </DialogHeader>
 
         <div className="space-y-4">
-          {error && (
+          {/* {error && (
             <p className="text-red-600 text-sm">{error}</p>
-          )}
+          )} */}
 
           <p className="text-sm text-muted-foreground">
             If you leave this chapter:
