@@ -1,6 +1,19 @@
 // lib/helpers/getUserChapterStatus.ts
 // 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this someday. 
 
+// TODO - REFACTORING OPPORTUNITY (2025oct28):
+// Now that we use MemberRole enums, the 7 boolean flags in this function are redundant.
+// Original purpose was to prevent typos like 'MANARGER', but enums solve that.
+// 
+// Proposed simplification:
+// - Keep: isAnonymous, membership object, isAuthenticated, isActiveMember, isManager
+// - Remove: applicant, genMember, mgrMember, blockedMember, removedMember booleans
+// - Use direct role checks: membership?.memberRole === MemberRole.APPLICANT
+// 
+// Benefits: Simpler, single source of truth, easier to add new roles (OWNER, QUIT, CANCELED)
+// Migration: Create new getUserChapterMembership() alongside this, migrate gradually, test thoroughly
+// See chat thread from 2025oct28 for detailed refactoring plan and code examples
+
 import { prisma } from '@/lib/prisma';
 import { MemberRole, type MemberRoleValue } from '@/lib/constants/membershipEnums';
 
