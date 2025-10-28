@@ -34,9 +34,6 @@ export default async function ChapterPage({ params }: { params: { slug: string }
   
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
-
-  // At the very top of ChapterPage function, after getting authenticatedUserProfile:
-  console.log('[ChapterPage] Rendering, user:', authenticatedUserProfile?.id);
   
   // 1 - load chapter v. notFound
   const slug = params.slug;

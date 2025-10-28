@@ -13,21 +13,20 @@ import { chapterSlugSchema, updateMemberRoleSchema
 import { ActionResult, 
   // success, // if future actions DO return success data (like creating an event and returning its ID), then we'll need this imported function
   failure } from '@/lib/types/serverActionResults';
+  import { MemberRole } from '@/lib/constants/membershipEnums';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
 // works great for forms that show validation errors on the same page, but breaks with redirects (required in our current architecture) because the component unmounts.
-// Only workable solution (for now?) seems to be this SessionStorage solution shown below.  Notably, to extent useStateForm could work, it's time is limited: 
+// Only workable solution (for now?) seems to be this SessionStorage solution referenced herein.  Notably, to extent useStateForm could work, it's time is limited: 
 // useFormState is being phased out; useActionState is the current recommended approach for React 19, etc. 
 
 // **********************************
 // joinChapterAction
 // **********************************
 
-// export async function joinChapterAction(formData: FormData) {
 export async function joinChapterAction(formData: FormData): Promise<ActionResult> {
   try {
-
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
@@ -38,13 +37,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
     const parseResult = chapterSlugSchema.safeParse({ // chapterSlugSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug')
     });
-
-    // if (!parseResult.success) {
-    //   return {
-    //     success: false,
-    //     error: 'Invalid request data'
-    //   };
-    // }
 
     if (!parseResult.success) {
       return failure('Invalid request data');
@@ -57,15 +49,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
     where: { slug: chapterSlug }
     })
 
-    // if (!chapter) {
-    //   // throw new Error('Chapter not found')
-    //   // CHANGED: Don't reveal whether chapter exists, even tho these are public, so who cares, really? 
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
-
     // Below won't reveal chapter non-existence, even tho these are public, so who cares, really? 
     if (!chapter) {
       return failure('Unable to process request');
@@ -75,14 +58,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
     const canJoin = userStatus.authVisitor || userStatus.removedMember
-    // if (!canJoin) {
-    //   // throw new Error('Invalid action for current membership status')
-    //   // CHANGED: Don't reveal membership status details
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
 
     if (!canJoin) {
       return failure('Unable to process request');
@@ -121,10 +96,12 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
 
     // 6 - Run the update/insert, including newWindowStart and newCount values derived above
     if (userStatus.removedMember && userStatus.membership) {
+      // record exists, e.g., applied/cancelled before, joined/left chapter before, etc.
       await prisma.chapterMember.update({
         where: { id: userStatus.membership.id },
         data: {
-          memberRole: 'APPLICANT',
+          // memberRole: 'APPLICANT',
+          memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 
           updatedBy: authenticatedUserProfile.id,
@@ -136,7 +113,8 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
         data: {
           chapterId: chapter.id,
           userProfileId: authenticatedUserProfile.id,
-          memberRole: 'APPLICANT',
+          // memberRole: 'APPLICANT',
+          memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 
           updatedBy: authenticatedUserProfile.id,
@@ -152,14 +130,10 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error;  // Re-throw redirects
     }
-
+    
     // Log the actual error server-side for debugging
     console.error('Join chapter error:', error);
 
-    // return { 
-    //   success: false, 
-    //   error: 'Unable to join chapter. Please try again.'
-    // };
     return failure('Unable to join chapter. Please try again.');
   }
 
@@ -169,7 +143,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
 // cancelJoinRequestAction
 // **********************************
 
-// export async function cancelJoinRequestAction(formData: FormData) {
 export async function cancelJoinRequestAction(formData: FormData): Promise<ActionResult> {
   try {
     // 0 - validate user, part 1: authenticated not-dupe user? 
@@ -183,12 +156,6 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
       chapterSlug: formData.get('chapterSlug')
     });
 
-    // if (!parseResult.success) {
-    //   return {
-    //     success: false,
-    //     error: 'Invalid request data'
-    //   };
-    // }
     if (!parseResult.success) {
       return failure('Invalid request data');
     }
@@ -200,14 +167,6 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
       where: { slug: chapterSlug }
     })
 
-    // if (!chapter) {
-    //   // throw new Error('Chapter not found')
-    //   // Don't leak information about chapter existence, although this is meaningless since chapter URLS are public
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!chapter) {
       return failure('Unable to process request');
     }
@@ -215,14 +174,6 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
-    // if (!userStatus.applicant) {
-    //   // throw new Error('Invalid action for current membership status')
-    //   // Don't leak membership status details
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!userStatus.applicant) {
       return failure('Unable to process request');
     }
@@ -231,7 +182,8 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
     await prisma.chapterMember.update({
       where: { id: userStatus.membership!.id },
       data: {
-        memberRole: 'REMOVED',
+        // memberRole: 'REMOVED',
+        memberRole: MemberRole.REMOVED,
         updatedBy: authenticatedUserProfile.id
       }
     })
@@ -249,10 +201,6 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
     // for server side debugging
     console.error('Cancel join error:', error);
 
-    // return { 
-    //   success: false, 
-    //   error: 'Unable to cancel request'
-    // };
     return failure('Unable to cancel request');
   }
 
@@ -263,9 +211,7 @@ export async function cancelJoinRequestAction(formData: FormData): Promise<Actio
 // **********************************
 
 export async function leaveChapterAction(formData: FormData): Promise<ActionResult> {
-// export async function leaveChapterAction(formData: FormData) {
   try {
-  
     // 0 - validate user, part 1: authenticated not-dupe user? 
     const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
     if (!authenticatedUserProfile) {
@@ -277,12 +223,6 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
       chapterSlug: formData.get('chapterSlug')
     });
 
-    // if (!parseResult.success) {
-    //   return {
-    //     success: false,
-    //     error: 'Invalid request data'
-    //   };
-    // }
     if (!parseResult.success) {
       return failure('Invalid request data');
     }
@@ -294,14 +234,6 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
       where: { slug: chapterSlug }
     })
 
-    // if (!chapter) {
-    //   // throw new Error('Chapter not found')
-    //   // CHANGE THIS:
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!chapter) {
       return failure('Unable to process request');
     }
@@ -309,14 +241,6 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const userStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
 
-    // if (!userStatus.membership) {
-    //   // throw new Error('You are not a member of this chapter')
-    //   // CHANGE THIS:
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!userStatus.membership) {
       return failure('Unable to process request');
     }
@@ -326,20 +250,11 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
       const managerCount = await prisma.chapterMember.count({
         where: {
           chapterId: chapter.id,
-          memberRole: 'MANAGER'
+          // memberRole: 'MANAGER'
+          memberRole: MemberRole.MANAGER 
         }
       });
 
-      // if (managerCount === 1) {
-      //   throw new Error('Cannot leave - you are the only manager. Promote another member first.')
-      // }
-      // if (managerCount === 1) {
-      //   // Return error instead of throwing
-      //   return {
-      //     success: false,
-      //     error: 'Cannot leave - you are the only manager. Promote another member first.'
-      //   }
-      // }
       if (managerCount === 1) {
         return failure('Cannot leave - you are the only manager. Promote another member first.');
         }
@@ -349,7 +264,8 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
     await prisma.chapterMember.update({
       where: { id: userStatus.membership.id },
       data: {
-        memberRole: 'REMOVED',
+        // memberRole: 'REMOVED',
+        memberRole: MemberRole.REMOVED,
         updatedBy: authenticatedUserProfile.id
       }
     })
@@ -366,10 +282,6 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
     //server side logging for debugging
     console.error('Leave chapter error:', error);
 
-    // return { 
-    //   success: false, 
-    //   error: 'Unable to leave chapter. Please try again.'
-    // };
     return failure('Unable to leave chapter. Please try again.');
   }
 
@@ -380,7 +292,6 @@ export async function leaveChapterAction(formData: FormData): Promise<ActionResu
 // **********************************
 
 export async function updateMemberRoleAction(formData: FormData): Promise<ActionResult> {
-// export async function updateMemberRoleAction(formData: FormData) {
 
   // 2025oct07: reminder for self: update program so we have a single designated owner for each chapter, who is the only person that can manage the managers.  
   try {
@@ -397,12 +308,6 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
       newRole: formData.get('newRole')
     });
 
-    // if (!parseResult.success) {
-    //   return {
-    //     success: false,
-    //     error: 'Invalid request data'
-    //   };
-    // }
     if (!parseResult.success) {
       return failure('Invalid request data');
     }
@@ -410,19 +315,10 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
     const { chapterSlug, chapterMemberId, newRole } = parseResult.data; // Note: chapterMemberId is now a number thanks to .transform(Number) in schema
 
     // 2 - validate chapter 
-    // const chapterSlug = formData.get('chapterSlug') as string
     const chapter = await prisma.chapter.findUnique({
       where: { slug: chapterSlug }
     })
     
-    // if (!chapter) {
-    //   // throw new Error('Chapter not found')
-    //   // CHANGE THIS:
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!chapter) {
       return failure('Unable to process request');
     }
@@ -430,33 +326,26 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
     // 3 - validate user, part 2: requisite chapterMember permissions? 
     const actingUserStatus = await getUserChapterStatus(chapter.id, authenticatedUserProfile)
     
-    // if (!actingUserStatus.mgrMember) {
-    //   // throw new Error('Only managers can update member roles')
-    //   // CHANGE THIS:
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!actingUserStatus.mgrMember) {
       return failure('Unable to process request');
     }
     
-    // 4 - validate chapterMember exists
-    // const chapterMemberId = parseInt(formData.get('chapterMemberId') as string)
+    // 4 - validate chapterMember exists and belongs to target chapter (i.e. chapter that acting user is manager of)
+    // 4.1 - verify record exists
     const targetMember = await prisma.chapterMember.findUnique({
       where: { id: chapterMemberId }
     })
 
-    // if (!targetMember) {
-    //   // throw new Error('Member not found')
-    //   return {
-    //     success: false,
-    //     error: 'Unable to process request'
-    //   };
-    // }
     if (!targetMember) {
       return failure('Unable to process request');
+    }
+
+    // 4.2 - verify target is applicant/etc. of this chapter
+    if (targetMember.chapterId !== chapter.id) {
+      return { 
+        success: false, 
+        error: 'Unauthorized: Cannot modify members from other chapters' 
+      };
     }
 
     // 5 - prevent self-management
@@ -467,11 +356,6 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
     // allowing managers to affect themselves seems to be very error prone.  
 
     if (targetMember.userProfileId === authenticatedUserProfile.id) {
-      // throw new Error('You cannot manage your own membership')
-      // return {
-      //   success: false,
-      //   error: 'You cannot manage your own membership'
-      // }
       return failure('You cannot manage your own membership');
     }
 
@@ -490,19 +374,15 @@ export async function updateMemberRoleAction(formData: FormData): Promise<Action
     redirect(`/${chapterSlug}`)
 
   } catch (error) {
-  // Handle redirect errors
-  if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-    throw error;
-  }
+    // Handle redirect errors
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
 
-  // server side debugging
+    // server side debugging
     console.error('Update member role error:', error);
   
-  // return { 
-  //   success: false, 
-  //   error: 'Unable to update member role. Please try again.'
-  // };
-  return failure('Unable to update member role. Please try again.');
-}
+    return failure('Unable to update member role. Please try again.');
+  }
 }
 

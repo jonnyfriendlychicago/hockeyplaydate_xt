@@ -3,6 +3,7 @@
 import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
 import { prisma } from "@/lib/prisma";
 import { ChapterMembersListClient } from "./ChapterMembersListClient";
+import { MemberRole } from '@/lib/constants/membershipEnums';
 
 type MemberFilter = 'applicants' | 'members' | 'restricted';
 
@@ -35,7 +36,8 @@ async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
     return await prisma.chapterMember.findMany({
       where: {
         chapterId,
-        memberRole: 'APPLICANT'
+        // memberRole: 'APPLICANT'
+        memberRole: MemberRole.APPLICANT
       },
       include: {
         userProfile: {
@@ -61,7 +63,8 @@ async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
     return await prisma.chapterMember.findMany({
       where: {
         chapterId,
-        memberRole: { in: ['MEMBER', 'MANAGER'] }
+        // memberRole: { in: ['MEMBER', 'MANAGER'] }
+        memberRole: { in: [MemberRole.MEMBER, MemberRole.MANAGER] }
       },
       include: {
         userProfile: {
@@ -87,7 +90,8 @@ async function getFilteredMembers(chapterId: number, filter: MemberFilter) {
   return await prisma.chapterMember.findMany({
     where: {
       chapterId,
-      memberRole: { in: ['BLOCKED', 'REMOVED'] }
+      // memberRole: { in: ['BLOCKED', 'REMOVED'] }
+      memberRole: { in: [MemberRole.BLOCKED, MemberRole.REMOVED] }
     },
     include: {
       userProfile: {

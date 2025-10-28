@@ -28,12 +28,6 @@ export default async function MemberPage({ params }: { params: { slug: string } 
       const returnTo = `/member/${params.slug}`;
       redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
-  
-    // if (authenticatedUser?.authUser.duplicateOfId) {
-    //   console.log("dupe authenticated user - redirect home")
-    //      redirect('/');
-    //      // devNotes: please do not type above line as `return redirect('/');`  Such will work in development but not ubuntu server in production.
-    //   }
 
   // 1- validate target user profile
   const presentedUserProfile = await prisma.userProfile.findFirst({
@@ -67,32 +61,6 @@ export default async function MemberPage({ params }: { params: { slug: string } 
     
     // 2.2 - create array of IDs of those chapters
     const authUserChapterIds = authUserChapters.map(cm => cm.chapterId);
-
-    // // 2.3 - check if presented user is in any of those chapters as MEMBER or MANAGER
-    // const sharedChapter = await prisma.chapterMember.findFirst({ // doing 'findFirst' b/c as soon as even one is found, then BOOM, they are chapter siblings.
-    //   where: {
-    //     userProfileId: presentedUserProfile.id,
-    //     chapterId: { in: authUserChapterIds },
-    //     memberRole: { in: ['MEMBER', 'MANAGER'] }
-    //   }
-    // });
-
-    // // No shared chapters - deny access
-    // if (!sharedChapter) {
-    //   // return notFound();
-    //   return (
-    //     <section className="max-w-6xl mx-auto p-6 text-center py-12">
-    //       <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
-    //       <p className="text-muted-foreground mb-4">
-    //         Sorry, you do not have permission to view this profile.
-    //       </p>
-    //       <p className="text-sm text-muted-foreground">
-    //         You can only view profiles of members in your chapters.
-    //       </p>
-    //     </section>
-    //   );
-
-    // above replaced by below; above wrongly prevented managers from seeing applicants/removeds/blocks
 
     // 2.3 - check if presented user shares any chapters with auth user
     // Two scenarios allow viewing:

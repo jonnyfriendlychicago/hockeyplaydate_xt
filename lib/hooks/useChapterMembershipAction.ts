@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ActionResult } from '@/lib/types/serverActionResults';
-import { setChapterError } from './useChapterError'; // TODO: Rename this file to useChapterMembershipError.ts
+import { setChapterError } from './useChapterMembershipError'; 
 import { ChapterErrorKey } from '@/lib/constants/errorKeys';
 
 /**
@@ -52,15 +52,6 @@ interface UseChapterMembershipActionReturn {
    */
   isSubmitting: boolean;
   
-  /**
-   * Error from the last action execution (if any)
-   */
-  error: string | null;
-  
-  /**
-   * Manually clear the error
-   */
-  clearError: () => void;
 }
 
 /**
@@ -77,7 +68,7 @@ interface UseChapterMembershipActionReturn {
  * 
  * @example
  * // In a modal component
- * const { executeAction, isSubmitting, error, clearError } = useChapterMembershipAction({
+ * const { executeAction, isSubmitting } = useChapterMembershipAction({
  *   errorKey: CHAPTER_ERROR_KEYS.LEAVE_CHAPTER,
  *   onSuccess: () => {
  *     setConfirmText('');
@@ -100,6 +91,7 @@ interface UseChapterMembershipActionReturn {
  *   await executeAction(joinChapterAction, { chapterSlug });
  * };
  */
+
 export function useChapterMembershipAction(
   options: UseChapterMembershipActionOptions = {}
 ): UseChapterMembershipActionReturn {
@@ -111,18 +103,11 @@ export function useChapterMembershipAction(
   } = options;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const clearError = () => {
-    setError(null);
-  };
 
   const executeAction = async (
     action: (formData: FormData) => Promise<ActionResult>,
     data: Record<string, string>
   ): Promise<void> => {
-    // Clear any previous errors
-    setError(null);
     setIsSubmitting(true);
 
     try {
@@ -138,9 +123,6 @@ export function useChapterMembershipAction(
       // Handle action failure
       if (result && !result.success) {
         const errorMessage = result.error || defaultErrorMessage;
-        
-        // Set local error state
-        setError(errorMessage);
         
         // Persist to sessionStorage if errorKey provided
         if (errorKey) {
@@ -175,7 +157,7 @@ export function useChapterMembershipAction(
       console.error('Chapter membership action execution error:', error);
       
       const errorMessage = defaultErrorMessage;
-      setError(errorMessage);
+      // setError(errorMessage);
       
       if (errorKey) {
         setChapterError(errorKey, errorMessage);
@@ -196,7 +178,5 @@ export function useChapterMembershipAction(
   return {
     executeAction,
     isSubmitting,
-    error,
-    clearError
   };
 }

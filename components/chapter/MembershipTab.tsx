@@ -3,6 +3,7 @@
 import { UserChapterStatus } from "@/lib/helpers/getUserChapterStatus";
 import { MembershipTabClient } from "./MembershipTabClient";
 import { prisma } from "@/lib/prisma";
+import { MemberRole } from '@/lib/constants/membershipEnums';
 
 interface MembershipTabProps {
   chapterId: number;
@@ -24,7 +25,8 @@ export async function MembershipTab({ chapterId, userChapterMember }: Membership
   const managerCount = await prisma.chapterMember.count({
     where: {
       chapterId,
-      memberRole: 'MANAGER'
+      // memberRole: 'MANAGER'
+      memberRole: MemberRole.MANAGER
     }
   });
 

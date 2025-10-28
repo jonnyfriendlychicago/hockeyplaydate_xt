@@ -1,7 +1,21 @@
 // lib/helpers/getUserChapterStatus.ts
-// 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this soon. 
+// 2025sep20: should rename this file getUserChapterMember, b/c the new-era name of variable in files that calls this lib file = userChapterMember.  Get around to this someday. 
+
+// TODO - REFACTORING OPPORTUNITY (2025oct28):
+// Now that we use MemberRole enums, the 7 boolean flags in this function are redundant.
+// Original purpose was to prevent typos like 'MANARGER', but enums solve that.
+// 
+// Proposed simplification:
+// - Keep: isAnonymous, membership object, isAuthenticated, isActiveMember, isManager
+// - Remove: applicant, genMember, mgrMember, blockedMember, removedMember booleans
+// - Use direct role checks: membership?.memberRole === MemberRole.APPLICANT
+// 
+// Benefits: Simpler, single source of truth, easier to add new roles (OWNER, QUIT, CANCELED)
+// Migration: Create new getUserChapterMembership() alongside this, migrate gradually, test thoroughly
+// See chat thread from 2025oct28 for detailed refactoring plan and code examples
 
 import { prisma } from '@/lib/prisma';
+import { MemberRole, type MemberRoleValue } from '@/lib/constants/membershipEnums';
 
 // prereqs: define types
 
@@ -15,8 +29,8 @@ type ChapterMembership = {
   id: number;
   chapterId: number;
   userProfileId: number;
-  // memberRole: 'MEMBER' | 'MANAGER' | 'BLOCKED';
-  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  // memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  memberRole: MemberRoleValue;
   joinedAt: Date;
   joinRequestCount: number | null; 
   joinRequestWindowStart: Date | null; 
@@ -75,30 +89,28 @@ export async function getUserChapterStatus(
       },
     });
 
-    // if (!membership) {
-    //   // Logged in but not a member of this chapter
-    //   authVisitor = true;
-    // } else if (membership.memberRole === 'BLOCKED') {
-    //   // Member but blocked
-    //   blockedMember = true;
-    // } else if (membership.memberRole === 'MANAGER') {
-    //   // Manager member
-    //   mgrMember = true;
-    // } else {
-    //   // Regular member (memberRole === 'MEMBER')
-    //   genMember = true;
-    // }
      if (!membership) {
       authVisitor = true;
-    } else if (membership.memberRole === 'APPLICANT') {
+    // } else if (membership.memberRole === 'APPLICANT') {
+    //   applicant = true;
+    // } else if (membership.memberRole === 'MEMBER') {
+    //   genMember = true;
+    // } else if (membership.memberRole === 'MANAGER') {
+    //   mgrMember = true;
+    // } else if (membership.memberRole === 'BLOCKED') {
+    //   blockedMember = true;
+    // } else if (membership.memberRole === 'REMOVED') {
+    //   removedMember = true;
+    // }
+    } else if (membership.memberRole === MemberRole.APPLICANT) {
       applicant = true;
-    } else if (membership.memberRole === 'MEMBER') {
+    } else if (membership.memberRole === MemberRole.MEMBER) {
       genMember = true;
-    } else if (membership.memberRole === 'MANAGER') {
+    } else if (membership.memberRole === MemberRole.MANAGER) {
       mgrMember = true;
-    } else if (membership.memberRole === 'BLOCKED') {
+    } else if (membership.memberRole === MemberRole.BLOCKED) {
       blockedMember = true;
-    } else if (membership.memberRole === 'REMOVED') {
+    } else if (membership.memberRole === MemberRole.REMOVED) {
       removedMember = true;
     }
   }

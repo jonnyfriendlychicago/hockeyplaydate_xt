@@ -1,10 +1,13 @@
 // lib/types/chapterMember.ts
 
+import { MemberRole, type MemberRoleValue } from '@/lib/constants/membershipEnums';
+
 export interface ChapterMemberWithProfile {
   id: number;
   chapterId: number;
   userProfileId: number;
-  memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  // memberRole: 'APPLICANT' | 'MEMBER' | 'MANAGER' | 'BLOCKED' | 'REMOVED';
+  memberRole: MemberRoleValue;
   joinedAt: Date;
   createdAt?: Date | null;
   updatedAt?: Date | null;
@@ -22,14 +25,32 @@ export interface ChapterMemberWithProfile {
 }
 
 // Shared utility functions
+// export function getMaskedRole(role: string): string {
+//   switch (role) {
+//     case 'APPLICANT': return 'Applicant';
+//     case 'MEMBER': return 'Member';
+//     case 'MANAGER': return 'Manager';
+//     case 'BLOCKED': return 'Blocked';
+//     case 'REMOVED': return 'Removed';
+//     default: return role;
+//   }
+// }
+
+// above replaced by below, embracing new imported Enum
 export function getMaskedRole(role: string): string {
   switch (role) {
-    case 'APPLICANT': return 'Applicant';
-    case 'MEMBER': return 'Member';
-    case 'MANAGER': return 'Manager';
-    case 'BLOCKED': return 'Blocked';
-    case 'REMOVED': return 'Removed';
-    default: return role;
+    case MemberRole.APPLICANT:
+      return 'Applicant';
+    case MemberRole.MEMBER:
+      return 'Member';
+    case MemberRole.MANAGER:
+      return 'Manager';
+    case MemberRole.BLOCKED:
+      return 'Blocked';
+    case MemberRole.REMOVED:
+      return 'Removed';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -40,5 +61,6 @@ export function getDisplayName(givenName: string | null, familyName: string | nu
 }
 
 export function getActionButtonText(role: string): string {
-  return role === 'APPLICANT' ? 'Review' : 'Manage';
+  // return role === 'APPLICANT' ? 'Review' : 'Manage';
+  return role === MemberRole.APPLICANT ? 'Review' : 'Manage';
 }

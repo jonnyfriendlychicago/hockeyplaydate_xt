@@ -1,13 +1,4 @@
-// lib/hooks/useChapterError.ts
-
-// devNotes: 2025oct25: this file (and related imports in other files) needs to be renamed: useChapterMembershipError.ts
-// TODO: Rename useChapterError.ts → useChapterMembershipError.ts
-// - Update imports in 5 files:
-//   - JoinChapterButton.tsx
-//   - LeaveChapterModal.tsx
-//   - ChapterMemberManagementModal.tsx
-//   - MembershipTabClient.tsx
-//   - useChapterMembershipAction.ts
+// lib/hooks/useChapterMembershipError.ts
 
 // devNotes: 2025oct24: this file used by chapter server actions file (root/slug/actions.ts)
 

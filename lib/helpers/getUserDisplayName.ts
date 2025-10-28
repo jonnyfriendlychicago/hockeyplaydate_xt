@@ -13,10 +13,3 @@ export function getUserDisplayName(profile: Partial<Pick<UserProfile, "givenName
 
   return "";
 }
-
-// old code from original page:
-// authenticatedUserProfile?.givenName && authenticatedUserProfile?.familyName
-//   ? `${authenticatedUserProfile.givenName} ${authenticatedUserProfile.familyName}`
-//   : authenticatedUserProfile?.givenName
-//   ? authenticatedUserProfile.givenName
-//   : authenticatedUserProfile?.familyName
