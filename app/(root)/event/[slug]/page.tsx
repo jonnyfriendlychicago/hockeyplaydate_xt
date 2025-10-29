@@ -22,20 +22,13 @@ export default async function EventPage({ params }: { params: { slug: string } }
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 
-  // 0.1 // redirect not authenticated / anon user
+  // 0.1 // redirect not authenticated / anon user; events are fully protected pages. 
   if (!authenticatedUserProfile) { 
       const returnTo = `/event/${params.slug}`;
       redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
-  // // 0.2 - bounce home if dupe user 
-  // // devNotes: this is an 'every site page' kind of thing.  can this be incorporated into getAuthenticatedUserProfileOrNull ? 
-  // if (authenticatedUserProfile?.authUser.duplicateOfId) {
-  //   return redirect('/');
-  // }
-
-  // 1 - find the event 
-  // devNotes: we don't import that from the prisma schema. does anyone care?  doesn't seem to make a difference
+  // 1 - validate event 
   const presentedEvent = await prisma.event.findFirst({
     where: {
       presentableId: params.slug,
@@ -62,13 +55,9 @@ export default async function EventPage({ params }: { params: { slug: string } }
     authenticatedUserProfile
   );
 
-
-
   if (!(userStatus.mgrMember || userStatus.genMember)) {
     // devNotes: above reads very simple: if not (this OR that), then do such and such
     // way more intuitive than if not this and not that, then do such and such
-    // notFound();
-    // above replaced by below
     return (
       <section className="max-w-6xl mx-auto p-6 text-center py-12">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
@@ -83,7 +72,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </p>
       </section>
     );
-
   }
 
   // 3 - data presention helpers
@@ -102,31 +90,42 @@ export default async function EventPage({ params }: { params: { slug: string } }
     }).format(date);
   };
 
-  // format end time (instead of duration)
-const formatEndTime = (endDate: Date | null) => {
-  if (!endDate) return '';
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'America/Chicago',
-    timeZoneName: 'short',
-  }).format(endDate);
-};
+  // 3b - format end time (instead of duration)
+  const formatEndTime = (endDate: Date | null) => {
+    if (!endDate) return '';
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'America/Chicago',
+      timeZoneName: 'short',
+    }).format(endDate);
+  };
 
-  // 3b - RSVP counts
+  // 3c - format duration 
+  // const formatDuration = (minutes: number | null) => {
+  //   if (!minutes) return '';
+  //   const hours = Math.floor(minutes / 60);
+  //   const mins = minutes % 60;
+  //   if (hours > 0) {
+  //     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  //   }
+  //   return `${mins}m`;
+  // };
+
+  // 3d - RSVP counts
   const rsvpCounts = {
     yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
     no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
     maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
   };
 
-  // 3c - Get current user's RSVP status
+  // 3e - Get current user's RSVP status
   const userRsvp = authenticatedUserProfile 
     ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
     : null;
   const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
-  // 4 - return it all.. WHO THE HELL KNOWS WHAT THIS IS GONNA LOOK LIKE! REVISIT
+  // 4 - return it all
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
       
