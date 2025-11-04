@@ -174,7 +174,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              Event Details
+              Details
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -260,7 +260,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Attendees
+              My Status
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -353,7 +353,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="w-5 h-5" />
-              Member RSVP Status
+              RSVP Tracking
             </CardTitle>
           </CardHeader>
           <CardContent>
