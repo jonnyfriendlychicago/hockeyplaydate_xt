@@ -59,6 +59,10 @@ model UserProfile {
 
   updatedChapterMembers ChapterMember[] @relation("ChapterMemberUpdatedBy")
 
+  // RSVP audit trail relations (NEW)
+  createdRsvps              Rsvp[]           @relation("RsvpCreatedBy")
+  updatedRsvps              Rsvp[]           @relation("RsvpUpdatedBy")
+
   @@map("user_profile")
 }
 
@@ -225,30 +229,46 @@ model Event {
 }
 
 model Rsvp {
+  // ids and fks
   id              Int                 @id @default(autoincrement())
   eventId         Int                 @map("event_id")           
   
-  // optional: populated for member rsvps, null for ad hoc rsvps 
+  // User identification (one will be populated)
+  // populated for chapterMember rsvps, null for ad hoc rsvps 
   userProfileId   Int?                @map("user_profile_id") 
   
-  // optional: null for member rsvps, populated for ad hoc rsvps
+  // null for chapterMember rsvps, populated for ad hoc rsvps
   name            String?             
   email           String?             
-  slug            String?             @unique 
+  slug            String?             @unique // devNote: this would be a big randomized value, making the unprotected individual rsvp record unguessable / inaccessible to anyone other than recipient
 
+  // RSVP status
   rsvpStatus      RsvpStatus?          @map("rsvp_status")
+
+   // Attendance counts
+  playersYouth      Int?              @default(0)  @map("players_youth")
+  playersAdult      Int?              @default(0)  @map("players_adult")  
+  spectatorsAdult   Int?              @default(0)  @map("spectators_adult")
+  spectatorsYouth   Int?              @default(0)  @map("spectators_youth")
+
+  // Audit fields
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
+  createdBy       Int                 @map("created_by")
+  updatedBy       Int                 @map("updated_by")
 
+  // Relations
   event          Event                @relation(fields: [eventId], references: [id])
   userProfile    UserProfile?         @relation(fields: [userProfileId], references: [id])
+  createdByUser   UserProfile         @relation("RsvpCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser   UserProfile         @relation("RsvpUpdatedBy", fields: [updatedBy], references: [id])
   
   @@map("rsvp")
   // future fields: 
-  // createdBy       lookup to userProfile.  need to track this, display it
-  // respondedAt     DateTime?           @map("responded_at")    // set when user responds?? 
-  // count of on-ice kids
-  // count of on-ice adults
+  // createdBy       DONE
+  // respondedAt     DONE i.e. createdAt
+  // count of on-ice kids DONE 
+  // count of on-ice adults DONE
   // attributes about volunteering, i.e. music, team captain, referee, photographer, etc. 
 }
 

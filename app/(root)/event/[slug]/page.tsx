@@ -17,7 +17,8 @@ import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import EventLocationMap from '@/components/Event/EventLocationMap';
 import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
-// import EventMessages from '@/components/Event/EventMessages'; 
+// import EventMessages from '@/components/Event/EventMessages';  // 2025nov5: not sure what this is about.  no component exists
+import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -107,11 +108,11 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
   // placeholder: this is gonna be updated using our new rsvp enum!
   // 3c - RSVP counts
-  const rsvpCounts = {
-    yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
-    no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
-    maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
-  };
+  // const rsvpCounts = {
+  //   yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
+  //   no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
+  //   maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
+  // };
 
   // 3d - Get current user's RSVP status
   const userRsvp = authenticatedUserProfile 
@@ -266,7 +267,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardContent className="space-y-4">
             
             {/* Placeholder content */}
-            <div className="bg-muted/30 p-8 rounded-lg text-center">
+            {/* <div className="bg-muted/30 p-8 rounded-lg text-center">
               <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground mb-2">
                 RSVP functionality placeholder
@@ -274,10 +275,10 @@ export default async function EventPage({ params }: { params: { slug: string } }
               <p className="text-xs text-muted-foreground">
                 User RSVP status, counts, and update button will go here
               </p>
-            </div>
+            </div> */}
 
             {/* Show current RSVP counts for reference */}
-            <div className="space-y-2 pt-4 border-t">
+            {/* <div className="space-y-2 pt-4 border-t">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Going:</span>
                 <span className="font-medium text-green-700">{rsvpCounts.yes}</span>
@@ -290,7 +291,14 @@ export default async function EventPage({ params }: { params: { slug: string } }
                 <span className="text-muted-foreground">Not Going:</span>
                 <span className="font-medium text-red-700">{rsvpCounts.no}</span>
               </div>
-            </div>
+            </div> */}
+
+            {/* My RSVP */}
+            <MyRsvpCard 
+              eventId={presentedEvent.id}
+              eventSlug={presentedEvent.presentableId}
+              userProfileId={authenticatedUserProfile.id}
+            />
 
           </CardContent>
         </Card>
