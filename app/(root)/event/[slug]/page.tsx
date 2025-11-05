@@ -108,11 +108,11 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
   // placeholder: this is gonna be updated using our new rsvp enum!
   // 3c - RSVP counts
-  // const rsvpCounts = {
-  //   yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
-  //   no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
-  //   maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
-  // };
+  const rsvpCounts = {
+    yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
+    no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
+    maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
+  };
 
   // 3d - Get current user's RSVP status
   const userRsvp = authenticatedUserProfile 
@@ -168,7 +168,14 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </div>
       )} */}
 
-      {/* Row 1: Event Details + Attendees (Placeholder) */}
+      {/* NEW ROW: My RSVP - Full Width Prominent */}
+      <MyRsvpCard 
+        eventId={presentedEvent.id}
+        eventSlug={presentedEvent.presentableId}
+        userProfileId={authenticatedUserProfile.id}
+      />
+
+      {/* Row 1: Event Details + RSVP Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Event Details */}
         <Card className="border-0 shadow-none">
@@ -261,78 +268,42 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              My Status
+              RSVP Summary
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            
-            {/* Placeholder content */}
-            {/* <div className="bg-muted/30 p-8 rounded-lg text-center">
-              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
-                RSVP functionality placeholder
-              </p>
-              <p className="text-xs text-muted-foreground">
-                User RSVP status, counts, and update button will go here
-              </p>
-            </div> */}
-
             {/* Show current RSVP counts for reference */}
-            {/* <div className="space-y-2 pt-4 border-t">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Going:</span>
-                <span className="font-medium text-green-700">{rsvpCounts.yes}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Maybe:</span>
-                <span className="font-medium text-yellow-700">{rsvpCounts.maybe}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Not Going:</span>
-                <span className="font-medium text-red-700">{rsvpCounts.no}</span>
-              </div>
-            </div> */}
+            <div className="bg-muted/30 p-8 rounded-lg text-center">
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    RSVP Summary placeholder
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Total player counts and RSVP breakdown will go here
+                  </p>
+                </div>
 
-            {/* My RSVP */}
-            <MyRsvpCard 
-              eventId={presentedEvent.id}
-              eventSlug={presentedEvent.presentableId}
-              userProfileId={authenticatedUserProfile.id}
-            />
+                {/* Temporary: Show old counts */}
+                <div className="space-y-2 pt-4 border-t">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Going:</span>
+                    <span className="font-medium text-green-700">{rsvpCounts.yes}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Maybe:</span>
+                    <span className="font-medium text-yellow-700">{rsvpCounts.maybe}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Not Going:</span>
+                    <span className="font-medium text-red-700">{rsvpCounts.no}</span>
+                  </div>
+                </div>
+
+             
 
           </CardContent>
         </Card>
       </div>
-
-      {/* CHANGE: NEW - Row 2 with Location Map + Messages */}
-      {/* Row 2: Location (Map) + Messages */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Location</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EventLocationMap
-              venueName={presentedEvent.venueName}
-              address={presentedEvent.address}
-              placeId={presentedEvent.placeId}
-              lat={presentedEvent.lat}
-              lng={presentedEvent.lng}
-              bypassAddressValidation={presentedEvent.bypassAddressValidation}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              Messages
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-          </CardContent>
-        </Card>
-      </div> */}
 
       {/* Row 2: Location (Full Width) */}
       <div className="grid grid-cols-1 gap-6">
