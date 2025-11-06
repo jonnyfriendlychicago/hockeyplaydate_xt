@@ -8,9 +8,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pencil, Calendar, MapPin, Clock, Users, AlertTriangle, 
-  Building2 , UserCheck 
+import { Pencil, Calendar, MapPin, Clock, AlertTriangle, Building2 , UserCheck 
   // , MessageSquare
+  // Users, 
 } from 'lucide-react';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { CopyText } from '@/components/shared/copyText';
@@ -19,6 +19,7 @@ import EventLocationMap from '@/components/Event/EventLocationMap';
 import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
 // import EventMessages from '@/components/Event/EventMessages';  // 2025nov5: not sure what this is about.  no component exists
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
+import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   
@@ -108,11 +109,11 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
   // placeholder: this is gonna be updated using our new rsvp enum!
   // 3c - RSVP counts
-  const rsvpCounts = {
-    yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
-    no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
-    maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
-  };
+  // const rsvpCounts = {
+  //   yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
+  //   no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
+  //   maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
+  // };
 
   // 3d - Get current user's RSVP status
   const userRsvp = authenticatedUserProfile 
@@ -264,7 +265,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
 
         {/* Attendees - PLACEHOLDER */}
-        <Card className="border-0 shadow-none">
+        {/* <Card className="border-0 shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
@@ -272,7 +273,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Show current RSVP counts for reference */}
             <div className="bg-muted/30 p-8 rounded-lg text-center">
                   <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-sm text-muted-foreground mb-2">
@@ -283,7 +283,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
                   </p>
                 </div>
 
-                {/* Temporary: Show old counts */}
                 <div className="space-y-2 pt-4 border-t">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Going:</span>
@@ -298,11 +297,9 @@ export default async function EventPage({ params }: { params: { slug: string } }
                     <span className="font-medium text-red-700">{rsvpCounts.no}</span>
                   </div>
                 </div>
-
-             
-
           </CardContent>
-        </Card>
+        </Card> */}
+        <RsvpSummary eventId={presentedEvent.id} />
       </div>
 
       {/* Row 2: Location (Full Width) */}
