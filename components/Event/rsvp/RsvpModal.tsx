@@ -7,7 +7,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, HelpCircle } from "lucide-react";
+import { CheckCircle, XCircle, HelpCircle 
+  // , Info
+} from "lucide-react";
 import { updateMyRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
@@ -68,16 +70,45 @@ export function RsvpModal({
     }
   });
 
+  // Determine if counts should be shown
+  const showCounts = selectedStatus === RsvpStatus.YES;
+
+  // Handle status change - clear counts if not YES
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+    if (status !== RsvpStatus.YES) {
+      // Clear all count fields when switching to MAYBE or NO
+      setPlayersYouth('0');
+      setPlayersAdult('0');
+      setSpectatorsAdult('0');
+      setSpectatorsYouth('0');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedStatus || isSubmitting) return;
 
-    await executeAction(updateMyRsvpAction, {
-      eventSlug,
-      rsvpStatus: selectedStatus,
+    // Force counts to 0 if status is not YES
+    const countsToSubmit = selectedStatus === RsvpStatus.YES ? {
       playersYouth,
       playersAdult,
       spectatorsAdult,
       spectatorsYouth
+    } : {
+      playersYouth: '0',
+      playersAdult: '0',
+      spectatorsAdult: '0',
+      spectatorsYouth: '0'
+    };
+
+    await executeAction(updateMyRsvpAction, {
+      eventSlug,
+      rsvpStatus: selectedStatus,
+      // playersYouth,
+      // playersAdult,
+      // spectatorsAdult,
+      // spectatorsYouth
+      ...countsToSubmit
     });
   };
 
@@ -115,7 +146,8 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.YES ? "default" : "outline"}
-                onClick={() => setSelectedStatus(RsvpStatus.YES)}
+                // onClick={() => setSelectedStatus(RsvpStatus.YES)}
+                onClick={() => handleStatusChange(RsvpStatus.YES)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"
               >
@@ -126,7 +158,8 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.MAYBE ? "default" : "outline"}
-                onClick={() => setSelectedStatus(RsvpStatus.MAYBE)}
+                // onClick={() => setSelectedStatus(RsvpStatus.MAYBE)}
+                onClick={() => handleStatusChange(RsvpStatus.MAYBE)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"
               >
@@ -137,7 +170,8 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.NO ? "default" : "outline"}
-                onClick={() => setSelectedStatus(RsvpStatus.NO)}
+                // onClick={() => setSelectedStatus(RsvpStatus.NO)}
+                onClick={() => handleStatusChange(RsvpStatus.NO)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"
               >
@@ -148,7 +182,7 @@ export function RsvpModal({
           </div>
 
           {/* Player Counts */}
-          <div className="space-y-3 pt-2 border-t">
+          {/* <div className="space-y-3 pt-2 border-t">
             <Label className="text-sm font-medium">On-Ice Players</Label>
             
             <div className="grid grid-cols-2 gap-3">
@@ -187,7 +221,7 @@ export function RsvpModal({
           </div>
 
           {/* Spectator Counts */}
-          <div className="space-y-3 pt-2 border-t">
+          {/* <div className="space-y-3 pt-2 border-t">
             <Label className="text-sm font-medium">Off-Ice Spectators</Label>
             
             <div className="grid grid-cols-2 gap-3">
@@ -223,7 +257,91 @@ export function RsvpModal({
                 />
               </div>
             </div>
-          </div>
+          </div>  */}
+
+          {/* Conditional: Show counts only for YES */}
+          {showCounts && (
+            <>
+              {/* Player Counts */}
+              <div className="space-y-3 pt-2 border-t">
+                <Label className="text-sm font-medium">On-Ice Players</Label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="playersYouth" className="text-xs text-muted-foreground">
+                      Youth Players
+                    </Label>
+                    <Input
+                      id="playersYouth"
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={playersYouth}
+                      onChange={(e) => setPlayersYouth(e.target.value)}
+                      disabled={isSubmitting}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="playersAdult" className="text-xs text-muted-foreground">
+                      Adult Players
+                    </Label>
+                    <Input
+                      id="playersAdult"
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={playersAdult}
+                      onChange={(e) => setPlayersAdult(e.target.value)}
+                      disabled={isSubmitting}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Spectator Counts */}
+              <div className="space-y-3 pt-2 border-t">
+                <Label className="text-sm font-medium">Off-Ice Spectators</Label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="spectatorsYouth" className="text-xs text-muted-foreground">
+                      Youth Spectators
+                    </Label>
+                    <Input
+                      id="spectatorsYouth"
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={spectatorsYouth}
+                      onChange={(e) => setSpectatorsYouth(e.target.value)}
+                      disabled={isSubmitting}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="spectatorsAdult" className="text-xs text-muted-foreground">
+                      Adult Spectators
+                    </Label>
+                    <Input
+                      id="spectatorsAdult"
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={spectatorsAdult}
+                      onChange={(e) => setSpectatorsAdult(e.target.value)}
+                      disabled={isSubmitting}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) 
+          }
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4">

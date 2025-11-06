@@ -80,8 +80,18 @@ export function MyRsvpCardClient({ userRsvp, eventSlug }: MyRsvpCardClientProps)
     (userRsvp.playersYouth || 0) === 0 &&
     (userRsvp.playersAdult || 0) === 0;
 
-  // Compact mode: No RSVP or player warning
-  const isCompact = !userRsvp || showPlayerWarning;
+  // // Compact mode: No RSVP or player warning
+  // const isCompact = !userRsvp || showPlayerWarning;
+
+  // Only show counts for YES status
+  const showCounts = userRsvp?.rsvpStatus === RsvpStatus.YES;
+
+  // Determine which counts are > 0
+  const hasYouthPlayers = (userRsvp?.playersYouth || 0) > 0;
+  const hasAdultPlayers = (userRsvp?.playersAdult || 0) > 0;
+  const hasAdultSpectators = (userRsvp?.spectatorsAdult || 0) > 0;
+  const hasYouthSpectators = (userRsvp?.spectatorsYouth || 0) > 0;
+  const hasAnySpectators = hasAdultSpectators || hasYouthSpectators;
 
   return (
     <>
@@ -120,33 +130,76 @@ export function MyRsvpCardClient({ userRsvp, eventSlug }: MyRsvpCardClientProps)
           </div>
 
           {/* Expanded Section: Player Counts (only if RSVP exists and no warning) */}
-          {userRsvp && !isCompact && (
+          {/* {userRsvp && !isCompact && (
             <div className="p-4 bg-gray-50 border-t">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Youth Players */}
+               
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{userRsvp.playersYouth || 0}</p>
                   <p className="text-xs text-muted-foreground">Youth Players</p>
                 </div>
                 
-                {/* Adult Players */}
+                
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{userRsvp.playersAdult || 0}</p>
                   <p className="text-xs text-muted-foreground">Adult Players</p>
                 </div>
                 
-                {/* Adult Spectators */}
+                
                 <div className="text-center">
                   <p className="text-xl font-semibold text-gray-600">{userRsvp.spectatorsAdult || 0}</p>
                   <p className="text-xs text-muted-foreground">Adult Spectators</p>
                 </div>
                 
-                {/* Youth Spectators */}
+               
                 <div className="text-center">
                   <p className="text-xl font-semibold text-gray-600">{userRsvp.spectatorsYouth || 0}</p>
                   <p className="text-xs text-muted-foreground">Youth Spectators</p>
                 </div>
               </div>
+            </div>
+          )} */}
+
+          {/* Expanded Section: Player Counts (only if YES status and has counts) */}
+          {showCounts && !showPlayerWarning && (hasYouthPlayers || hasAdultPlayers || hasAnySpectators) && (
+            <div className="p-4 bg-gray-50 border-t">
+              {/* Players Row - only show non-zero values */}
+              {(hasYouthPlayers || hasAdultPlayers) && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {hasYouthPlayers && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900">{userRsvp.playersYouth}</p>
+                      <p className="text-xs text-muted-foreground">Youth Players</p>
+                    </div>
+                  )}
+                  
+                  {hasAdultPlayers && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900">{userRsvp.playersAdult}</p>
+                      <p className="text-xs text-muted-foreground">Adult Players</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Spectators Row - only show if any spectators exist */}
+              {hasAnySpectators && (
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  {hasAdultSpectators && (
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-gray-600">{userRsvp.spectatorsAdult}</p>
+                      <p className="text-xs text-muted-foreground">Adult Spectators</p>
+                    </div>
+                  )}
+                  
+                  {hasYouthSpectators && (
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-gray-600">{userRsvp.spectatorsYouth}</p>
+                      <p className="text-xs text-muted-foreground">Youth Spectators</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

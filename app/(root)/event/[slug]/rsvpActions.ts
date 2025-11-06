@@ -10,7 +10,7 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { updateMyRsvpSchema } from '@/lib/validation/rsvpValSchema'
 import { ActionResult, failure } from '@/lib/types/serverActionResults'
-// import { RsvpStatus } from '@/lib/constants/rsvpEnums' // no use case for inclusion presently
+import { RsvpStatus } from '@/lib/constants/rsvpEnums' 
 
 // **********************************
 // updateMyRsvpAction
@@ -40,6 +40,19 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
     }
 
     const { eventSlug, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
+
+    // 1.5 - ENFORCE: Zero out counts if status is not YES
+    const finalCounts = rsvpStatus === RsvpStatus.YES ? {
+      playersYouth,
+      playersAdult,
+      spectatorsAdult,
+      spectatorsYouth
+    } : {
+      playersYouth: 0,
+      playersAdult: 0,
+      spectatorsAdult: 0,
+      spectatorsYouth: 0
+    };
 
     // 2 - Validate event exists
     const event = await prisma.event.findUnique({
@@ -77,10 +90,14 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
         where: { id: existingRsvp.id },
         data: {
           rsvpStatus,
-          playersYouth,
-          playersAdult,
-          spectatorsAdult,
-          spectatorsYouth,
+          // playersYouth,
+          // playersAdult,
+          // spectatorsAdult,
+          // spectatorsYouth,
+          playersYouth: finalCounts.playersYouth,
+          playersAdult: finalCounts.playersAdult,
+          spectatorsAdult: finalCounts.spectatorsAdult,
+          spectatorsYouth: finalCounts.spectatorsYouth,
           updatedBy: authenticatedUserProfile.id,
         }
       });
@@ -91,10 +108,14 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
           eventId: event.id,
           userProfileId: authenticatedUserProfile.id,
           rsvpStatus,
-          playersYouth,
-          playersAdult,
-          spectatorsAdult,
-          spectatorsYouth,
+          // playersYouth,
+          // playersAdult,
+          // spectatorsAdult,
+          // spectatorsYouth,
+          playersYouth: finalCounts.playersYouth,
+          playersAdult: finalCounts.playersAdult,
+          spectatorsAdult: finalCounts.spectatorsAdult,
+          spectatorsYouth: finalCounts.spectatorsYouth,
           createdBy: authenticatedUserProfile.id,
           updatedBy: authenticatedUserProfile.id,
         }
