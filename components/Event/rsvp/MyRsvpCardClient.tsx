@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, HelpCircle, AlertTriangle, Edit } from "lucide-react";
 import { RsvpModal } from "./RsvpModal";
-import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
-import { useRsvpError } from '@/lib/hooks/useRsvpError';
+// import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
+// import { useRsvpError } from '@/lib/hooks/useRsvpError';
 import { RsvpStatus } from '@/lib/constants/rsvpEnums';
 import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client';
 
@@ -63,10 +63,10 @@ function getStatusConfig(status: PrismaRsvpStatus | null) {
 
 export function MyRsvpCardClient({ userRsvp, eventSlug }: MyRsvpCardClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalError, setModalError] = useRsvpError(RSVP_ERROR_KEYS.UPDATE_MY_RSVP);
+  // const [modalError, setModalError] = useRsvpError(RSVP_ERROR_KEYS.UPDATE_MY_RSVP);
 
   const openModal = () => {
-    setModalError(null);
+    // setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -99,11 +99,11 @@ export function MyRsvpCardClient({ userRsvp, eventSlug }: MyRsvpCardClientProps)
         <CardContent className="p-0">
           
           {/* Display modal error if exists */}
-          {modalError && (
+          {/* {modalError && (
             <div className="p-4 bg-red-50 border-b-2 border-red-200">
               <p className="text-red-800 text-sm font-medium">{modalError}</p>
             </div>
-          )}
+          )} */}
 
           <div className={`${statusConfig.bgColor} ${statusConfig.textColor} p-4`}>
             <div className="flex items-center justify-between">

@@ -20,9 +20,9 @@ import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
 // import EventMessages from '@/components/Event/EventMessages';  // 2025nov5: not sure what this is about.  no component exists
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
+import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
-  
   // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
@@ -168,6 +168,8 @@ export default async function EventPage({ params }: { params: { slug: string } }
           )}
         </div>
       )} */}
+
+      <EventErrorDisplay />
 
       {/* NEW ROW: My RSVP - Full Width Prominent */}
       <MyRsvpCard 

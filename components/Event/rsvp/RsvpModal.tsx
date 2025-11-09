@@ -7,9 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, HelpCircle 
-  // , Info
-} from "lucide-react";
+import { CheckCircle, XCircle, HelpCircle } from "lucide-react";
 import { updateMyRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
@@ -101,15 +99,48 @@ export function RsvpModal({
       spectatorsYouth: '0'
     };
 
-    await executeAction(updateMyRsvpAction, {
-      eventSlug,
+    // await executeAction(updateMyRsvpAction, {
+    //   eventSlug,
+    //   rsvpStatus: selectedStatus,
+    //   ...countsToSubmit
+    // });
+
+    // TEST #1: Invalid event slug
+    console.log(eventSlug); 
+    await executeAction(updateMyRsvpAction, { 
+      eventSlug: 'BAD-SLUG!!!',
       rsvpStatus: selectedStatus,
-      // playersYouth,
-      // playersAdult,
-      // spectatorsAdult,
-      // spectatorsYouth
-      ...countsToSubmit
+    ...countsToSubmit
     });
+
+    // TEST #2: Invalid RSVP status
+    // await executeAction(updateMyRsvpAction, { 
+    //   eventSlug,
+    //   rsvpStatus: 'HACKED_STATUS',
+    // ...countsToSubmit
+    // });
+
+    // TEST #3: Invalid player count (string instead of number)
+    // await executeAction(updateMyRsvpAction, { 
+    //   eventSlug,
+    //   rsvpStatus: selectedStatus,
+    // ...countsToSubmit
+    // });
+
+    // TEST #4: Negative player count
+    // await executeAction(updateMyRsvpAction, { 
+    //   eventSlug,
+    //   rsvpStatus: selectedStatus,
+    // ...countsToSubmit
+    // });
+
+    // TEST #5: Exceeds max limit (max is 10)
+    // await executeAction(updateMyRsvpAction, { 
+    //   eventSlug,
+    //   rsvpStatus: selectedStatus,
+    // ...countsToSubmit
+    // });
+
   };
 
   const handleCancel = () => {
