@@ -8,16 +8,12 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pencil, Calendar, MapPin, Clock, AlertTriangle, Building2 , UserCheck 
-  // , MessageSquare
-  // Users, 
-} from 'lucide-react';
+import { Pencil, Calendar, MapPin, Clock, AlertTriangle, Building2 , UserCheck } from 'lucide-react';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { CopyText } from '@/components/shared/copyText';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import EventLocationMap from '@/components/Event/EventLocationMap';
 import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
-// import EventMessages from '@/components/Event/EventMessages';  // 2025nov5: not sure what this is about.  no component exists
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
 import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
@@ -60,7 +56,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
     authenticatedUserProfile
   );
 
-  // placeholder: let's use below as opportunity to exploit the enum file for chapterMembers, rather than using those bang boolean fields. 
+  // 2025nov08: let's use below as opportunity to exploit the enum file for chapterMembers, rather than using those bang boolean fields. 
   if (!(userStatus.mgrMember || userStatus.genMember)) {
     // devNotes: above reads very simple: if not (this OR that), then do such and such
     // way more intuitive than if not this and not that, then do such and such
@@ -107,14 +103,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
     }).format(endDate);
   };
 
-  // placeholder: this is gonna be updated using our new rsvp enum!
-  // 3c - RSVP counts
-  // const rsvpCounts = {
-  //   yes: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'YES').length,
-  //   no: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'NO').length,
-  //   maybe: presentedEvent.rsvps.filter(rsvp => rsvp.rsvpStatus === 'MAYBE').length,
-  // };
-
   // 3d - Get current user's RSVP status
   const userRsvp = authenticatedUserProfile 
     ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
@@ -124,7 +112,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
   // 4 - return it all
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Top Bar - Chapter Name + Edit Button */}
+      {/* Top Bar - Chapter Name + Edit Event Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-muted-foreground" />
@@ -171,7 +159,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       <EventErrorDisplay />
 
-      {/* NEW ROW: My RSVP - Full Width Prominent */}
+      {/* My RSVP Row  */}
       <MyRsvpCard 
         eventId={presentedEvent.id}
         eventSlug={presentedEvent.presentableId}
@@ -265,42 +253,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
           </CardContent>
         </Card>
-
-        {/* Attendees - PLACEHOLDER */}
-        {/* <Card className="border-0 shadow-none">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              RSVP Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-muted/30 p-8 rounded-lg text-center">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    RSVP Summary placeholder
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Total player counts and RSVP breakdown will go here
-                  </p>
-                </div>
-
-                <div className="space-y-2 pt-4 border-t">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Going:</span>
-                    <span className="font-medium text-green-700">{rsvpCounts.yes}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Maybe:</span>
-                    <span className="font-medium text-yellow-700">{rsvpCounts.maybe}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Not Going:</span>
-                    <span className="font-medium text-red-700">{rsvpCounts.no}</span>
-                  </div>
-                </div>
-          </CardContent>
-        </Card> */}
+      
         <RsvpSummary eventId={presentedEvent.id} />
       </div>
 

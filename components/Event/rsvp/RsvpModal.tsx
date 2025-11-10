@@ -99,19 +99,19 @@ export function RsvpModal({
       spectatorsYouth: '0'
     };
 
-    // await executeAction(updateMyRsvpAction, {
-    //   eventSlug,
-    //   rsvpStatus: selectedStatus,
-    //   ...countsToSubmit
-    // });
-
-    // TEST #1: Invalid event slug
-    console.log(eventSlug); 
-    await executeAction(updateMyRsvpAction, { 
-      eventSlug: 'BAD-SLUG!!!',
+    await executeAction(updateMyRsvpAction, {
+      eventSlug,
       rsvpStatus: selectedStatus,
-    ...countsToSubmit
+      ...countsToSubmit
     });
+
+    // // TEST #1: Invalid event slug
+    // console.log(eventSlug); 
+    // await executeAction(updateMyRsvpAction, { 
+    //   eventSlug: 'BAD-SLUG!!!',
+    //   rsvpStatus: selectedStatus,
+    // ...countsToSubmit
+    // });
 
     // TEST #2: Invalid RSVP status
     // await executeAction(updateMyRsvpAction, { 
