@@ -17,7 +17,11 @@ interface ChapterMemberCardProps {
   onEdit?: (member: ChapterMemberWithProfile) => void;
 }
 
-export function ChapterMemberCard({ member, showEditButton, onEdit }: ChapterMemberCardProps) {
+export function ChapterMemberCard({ 
+  member, 
+  showEditButton, 
+  onEdit 
+}: ChapterMemberCardProps) {
   const displayName = getDisplayName(member.userProfile.givenName, member.userProfile.familyName);
   const maskedRole = getMaskedRole(member.memberRole);
   const profilePicture = member.userProfile.authUser?.picture;

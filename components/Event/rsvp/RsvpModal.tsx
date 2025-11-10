@@ -12,13 +12,13 @@ import { updateMyRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
 import { RsvpStatus } from '@/lib/constants/rsvpEnums';
-import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client';
+import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client'; // revisit why nec?
 
 interface RsvpModalProps {
   isOpen: boolean;
   onClose: () => void;
   eventSlug: string;
-  currentRsvp: {
+  currentRsvp: { // devNote: this should be a type, like ChapterMemberWithProfile
     // rsvpStatus: string;
     rsvpStatus: PrismaRsvpStatus | null; 
     playersYouth: number | null;
@@ -26,7 +26,7 @@ interface RsvpModalProps {
     spectatorsAdult: number | null;
     spectatorsYouth: number | null;
   } | null;
-  isManagerMode: boolean;
+  isManagerMode: boolean; // For manager mode (Phase 4)
   targetUserName?: string; // For manager mode (Phase 4)
   targetUserProfileId?: number; // For manager mode (Phase 4)
 }
@@ -36,8 +36,8 @@ export function RsvpModal({
   onClose, 
   eventSlug,
   currentRsvp,
-  isManagerMode,
-  targetUserName,
+  isManagerMode, // For manager mode (Phase 4)
+  targetUserName, // For manager mode (Phase 4)
   // targetUserProfileId
 }: RsvpModalProps) {
   
@@ -58,7 +58,10 @@ export function RsvpModal({
     currentRsvp?.spectatorsYouth?.toString() || '0'
   );
 
-  const { executeAction, isSubmitting } = useRsvpAction({
+  const { 
+    executeAction, 
+    isSubmitting 
+  } = useRsvpAction({
     errorKey: RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
     onSuccess: () => {
       onClose();
@@ -212,85 +215,7 @@ export function RsvpModal({
             </div>
           </div>
 
-          {/* Player Counts */}
-          {/* <div className="space-y-3 pt-2 border-t">
-            <Label className="text-sm font-medium">On-Ice Players</Label>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="playersYouth" className="text-xs text-muted-foreground">
-                  Youth Players
-                </Label>
-                <Input
-                  id="playersYouth"
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={playersYouth}
-                  onChange={(e) => setPlayersYouth(e.target.value)}
-                  disabled={isSubmitting}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="playersAdult" className="text-xs text-muted-foreground">
-                  Adult Players
-                </Label>
-                <Input
-                  id="playersAdult"
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={playersAdult}
-                  onChange={(e) => setPlayersAdult(e.target.value)}
-                  disabled={isSubmitting}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Spectator Counts */}
-          {/* <div className="space-y-3 pt-2 border-t">
-            <Label className="text-sm font-medium">Off-Ice Spectators</Label>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="spectatorsYouth" className="text-xs text-muted-foreground">
-                  Youth Spectators
-                </Label>
-                <Input
-                  id="spectatorsYouth"
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={spectatorsYouth}
-                  onChange={(e) => setSpectatorsYouth(e.target.value)}
-                  disabled={isSubmitting}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="spectatorsAdult" className="text-xs text-muted-foreground">
-                  Adult Spectators
-                </Label>
-                <Input
-                  id="spectatorsAdult"
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={spectatorsAdult}
-                  onChange={(e) => setSpectatorsAdult(e.target.value)}
-                  disabled={isSubmitting}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </div>  */}
-
-          {/* Conditional: Show counts only for YES */}
+          {/* Conditional: Show counts only for YES rsvps */}
           {showCounts && (
             <>
               {/* Player Counts */}

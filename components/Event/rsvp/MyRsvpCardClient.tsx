@@ -61,7 +61,10 @@ function getStatusConfig(status: PrismaRsvpStatus | null) {
   }
 }
 
-export function MyRsvpCardClient({ userRsvp, eventSlug }: MyRsvpCardClientProps) {
+export function MyRsvpCardClient({ 
+  eventSlug , 
+  userRsvp, 
+}: MyRsvpCardClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const [modalError, setModalError] = useRsvpError(RSVP_ERROR_KEYS.UPDATE_MY_RSVP);
 

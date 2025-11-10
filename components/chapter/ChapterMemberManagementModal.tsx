@@ -30,10 +30,10 @@ import { useChapterMembershipAction } from '@/lib/hooks/useChapterMembershipActi
 import { MANAGEABLE_ROLES } from '@/lib/constants/membershipEnums';
 
 interface ChapterMemberManagementModalProps {
-  member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
   chapterSlug: string; 
+  member: ChapterMemberWithProfile | null;
 }
 
 // function getAvailableActions(currentRole: string): string[] {
@@ -46,10 +46,10 @@ function getAvailableActions(currentRole: string): string[] {
 }
 
 export function ChapterMemberManagementModal({ 
-  member, 
   isOpen, 
   onClose, 
-  chapterSlug 
+  chapterSlug, 
+  member, 
 }: ChapterMemberManagementModalProps) {
   
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
@@ -60,11 +60,11 @@ export function ChapterMemberManagementModal({
   } = useChapterMembershipAction({
     errorKey: CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT,
     onSuccess: () => {
-      setSelectedAction(null);
+      setSelectedAction(null);  // why this important here, but not for rsvp? 
       onClose();
     }, 
     onError: () => {  
-      setSelectedAction(null);
+      setSelectedAction(null);  // why this important here, but not for rsvp? 
       onClose();
     }
   }); 
@@ -82,6 +82,8 @@ export function ChapterMemberManagementModal({
 
   const handleSubmit = async () => {
     if (!selectedAction || isSubmitting) return;
+
+    // placeholder for any forced action, such as setting some attributes based on other attributes
 
     await executeAction(updateMemberRoleAction, {
       chapterSlug,
