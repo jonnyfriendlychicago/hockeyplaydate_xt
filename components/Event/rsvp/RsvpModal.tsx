@@ -23,7 +23,7 @@ interface RsvpModalProps {
     // rsvpStatus: string;
     // rsvpStatus: PrismaRsvpStatus | null; 
     rsvpStatus: RsvpStatus | null; 
-    playersYouth: number | null;
+    playersYouth: number | null; 
     playersAdult: number | null;
     spectatorsAdult: number | null;
     spectatorsYouth: number | null;
@@ -102,7 +102,7 @@ export function RsvpModal({
   const handleSubmit = async () => {
     if (!selectedStatus || isSubmitting) return;
 
-    // Force counts to 0 if status is not YES
+    // // create new object ('countsToSubmit') to contain the count values, and also force counts to 0 if status is not YES; this forcing to zero happens on back end as well
     const countsToSubmit = selectedStatus === RsvpStatus.YES ? {
       playersYouth,
       playersAdult,
@@ -115,45 +115,65 @@ export function RsvpModal({
       spectatorsYouth: '0'
     };
 
+    // // testing scenarios: replace above 'countsToSubmit' const with below.  all should result in Rsvp error 01
+    // Test 0: ensure that this forcing of values is going thru; it does in dev! :-)
+    // const countsToSubmit =  {
+    //   playersYouth: '3',
+    //   playersAdult: '3',
+    //   spectatorsAdult: '3',
+    //   spectatorsYouth: '3'
+    // };
+    // // Test 1: text instead of number
+    // const countsToSubmit =  {
+    //   playersYouth: 'hello',
+    //   playersAdult: '0',
+    //   spectatorsAdult: '0',
+    //   spectatorsYouth: '0'
+    // };
+
+    // // Test 2: too big number
+    // const countsToSubmit =  {
+    //   playersYouth: '100000',
+    //   playersAdult: '0',
+    //   spectatorsAdult: '0',
+    //   spectatorsYouth: '0'
+    // };
+
+    // // Test 3: negative number
+    // const countsToSubmit =  {
+    //   playersYouth: '-1',
+    //   playersAdult: '0',
+    //   spectatorsAdult: '0',
+    //   spectatorsYouth: '0'
+    // };
+
+    // // Test 4: not an integer
+    // const countsToSubmit =  {
+    //   playersYouth: '1.5',
+    //   playersAdult: '0',
+    //   spectatorsAdult: '0',
+    //   spectatorsYouth: '0'
+    // };
+
     await executeAction(updateMyRsvpAction, {
       eventSlug,
       rsvpStatus: selectedStatus,
       ...countsToSubmit
     });
 
-    // // TEST #1: Invalid event slug
-    // console.log(eventSlug); 
+    // testing scenarios: replace above 'await..' function with below
+
+    // // TEST #5: Invalid event slug - should result in Rsvp error 01 if has no value, and Rsvp error 02 if has nonexistent eventslug
     // await executeAction(updateMyRsvpAction, { 
-    //   eventSlug: 'BAD-SLUG!!!',
+    //   eventSlug: '',
     //   rsvpStatus: selectedStatus,
     // ...countsToSubmit
     // });
 
-    // // TEST #2: Invalid RSVP status
+    // // TEST #6: Invalid RSVP status - should result in Rsvp error 01
     // await executeAction(updateMyRsvpAction, { 
     //   eventSlug,
     //   rsvpStatus: 'HACKED_STATUS',
-    // ...countsToSubmit
-    // });
-
-    // TEST #3: Invalid player count (string instead of number)
-    // await executeAction(updateMyRsvpAction, { 
-    //   eventSlug,
-    //   rsvpStatus: selectedStatus,
-    // ...countsToSubmit
-    // });
-
-    // TEST #4: Negative player count
-    // await executeAction(updateMyRsvpAction, { 
-    //   eventSlug,
-    //   rsvpStatus: selectedStatus,
-    // ...countsToSubmit
-    // });
-
-    // TEST #5: Exceeds max limit (max is 10)
-    // await executeAction(updateMyRsvpAction, { 
-    //   eventSlug,
-    //   rsvpStatus: selectedStatus,
     // ...countsToSubmit
     // });
 
