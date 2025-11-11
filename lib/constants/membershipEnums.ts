@@ -1,5 +1,10 @@
 // lib/constants/membershipEnums.ts
 
+// 2025nov11: this entire file should be revisited.  
+// Presently, memberRole usage/checks in other files are using only this file, instead of the enum enforcement that comes automatically via prisma.  See how rsvpModal and MyRsvpCardClient work instead.
+// Also, this file could be rightly exploited by using the MANAGEMENT_ROLES etc., but as far as I can see, we are NOT doing so, just rushed developer oversight.  
+// Time to address above is when we update chapterMembership functionality to incorporate OWNER, QUIT and CANCELLED statuses. 
+
 /**
  * Chapter Member Roles
  * 

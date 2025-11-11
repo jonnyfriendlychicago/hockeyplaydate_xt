@@ -9,13 +9,15 @@ import { CheckCircle, XCircle, HelpCircle, AlertTriangle, Edit } from "lucide-re
 import { RsvpModal } from "./RsvpModal";
 // import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 // import { useRsvpError } from '@/lib/hooks/useRsvpError';
-import { RsvpStatus } from '@/lib/constants/rsvpEnums';
-import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client';
+// import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
+// import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client';
+import { RsvpStatus } from '@prisma/client';
 
 interface MyRsvpCardClientProps {
   userRsvp: {
     id: number;
-    rsvpStatus: PrismaRsvpStatus | null;
+    // rsvpStatus: PrismaRsvpStatus | null;
+    rsvpStatus: RsvpStatus | null;
     playersYouth: number | null;
     playersAdult: number | null;
     spectatorsAdult: number | null;
@@ -24,7 +26,8 @@ interface MyRsvpCardClientProps {
   eventSlug: string;
 }
 
-function getStatusConfig(status: PrismaRsvpStatus | null) {
+// function getStatusConfig(status: PrismaRsvpStatus | null) {
+function getStatusConfig(status: RsvpStatus | null) {
   switch (status) {
     case RsvpStatus.YES:
       return {

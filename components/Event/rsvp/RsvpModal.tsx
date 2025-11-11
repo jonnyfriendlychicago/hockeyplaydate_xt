@@ -11,8 +11,9 @@ import { CheckCircle, XCircle, HelpCircle } from "lucide-react";
 import { updateMyRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
-import { RsvpStatus } from '@/lib/constants/rsvpEnums';
-import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client'; // revisit why nec?
+// import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
+// import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client'; // revisit why nec?
+import { RsvpStatus } from '@prisma/client'; // revisit why nec?
 
 interface RsvpModalProps {
   isOpen: boolean;
@@ -20,7 +21,8 @@ interface RsvpModalProps {
   eventSlug: string;
   currentRsvp: { // devNote: this should be a type, like ChapterMemberWithProfile? 
     // rsvpStatus: string;
-    rsvpStatus: PrismaRsvpStatus | null; 
+    // rsvpStatus: PrismaRsvpStatus | null; 
+    rsvpStatus: RsvpStatus | null; 
     playersYouth: number | null;
     playersAdult: number | null;
     spectatorsAdult: number | null;
@@ -42,7 +44,8 @@ export function RsvpModal({
 }: RsvpModalProps) {
   
   // Initialize form state with current values or defaults
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(
+  // const [selectedStatus, setSelectedStatus] = useState<string | null>(
+  const [selectedStatus, setSelectedStatus] = useState<RsvpStatus | null>(  // this line enforces the enum values from rsvpStatus! so, no longer plain string
     currentRsvp?.rsvpStatus || null
   );
   const [playersYouth, setPlayersYouth] = useState<string>(
@@ -84,7 +87,8 @@ export function RsvpModal({
   const showCounts = selectedStatus === RsvpStatus.YES;
 
   // Handle status change - clear counts if not YES
-  const handleStatusChange = (status: string) => {
+  // const handleStatusChange = (status: string) => {
+  const handleStatusChange = (status: RsvpStatus) => {
     setSelectedStatus(status);
     if (status !== RsvpStatus.YES) {
       // Clear all count fields when switching to MAYBE or NO
