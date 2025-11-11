@@ -20,7 +20,7 @@
 'use client';
 
 import { useState } from "react";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
@@ -35,11 +35,6 @@ interface ChapterMemberManagementModalProps {
   chapterSlug: string; 
   member: ChapterMemberWithProfile | null;
 }
-
-// function getAvailableActions(currentRole: string): string[] {
-//   const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']; // Don't show current role or APPLICANT (can't go back to applicant)
-//   return allRoles.filter(role => role !== currentRole);
-// }
 
 function getAvailableActions(currentRole: string): string[] {
   return MANAGEABLE_ROLES.filter(role => role !== currentRole);

@@ -18,7 +18,7 @@ interface RsvpModalProps {
   isOpen: boolean;
   onClose: () => void;
   eventSlug: string;
-  currentRsvp: { // devNote: this should be a type, like ChapterMemberWithProfile
+  currentRsvp: { // devNote: this should be a type, like ChapterMemberWithProfile? 
     // rsvpStatus: string;
     rsvpStatus: PrismaRsvpStatus | null; 
     playersYouth: number | null;
@@ -64,9 +64,18 @@ export function RsvpModal({
   } = useRsvpAction({
     errorKey: RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
     onSuccess: () => {
+      // setSelectedStatus(null); 
+      // devNote: line above not needed (in contrast to chapterMembership files) b/c 
+      // (1) State re-initializes from props on every modal open
+      // (2) Success triggers parent revalidation → props update → state auto-syncs
+      // (3) You already have a proper reset in handleCancel() that uses props
+      // Summary: The RSVP modal differs because it's an edit form (pre-populated from current values) 
+      // while the chapter management modal is an action selector (starts blank each time).
       onClose();
     },
     onError: () => {
+      // setSelectedStatus(null); 
+      // devNote: line above not needed (in contrast to chapterMembership files).  explanation above.
       onClose();
     }
   });
@@ -116,7 +125,7 @@ export function RsvpModal({
     // ...countsToSubmit
     // });
 
-    // TEST #2: Invalid RSVP status
+    // // TEST #2: Invalid RSVP status
     // await executeAction(updateMyRsvpAction, { 
     //   eventSlug,
     //   rsvpStatus: 'HACKED_STATUS',

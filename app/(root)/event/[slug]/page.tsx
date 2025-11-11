@@ -161,7 +161,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       {/* My RSVP Row  */}
       <MyRsvpCard 
-        eventId={presentedEvent.id}
+        eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
         eventSlug={presentedEvent.presentableId}
         userProfileId={authenticatedUserProfile.id}
       />
@@ -250,11 +250,12 @@ export default async function EventPage({ params }: { params: { slug: string } }
                 // 2025oct28 Line above encountering errors, revisit
               />
             </div>
-
           </CardContent>
         </Card>
       
-        <RsvpSummary eventId={presentedEvent.id} />
+        <RsvpSummary 
+          eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+        />
       </div>
 
       {/* Row 2: Location (Full Width) */}

@@ -16,7 +16,7 @@ import { RsvpStatus } from '@/lib/constants/rsvpEnums'
 // updateMyRsvpAction
 // **********************************
 
-// devNote: this update action is actually and upsert function
+// devNote: this update action is actually an "upsert" function; titled 'update' b/c that's experience from EU perspective
 export async function updateMyRsvpAction(formData: FormData): Promise<ActionResult> {
   try {
     // 0 - Validate user, part 1: authenticated not-dupe user? 
@@ -25,7 +25,7 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
       redirect('/auth/login')
     }
 
-    // 1 - Parse and validate input FIRST, before any other operations
+    // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = updateMyRsvpSchema.safeParse({
       eventSlug: formData.get('eventSlug'),
       rsvpStatus: formData.get('rsvpStatus'),
@@ -36,7 +36,7 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
     });
 
     if (!parseResult.success) {
-      return failure('Invalid request data');
+      return failure('Rsvp error 01');
     }
 
     const { eventSlug, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
@@ -62,7 +62,7 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
 
     // note: event non-existence v. existence is NOT a public matter, so approp to have this be vague
     if (!event) {
-      return failure('Unable to process request');
+      return failure('Rsvp error 02');
     }
 
     // 3 - Validate user, part 2: requisite chapterMember permissions? 
@@ -72,7 +72,7 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
     const canRsvp = userStatus.genMember || userStatus.mgrMember
 
     if (!canRsvp) {
-      return failure('Unable to process request');
+      return failure('Rsvp error 03');
     }
 
     // 4 - Check if RSVP record for this event + userProfile already exists
@@ -83,17 +83,13 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
       }
     });
 
-    // 5 - Create or update RSVP record
+    // 5 - Run the update/insert
     if (existingRsvp) {
       // Update existing RSVP
       await prisma.rsvp.update({
         where: { id: existingRsvp.id },
         data: {
           rsvpStatus,
-          // playersYouth,
-          // playersAdult,
-          // spectatorsAdult,
-          // spectatorsYouth,
           playersYouth: finalCounts.playersYouth,
           playersAdult: finalCounts.playersAdult,
           spectatorsAdult: finalCounts.spectatorsAdult,
@@ -108,10 +104,6 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
           eventId: event.id,
           userProfileId: authenticatedUserProfile.id,
           rsvpStatus,
-          // playersYouth,
-          // playersAdult,
-          // spectatorsAdult,
-          // spectatorsYouth,
           playersYouth: finalCounts.playersYouth,
           playersAdult: finalCounts.playersAdult,
           spectatorsAdult: finalCounts.spectatorsAdult,

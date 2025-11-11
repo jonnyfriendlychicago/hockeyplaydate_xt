@@ -54,9 +54,9 @@ function getStatusConfig(status: PrismaRsvpStatus | null) {
       return {
         label: 'gimmieRSVP',
         icon: HelpCircle,
-        bgColor: 'bg-blue-600',
+        bgColor: 'bg-gray-400',
         textColor: 'text-white',
-        borderColor: 'border-blue-600',
+        borderColor: 'border-gray-400',
       };
   }
 }
@@ -125,6 +125,7 @@ export function MyRsvpCardClient({
                 variant="secondary"
                 size="lg"
                 className="bg-white hover:bg-gray-100 text-gray-900 font-semibold shadow-md"
+                aria-label={userRsvp ? 'Update your RSVP' : 'Add your RSVP'} 
               >
                 <Edit className="w-4 h-4 mr-2" />
                 {userRsvp ? 'Update' : 'Add RSVP'}
@@ -134,7 +135,7 @@ export function MyRsvpCardClient({
 
           {/* Expanded Section: Player Counts (only if YES status and has counts) */}
           {showCounts && !showPlayerWarning && (hasYouthPlayers || hasAdultPlayers || hasAnySpectators) && (
-            <div className="p-4 bg-gray-50 border-t">
+            <div className="p-4 bg-gray-50 ">
               {/* Players Row - only show non-zero values */}
               {(hasYouthPlayers || hasAdultPlayers) && (
                 <div className="grid grid-cols-2 gap-4 mb-4">
@@ -198,7 +199,7 @@ export function MyRsvpCardClient({
         onClose={() => setIsModalOpen(false)}
         eventSlug={eventSlug}
         currentRsvp={userRsvp}
-        isManagerMode={false}
+        isManagerMode={false} // For manager mode (Phase 4)
       />
     </>
   );
