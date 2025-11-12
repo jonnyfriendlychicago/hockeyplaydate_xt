@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CheckCircle, XCircle, HelpCircle } from "lucide-react";
-import { updateMyRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
+import { updateMyRsvpAction, updateMemberRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
 // import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
 // import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client'; // revisit why nec?
 import { RsvpStatus } from '@prisma/client'; // revisit why nec?
+
 
 interface RsvpModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export function RsvpModal({
   currentRsvp,
   isManagerMode, // For manager mode (Phase 4)
   targetUserName, // For manager mode (Phase 4)
-  // targetUserProfileId
+  targetUserProfileId
 }: RsvpModalProps) {
   
   // Initialize form state with current values or defaults
@@ -65,7 +66,9 @@ export function RsvpModal({
     executeAction, 
     isSubmitting 
   } = useRsvpAction({
-    errorKey: RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
+    // errorKey: RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
+    // below replaces above: with introduction of other-member-rsvp-mgmt, we need conditional error key based on mode
+    errorKey: isManagerMode ? RSVP_ERROR_KEYS.UPDATE_MEMBER_RSVP : RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
     onSuccess: () => {
       // setSelectedStatus(null); 
       // devNote: line above not needed (in contrast to chapterMembership files) b/c 
@@ -155,11 +158,29 @@ export function RsvpModal({
     //   spectatorsYouth: '0'
     // };
 
-    await executeAction(updateMyRsvpAction, {
-      eventSlug,
-      rsvpStatus: selectedStatus,
-      ...countsToSubmit
-    });
+    // await executeAction(updateMyRsvpAction, {
+    //   eventSlug,
+    //   rsvpStatus: selectedStatus,
+    //   ...countsToSubmit
+    // });
+
+    // above replaced by below; above await function only works for updateMy...; below is conditional action call based on manager mode
+    if (isManagerMode && targetUserProfileId) {
+      // Manager updating another member's RSVP
+      await executeAction(updateMemberRsvpAction, {
+        eventSlug,
+        targetUserProfileId: targetUserProfileId.toString(),
+        rsvpStatus: selectedStatus,
+        ...countsToSubmit
+      });
+    } else {
+      // User updating their own RSVP
+      await executeAction(updateMyRsvpAction, {
+        eventSlug,
+        rsvpStatus: selectedStatus,
+        ...countsToSubmit
+      });
+    }
 
     // testing scenarios: replace above 'await..' function with below
 

@@ -17,6 +17,7 @@ import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
 import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
+import { MemberRsvpList } from '@/components/Event/rsvp/MemberRsvpList';
 
 export default async function EventPage({ params }: { params: { slug: string } }) {
   // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
@@ -279,7 +280,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
       </div>
 
-      {/* Row 3: Member RSVP Status - PLACEHOLDER */}
+      {/* Row 3: Member RSVP Status */}
       <div className="grid grid-cols-1 gap-6">
         <Card className="border-0 shadow-none">
           <CardHeader>
@@ -289,12 +290,18 @@ export default async function EventPage({ params }: { params: { slug: string } }
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <MemberRsvpList
+              chapterId={presentedEvent.chapterId}
+              eventId={presentedEvent.id}
+              eventSlug={presentedEvent.presentableId}
+              currentUserProfileId={authenticatedUserProfile.id}
+              isManager={userStatus.mgrMember}
+            />
             
-            {/* Placeholder content */}
-            <div className="bg-muted/30 p-12 rounded-lg text-center">
+            {/* <div className="bg-muted/30 p-12 rounded-lg text-center">
               <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground mb-2">
-                Member RSVP list placeholder
+                Placeholder content - Member RSVP list placeholder
               </p>
               <p className="text-xs text-muted-foreground">
                 Chapter member list with RSVP statuses and tabs (All, Yes, No, Maybe, No Reply)
@@ -304,7 +311,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
                   Manager view: Will allow editing member RSVPs
                 </p>
               )}
-            </div>
+            </div> */}
 
           </CardContent>
         </Card>
@@ -313,210 +320,3 @@ export default async function EventPage({ params }: { params: { slug: string } }
     </section>
     );
 }
-    // below is old version, for reference
-
-    // <section className="max-w-6xl mx-auto p-6 space-y-6">
-      
-    //   {/* Edit Button Top-Right - only for managers */}
-    //   {userStatus.mgrMember && (
-    //     <div className="flex justify-end">
-    //       <Link href={`/event/manage-backend-test?event=${presentedEvent.presentableId}`}>
-    //         <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-muted">
-    //           <Pencil className="w-4 h-4" />
-    //           Edit Event
-    //         </Button>
-    //       </Link>
-    //     </div>
-    //   )}
-
-    //   {/* Event Title & chapterLink */}
-    //   <div className="text-center mb-6">
-    //     <h1 className="text-4xl font-extrabold tracking-tight text-primary">
-    //       {presentedEvent.title || 'Untitled Event'}
-    //     </h1>
-    //     <p className="text-lg text-muted-foreground mt-2">
-    //       <Link 
-    //         href={`/${presentedEvent.chapter.slug}`}
-    //         className="hover:underline"
-    //       >
-    //       Go to Chapter
-    //       </Link>
-    //     </p>
-    //   </div>
-
-    //   {/* Top Row: Event Details + RSVP Summary */}
-    //   <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        
-    //     {/* Left: Event Details */}
-    //     <div className="col-span-3">
-    //       <Card className="h-full">
-    //         <CardHeader>
-    //           <CardTitle className="flex items-center gap-2">
-    //             <Calendar className="w-5 h-5" />
-    //             Event Details
-    //           </CardTitle>
-    //         </CardHeader>
-    //         <CardContent className="space-y-4">
-              
-    //           {/* Date & Time */}
-    //           <div className="flex items-start gap-3">
-    //             <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-    //             <div>
-                  
-    //               {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
-    //               {presentedEvent.durationMin && (
-    //                 <p className="text-sm text-muted-foreground">
-    //                   Duration: {formatDuration(presentedEvent.durationMin)}
-    //                 </p>
-    //               )} */}
-
-    //               {/* NEW CODE - show end time instead of duration */}
-    //               {/* <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
-    //               {presentedEvent.endsAt && (
-    //                 <p className="text-sm text-muted-foreground">
-    //                   Ends: {formatEndTime(presentedEvent.endsAt)}
-    //                 </p>
-    //               )} */}
-
-    //               {/* // NEW CODE - with multi-day detection */}
-    //               <p className="font-medium">{formatEventDateTime(presentedEvent.startsAt)}</p>
-    //               {presentedEvent.endsAt && (() => {
-    //                 // Check if same date
-    //                 const startDate = presentedEvent.startsAt?.toDateString();
-    //                 const endDate = presentedEvent.endsAt.toDateString();
-    //                 const isMultiDay = startDate !== endDate;
-                    
-    //                 return (
-    //                   <div>
-    //                     <p className="text-sm text-muted-foreground">
-    //                       Ends: {isMultiDay ? formatEventDateTime(presentedEvent.endsAt) : formatEndTime(presentedEvent.endsAt)}
-    //                     </p>
-    //                     {isMultiDay && (
-    //                       <p className="text-sm text-red-600 font-medium mt-1 flex items-center gap-1">
-    //                         <AlertTriangle className="w-4 h-4" />
-    //                         NOTE: Multi-day event detected
-    //                       </p>
-    //                     )}
-    //                   </div>
-    //                 );
-    //               })()}
-
-
-    //             </div>
-    //           </div>
-
-    //           {/* Location */}
-    //           {(presentedEvent.venueName || presentedEvent.address) && (
-    //             <div className="flex items-start gap-3">
-    //               <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-    //               <div>
-    //                 {presentedEvent.venueName && (
-    //                   <p className="font-medium">{presentedEvent.venueName}</p>
-    //                 )}
-    //                 {presentedEvent.address && (
-    //                   <div className="flex items-center gap-1">
-    //                     <p className="text-sm text-muted-foreground">{presentedEvent.address}</p>
-    //                     <CopyText text={presentedEvent.address} />
-    //                   </div>
-    //                 )}
-    //               </div>
-    //             </div>
-    //           )}
-
-    //           {/* Description */}
-    //           {presentedEvent.description && (
-    //             <div>
-    //               <p className="text-sm text-muted-foreground mb-1">Description</p>
-    //               <p className="text-sm">{presentedEvent.description}</p>
-    //             </div>
-    //           )}
-
-    //         </CardContent>
-    //       </Card>
-    //     </div>
-
-    //     {/* Right: RSVP Summary */}
-    //     <div className="col-span-2">
-    //       <Card className="h-full">
-    //         <CardHeader>
-    //           <CardTitle className="flex items-center gap-2">
-    //             <Users className="w-5 h-5" />
-    //             Attendees
-    //           </CardTitle>
-    //         </CardHeader>
-    //         <CardContent className="space-y-4">
-              
-    //           <div className="space-y-3">
-    //             <div className="flex justify-between items-center">
-    //               <span className="text-sm font-medium text-green-700">Going</span>
-    //               <span className="text-lg font-bold text-green-700">{rsvpCounts.yes}</span>
-    //             </div>
-                
-    //             <div className="flex justify-between items-center">
-    //               <span className="text-sm font-medium text-yellow-700">Maybe</span>
-    //               <span className="text-lg font-bold text-yellow-700">{rsvpCounts.maybe}</span>
-    //             </div>
-                
-    //             <div className="flex justify-between items-center">
-    //               <span className="text-sm font-medium text-red-700">Not Going</span>
-    //               <span className="text-lg font-bold text-red-700">{rsvpCounts.no}</span>
-    //             </div>
-    //           </div>
-
-    //           {/* RSVP Button - only show for non-blocked members */}
-    //           {/* placeholder for now */}
-    //           {(userStatus.genMember || userStatus.mgrMember) && (
-    //             <div className="pt-4">
-    //               <Button className="w-full" size="lg">
-    //                 Update My RSVP
-    //               </Button>
-    //             </div>
-    //           )}
-
-    //         </CardContent>
-    //       </Card>
-    //     </div>
-    //   </div>
-
-    //   {/* Bottom Row: Calendar Integration + Location Map (Placeholders) */}
-    //   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-    //     <Card>
-    //       <CardHeader>
-    //         <CardTitle>Add to Calendar</CardTitle>
-    //       </CardHeader>
-    //       <CardContent>
-            // <AddToGoogleCalendar
-            //   event={{
-            //     title: presentedEvent.title || 'Hockey Event',
-            //     description: presentedEvent.description || undefined,
-            //     venueName: presentedEvent.venueName || undefined,
-            //     address: presentedEvent.address || undefined,
-            //     startsAt: presentedEvent.startsAt,
-            //     endsAt: presentedEvent.endsAt,
-            //   }}
-            //   userRsvpStatus={userRsvpStatus}
-            // />
-    //       </CardContent>
-    //     </Card>
-
-    //     {/* Location Map */}
-    //     <Card>
-    //       <CardHeader>
-    //         <CardTitle>Location</CardTitle>
-    //       </CardHeader>
-    //       <CardContent>
-    //         <EventLocationMap
-    //           venueName={presentedEvent.venueName}
-    //           address={presentedEvent.address}
-    //           placeId={presentedEvent.placeId}
-    //           lat={presentedEvent.lat}
-    //           lng={presentedEvent.lng}
-    //           bypassAddressValidation={presentedEvent.bypassAddressValidation}
-    //         />
-    //       </CardContent>
-    //     </Card>
-    //   </div>
-
-    // </section>
-  
