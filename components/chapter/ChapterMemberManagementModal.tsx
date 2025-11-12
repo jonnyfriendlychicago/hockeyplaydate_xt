@@ -20,7 +20,7 @@
 'use client';
 
 import { useState } from "react";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChapterMemberWithProfile, getMaskedRole, getDisplayName} from "@/lib/types/chapterMember";
@@ -30,26 +30,21 @@ import { useChapterMembershipAction } from '@/lib/hooks/useChapterMembershipActi
 import { MANAGEABLE_ROLES } from '@/lib/constants/membershipEnums';
 
 interface ChapterMemberManagementModalProps {
-  member: ChapterMemberWithProfile | null;
   isOpen: boolean;
   onClose: () => void;
   chapterSlug: string; 
+  member: ChapterMemberWithProfile | null;
 }
-
-// function getAvailableActions(currentRole: string): string[] {
-//   const allRoles = ['MEMBER', 'MANAGER', 'BLOCKED', 'REMOVED']; // Don't show current role or APPLICANT (can't go back to applicant)
-//   return allRoles.filter(role => role !== currentRole);
-// }
 
 function getAvailableActions(currentRole: string): string[] {
   return MANAGEABLE_ROLES.filter(role => role !== currentRole);
 }
 
 export function ChapterMemberManagementModal({ 
-  member, 
   isOpen, 
   onClose, 
-  chapterSlug 
+  chapterSlug, 
+  member, 
 }: ChapterMemberManagementModalProps) {
   
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
@@ -60,11 +55,11 @@ export function ChapterMemberManagementModal({
   } = useChapterMembershipAction({
     errorKey: CHAPTER_ERROR_KEYS.MEMBER_MANAGEMENT,
     onSuccess: () => {
-      setSelectedAction(null);
+      setSelectedAction(null);  // why this important here, but not for rsvp? 
       onClose();
     }, 
     onError: () => {  
-      setSelectedAction(null);
+      setSelectedAction(null);  // why this important here, but not for rsvp? 
       onClose();
     }
   }); 
@@ -82,6 +77,8 @@ export function ChapterMemberManagementModal({
 
   const handleSubmit = async () => {
     if (!selectedAction || isSubmitting) return;
+
+    // placeholder for any forced action, such as setting some attributes based on other attributes
 
     await executeAction(updateMemberRoleAction, {
       chapterSlug,

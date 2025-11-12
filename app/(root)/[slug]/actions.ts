@@ -8,12 +8,11 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
-import { chapterSlugSchema, updateMemberRoleSchema
-} from '@/lib/validation/chapterMembershipValSchema';
+import { chapterSlugSchema, updateMemberRoleSchema} from '@/lib/validation/chapterMembershipValSchema';
 import { ActionResult, 
   // success, // if future actions DO return success data (like creating an event and returning its ID), then we'll need this imported function
   failure } from '@/lib/types/serverActionResults';
-  import { MemberRole } from '@/lib/constants/membershipEnums';
+import { MemberRole } from '@/lib/constants/membershipEnums';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
@@ -33,7 +32,7 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
         redirect('/auth/login')
     }
 
-    // 1 - Parse and validate input FIRST, before any other operations
+    // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = chapterSlugSchema.safeParse({ // chapterSlugSchema is the imported zod function
       chapterSlug: formData.get('chapterSlug')
     });
@@ -100,7 +99,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
       await prisma.chapterMember.update({
         where: { id: userStatus.membership.id },
         data: {
-          // memberRole: 'APPLICANT',
           memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 
@@ -113,7 +111,6 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
         data: {
           chapterId: chapter.id,
           userProfileId: authenticatedUserProfile.id,
-          // memberRole: 'APPLICANT',
           memberRole: MemberRole.APPLICANT,
           joinRequestWindowStart: newWindowStart,
           joinRequestCount: newCount, 

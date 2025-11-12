@@ -68,7 +68,7 @@ export function RsvpSummaryClient({
 
         {/* Spectators Section (Collapsible) - YES counts only */}
         {showSpectators && (
-          <div className="space-y-6 pt-4 border-t">
+          <div className="space-y-6 pt-4 ">
             <div className="grid grid-cols-2 gap-6">
               <CountDisplay label="Adult Spectators" count={adultSpectators} />
               <CountDisplay label="Youth Spectators" count={youthSpectators} />

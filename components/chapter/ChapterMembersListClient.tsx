@@ -17,9 +17,9 @@ interface ChapterMembersListClientProps {
 }
 
 export function ChapterMembersListClient({ 
+  chapterSlug,
   members, 
   userChapterMember, 
-  chapterSlug,
   emptyMessage,
   title
 }: ChapterMembersListClientProps) {
@@ -64,10 +64,10 @@ export function ChapterMembersListClient({
       </div>
 
       <ChapterMemberManagementModal
-        member={selectedMember}
         isOpen={isModalOpen}
         onClose={handleModalClose}
         chapterSlug={chapterSlug}
+        member={selectedMember}
       />
     </div>
   );
