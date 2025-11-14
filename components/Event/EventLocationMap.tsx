@@ -39,7 +39,8 @@ interface EventLocationMapProps {
   bypassAddressValidation: boolean;
 }
 
-export default function EventLocationMap({
+// export default function EventLocationMap({
+export function EventLocationMap({
   venueName,
   address,
   placeId,

@@ -10,7 +10,7 @@ type FullUserProfile = UserProfile & {
     authUser: AuthUser;
   };
 
-// 2025oct15: this is the new standard authentication function for all pages/routes. 
+// 2025oct15: this function - getAuthenticatedUserProfileOrNull - is the new standard authentication function for all pages/routes. 
 export async function getAuthenticatedUserProfileOrNull() {
   const authSession = await auth0.getSession();
   const authSessionUser = authSession?.user;
@@ -41,12 +41,15 @@ export async function getAuthenticatedUserProfileOrNull() {
     redirect('/duplicate-user');
   }
 
+  // 5 - placeholder: if userProfile givenName or familyName null/blank, redirect to new "minimal file completion" page, that shall be created
+  // from the component that floats above all pages via the layout file.  
+
   return dbUserProfile as FullUserProfile;
 }
 
 
 // 2025oct15: 
-// I think this entire getAuthenticatedUser funct should be deprecated then deleted, b/c redirect for login should not be here; the redirecting code must exist on the originating page itself, so that 
+// I think this entire getAuthenticatedUser funct below should be deprecated then deleted, b/c redirect for login should not be here; the redirecting code must exist on the originating page itself, so that 
 // that such page's url/string can be submitted as part of the login redirect, thus ensuring that the user is redircted to such page after successful login (instead of being redirected to a static homepage)
 
 // This first function should be renamed getAuthenticatedUserOrRedirect, 
