@@ -184,7 +184,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       {/* My RSVP Row  */}
       <MyRsvpCard 
-        eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+        // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
         eventSlug={presentedEvent.presentableId}
         userProfileId={authenticatedUserProfile.id}
       />
@@ -277,7 +277,8 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
       
         <RsvpSummary 
-          eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+          // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+          eventSlug={presentedEvent.presentableId}
         />
       </div>
 
@@ -314,7 +315,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardContent>
             <MemberRsvpList
               chapterId={presentedEvent.chapterId}
-              eventId={presentedEvent.id}
+              // eventId={presentedEvent.id}
               eventSlug={presentedEvent.presentableId}
               currentUserProfileId={authenticatedUserProfile.id}
               // isManager={userStatus.mgrMember}

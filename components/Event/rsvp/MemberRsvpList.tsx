@@ -11,7 +11,7 @@ import { MemberRsvpListClient } from './MemberRsvpListClient';
 
 interface MemberRsvpListProps {
   chapterId: number;
-  eventId: number;
+  // eventId: number;
   eventSlug: string;
   currentUserProfileId: number | null;
   isManager: boolean;
@@ -19,11 +19,30 @@ interface MemberRsvpListProps {
 
 export async function MemberRsvpList({
   chapterId,
-  eventId,
+  // eventId,
   eventSlug,
   currentUserProfileId,
   isManager,
 }: MemberRsvpListProps) {
+
+  // Look up event by slug first
+  const event = await prisma.event.findUnique({
+    where: { presentableId: eventSlug },
+    select: { id: true }
+  });
+
+  // Guard clause - if event doesn't exist, return empty state
+  // (This shouldn't happen since page already validated event exists)
+  if (!event) {
+    return (
+      <MemberRsvpListClient
+        members={[]}
+        eventSlug={eventSlug}
+        currentUserProfileId={currentUserProfileId}
+        isManager={isManager}
+      />
+    );
+  }
   
   // Fetch all MEMBER and MANAGER roles from this chapter
   // LEFT JOIN with RSVP data for this specific event
@@ -62,7 +81,8 @@ export async function MemberRsvpList({
   // This is cleaner than trying to do complex nested queries
   const rsvps = await prisma.rsvp.findMany({
     where: {
-      eventId,
+      // eventId,
+      eventId: event.id, 
       userProfileId: {
         in: members.map(m => m.userProfileId)
       }
