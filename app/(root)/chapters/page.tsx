@@ -14,6 +14,7 @@ import { CreateChapterButton } from '@/components/Chapters/CreateChapterButton';
 import { ChapterCard } from '@/components/Chapters/ChapterCard';
 import { ChapterWithData } from '@/app/types/models/chapter';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function ChaptersPage() {
   // Authentication check
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull();

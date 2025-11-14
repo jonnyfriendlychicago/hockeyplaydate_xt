@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 import { getAuthenticatedUser } from '@/lib/enhancedAuthentication/authUserVerification';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function EditProfilePage() {
   // 0 - authenticate user
   const  authenticatedUser = await getAuthenticatedUser(); 

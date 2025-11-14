@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Mail, CheckCircle, Users, Calendar, MapPin, Heart } from 'lucide-react';
 import Link from 'next/link';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default function NewChapterPage() {
   return (
     <div className="min-h-screen bg-white">

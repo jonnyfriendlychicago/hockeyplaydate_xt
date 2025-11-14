@@ -2,6 +2,7 @@
 
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function HowItWorks() {
 
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user

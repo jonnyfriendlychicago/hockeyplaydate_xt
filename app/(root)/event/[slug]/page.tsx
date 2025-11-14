@@ -19,6 +19,7 @@ import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
 import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 import { MemberRsvpList } from '@/components/Event/rsvp/MemberRsvpList';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function EventPage({ params }: { params: { slug: string } }) {
   // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
   // 0 - Validate user, part 1: authenticated not-dupe user? 

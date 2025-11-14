@@ -4,6 +4,7 @@ import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function DuplicateUser() {
 
     // devNotes: 

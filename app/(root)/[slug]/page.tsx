@@ -30,6 +30,7 @@ import { ChapterErrorDisplay } from '@/components/chapter/ChapterErrorDisplay';
 
 // export const dynamic = 'force-dynamic';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function ChapterPage({ params }: { params: { slug: string } }) {
   
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
