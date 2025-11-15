@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link'; 
 // devNotes: above unbracketed, b/c Next.js uses a mix of export patterns; default exports for components: Link, Image, 
@@ -80,6 +80,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
   if (!membership || 
       (membership.memberRole !== MemberRole.MEMBER && 
       membership.memberRole !== MemberRole.MANAGER)) {
+    // 2025nov14: devNote: below return features no tailwind/shadCNui. To be updated. 
     return (
       <section className="max-w-6xl mx-auto p-6 text-center py-12">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
@@ -125,13 +126,13 @@ export default async function EventPage({ params }: { params: { slug: string } }
     }).format(endDate);
   };
 
-  // 3d - Get current user's RSVP status
-  const userRsvp = authenticatedUserProfile 
-    ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
+  // 4 - Get current user's RSVP status
+  const userRsvp = 
+    authenticatedUserProfile ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
     : null;
   const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
-  // 4 - return it all
+  // 5 - return it all
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Top Bar - Chapter Name + Edit Event Button */}
@@ -184,7 +185,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       {/* My RSVP Row  */}
       <MyRsvpCard 
-        // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+        // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
         eventSlug={presentedEvent.presentableId}
         userProfileId={authenticatedUserProfile.id}
       />
@@ -277,7 +278,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
       
         <RsvpSummary 
-          // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+          // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
           eventSlug={presentedEvent.presentableId}
         />
       </div>

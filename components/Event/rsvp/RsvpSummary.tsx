@@ -2,7 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { RsvpSummaryClient } from "./RsvpSummaryClient";
-import { RsvpStatus } from '@/lib/constants/rsvpEnums';
+// import { RsvpStatus } from '@/lib/constants/rsvpEnums';
+import { RsvpStatus } from '@prisma/client'; 
 
 interface RsvpSummaryProps {
   // eventId: number;
