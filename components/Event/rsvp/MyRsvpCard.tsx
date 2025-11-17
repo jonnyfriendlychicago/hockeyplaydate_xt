@@ -15,7 +15,7 @@ export async function MyRsvpCard({
   userProfileId 
 }: MyRsvpCardProps) {
 
-  // Look up event by slug first
+  // 1 - Look up event by slug 
   const event = await prisma.event.findUnique({
     where: { presentableId: eventSlug },
     select: { id: true }

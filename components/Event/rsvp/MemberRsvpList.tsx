@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { MemberRole } from '@prisma/client';
 import { MemberRsvpListClient } from './MemberRsvpListClient';
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 
 // devNotes:
 // Two-query approach: Prisma doesn't easily support LEFT JOIN with filters, so we fetch members, then RSVPs, then merge. This is clean and performant.
@@ -10,22 +11,45 @@ import { MemberRsvpListClient } from './MemberRsvpListClient';
 // Type safety: The merged structure matches MemberWithRsvp
 
 interface MemberRsvpListProps {
-  chapterId: number;
-  // eventId: number;
+  chapterSlug: string; 
   eventSlug: string;
-  currentUserProfileId: number | null;
-  isManager: boolean;
+  // chapterId: number;
+  // eventId: number;
+  // currentUserProfileId: number | null;
+  // isManager: boolean;
 }
 
 export async function MemberRsvpList({
-  chapterId,
-  // eventId,
+  chapterSlug,
   eventSlug,
-  currentUserProfileId,
-  isManager,
+  // chapterId,
+  // eventId,
+  // currentUserProfileId,
+  // isManager,
 }: MemberRsvpListProps) {
 
-  // Look up event by slug first
+  // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
+  const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
+
+  // Look up chapter by slug
+  const chapter = await prisma.chapter.findUnique({
+    where: { slug: chapterSlug },
+    select: { id: true }
+  });
+
+  // Guard clause - if chapter doesn't exist, return empty state
+  if (!chapter) {
+    return (
+      <MemberRsvpListClient
+        members={[]}
+        eventSlug={eventSlug}
+        currentUserProfileId={null}
+        isManager={false}
+      />
+    );
+  }
+  
+  // Look up event by slug 
   const event = await prisma.event.findUnique({
     where: { presentableId: eventSlug },
     select: { id: true }
@@ -38,17 +62,31 @@ export async function MemberRsvpList({
       <MemberRsvpListClient
         members={[]}
         eventSlug={eventSlug}
-        currentUserProfileId={currentUserProfileId}
-        isManager={isManager}
+        currentUserProfileId={null}
+        isManager={false}
       />
     );
   }
   
+  // Look up current user's membership to determine manager status
+  const membership = authenticatedUserProfile 
+    ? await prisma.chapterMember.findFirst({
+        where: {
+          userProfileId: authenticatedUserProfile.id,
+          chapterId: chapter.id,
+        },
+      })
+    : null;
+
+  const isManager = membership?.memberRole === MemberRole.MANAGER;
+  const currentUserProfileId = authenticatedUserProfile?.id || null;
+
   // Fetch all MEMBER and MANAGER roles from this chapter
   // LEFT JOIN with RSVP data for this specific event
   const members = await prisma.chapterMember.findMany({
     where: {
-      chapterId,
+      // chapterId,
+      chapterId: chapter.id,
       memberRole: {
         in: [MemberRole.MEMBER, MemberRole.MANAGER]
       }

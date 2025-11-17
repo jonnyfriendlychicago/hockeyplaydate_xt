@@ -15,9 +15,9 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { CopyText } from '@/components/shared/copyText';
 import { EventLocationMap } from '@/components/Event/EventLocationMap';
 import { AddToGoogleCalendar } from '@/components/Event/AddToGoogleCalendar';
+import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
-import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 import { MemberRsvpList } from '@/components/Event/rsvp/MemberRsvpList';
 import { MemberRole } from '@prisma/client';
 // import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
@@ -187,7 +187,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
       <MyRsvpCard 
         // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
         eventSlug={presentedEvent.presentableId}
-        userProfileId={authenticatedUserProfile.id}
+        userProfileId={authenticatedUserProfile.id} // !!!!!!!!!!!!!!!!!!
       />
 
       {/* Row 1: Event Details + RSVP Summary */}
@@ -315,12 +315,13 @@ export default async function EventPage({ params }: { params: { slug: string } }
           </CardHeader>
           <CardContent>
             <MemberRsvpList
-              chapterId={presentedEvent.chapterId}
+              // chapterId={presentedEvent.chapterId}
+              chapterSlug={presentedEvent.chapter.slug}
               // eventId={presentedEvent.id}
               eventSlug={presentedEvent.presentableId}
-              currentUserProfileId={authenticatedUserProfile.id}
+              // currentUserProfileId={authenticatedUserProfile.id}
               // isManager={userStatus.mgrMember}
-              isManager={isManager}
+              // isManager={isManager}
             />
           </CardContent>
         </Card>
