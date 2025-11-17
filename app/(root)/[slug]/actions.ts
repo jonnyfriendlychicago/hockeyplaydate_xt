@@ -13,6 +13,7 @@ import { ActionResult,
   // success, // if future actions DO return success data (like creating an event and returning its ID), then we'll need this imported function
   failure } from '@/lib/types/serverActionResults';
 import { MemberRole } from '@/lib/constants/membershipEnums';
+import { createPresentableId } from '@/lib/idGenerators/createPresentableId';
 
 // devNotes 2025oct20: spend significant time troubleshooting error messages not being received/displayed on front end page.  
 // Various efforts made to resolve, including using useStateForm, which sounded like leading practice, and 
@@ -107,8 +108,11 @@ export async function joinChapterAction(formData: FormData): Promise<ActionResul
       });
     } else {
       // Create new record for first-time joiner
+      const cmPresentableId = await createPresentableId('chapterMember', 'presentableId', 10);
+
       await prisma.chapterMember.create({
         data: {
+          presentableId: cmPresentableId, 
           chapterId: chapter.id,
           userProfileId: authenticatedUserProfile.id,
           memberRole: MemberRole.APPLICANT,

@@ -13,7 +13,7 @@ import { customAlphabet } from 'nanoid';
 
 export async function createPresentableId(
   // devNote: this list of supported table names needs to be maintained for any new schema entity which shall use this function.
-  tableName: 'event' | 'loginFailure' | 'rsvp' | 'userProfile' | 'chapter',
+  tableName: 'event' | 'loginFailure' | 'rsvp' | 'userProfile' | 'chapter' | 'chapterMember',
   // devNote: in some cases, the fieldName is 'presentableId' but other cases include 'slug' fields, etc. 
   fieldName: string,
   // devNote: below sets a default value for number of characters, but this gets overridden by the incoming parameter
@@ -34,10 +34,25 @@ export async function createPresentableId(
         existing = await prisma.event.findUnique({ 
           where: { presentableId: candidate } 
         });
+      
+      // RSVP can generate EITHER presentableId OR slug, so slightly diff format
       } else if (tableName === 'rsvp') {
-        existing = await prisma.rsvp.findUnique({ 
-          where: { slug: candidate } 
+        
+        if (fieldName === 'presentableId') {
+          existing = await prisma.rsvp.findUnique({ 
+          where: { presentableId: candidate } 
         });
+        } else if (fieldName === 'slug') {
+          existing = await prisma.rsvp.findUnique({ 
+            where: { slug: candidate } 
+          });
+        }
+      
+      } else if (tableName === 'chapterMember') {  
+      existing = await prisma.chapterMember.findUnique({ 
+        where: { presentableId: candidate } 
+      });
+
       // 2025aug11: the following tables.fields do not use this process, this is just for future possible implementation. 
       } else if (tableName === 'loginFailure') {
         existing = await prisma.loginFailure.findUnique({ 
