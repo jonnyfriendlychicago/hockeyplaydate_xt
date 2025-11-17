@@ -10,11 +10,9 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { updateMyRsvpSchema } from '@/lib/validation/rsvpValSchema'
 import { ActionResult, failure } from '@/lib/types/serverActionResults'
-// import { RsvpStatus } from '@/lib/constants/rsvpEnums' 
 import { RsvpStatus } from '@prisma/client';
-// **************************
-// 2025nov12: above enum is supposed to be deprecated; revisit this file and update so no longer being used. 
-// **************************
+import { createPresentableId } from '@/lib/idGenerators/createPresentableId';
+
 import { updateMemberRsvpSchema } from '@/lib/validation/rsvpValSchema'
 
 // **********************************
@@ -104,8 +102,11 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
       });
     } else {
       // Create new RSVP
+      const rsvpPresentableId = await createPresentableId('rsvp', 'presentableId', 10);
+
       await prisma.rsvp.create({
         data: {
+          presentableId: rsvpPresentableId, 
           eventId: event.id,
           userProfileId: authenticatedUserProfile.id,
           rsvpStatus,
@@ -134,8 +135,6 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
     return failure('Unable to update RSVP. Please try again.');
   }
 }
-
-// Placeholder for updateMemberRsvpAction (Phase 4)
 
 // **********************************
 // updateMemberRsvpAction
@@ -238,8 +237,11 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
       });
     } else {
       // Create new RSVP
+      const rsvpPresentableId = await createPresentableId('rsvp', 'presentableId', 10);
+
       await prisma.rsvp.create({
         data: {
+          presentableId: rsvpPresentableId, 
           eventId: event.id,
           userProfileId: targetUserProfileId,
           rsvpStatus,
