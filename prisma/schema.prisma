@@ -171,7 +171,7 @@ model ChapterMember {
   updatedByUser   UserProfile?     @relation("ChapterMemberUpdatedBy", fields: [updatedBy], references: [id])
 
   // additional identifier(s)
-  presentableId   String?              @unique @map("presentable_id")
+  presentableId   String              @unique @map("presentable_id")
 
   @@unique([chapterId, userProfileId]) // each user_profile can only appear once per chapter
   @@map("chapter_member")
@@ -267,7 +267,7 @@ model Rsvp {
   updatedByUser   UserProfile         @relation("RsvpUpdatedBy", fields: [updatedBy], references: [id])
 
   // additional identifier(s)
-  presentableId   String?              @unique @map("presentable_id")
+  presentableId   String              @unique @map("presentable_id")
   
   @@map("rsvp")
   // future fields: 
