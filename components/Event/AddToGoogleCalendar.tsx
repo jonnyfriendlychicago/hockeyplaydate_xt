@@ -26,7 +26,8 @@ type AddToGoogleCalendarProps = {
   disabled?: boolean;
 };
 
-export default function AddToGoogleCalendar({ 
+// export default function AddToGoogleCalendar({
+export function AddToGoogleCalendar({ 
   event, 
   userRsvpStatus, 
   disabled = false 

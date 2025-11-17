@@ -10,7 +10,8 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { updateMyRsvpSchema } from '@/lib/validation/rsvpValSchema'
 import { ActionResult, failure } from '@/lib/types/serverActionResults'
-import { RsvpStatus } from '@/lib/constants/rsvpEnums' 
+// import { RsvpStatus } from '@/lib/constants/rsvpEnums' 
+import { RsvpStatus } from '@prisma/client';
 // **************************
 // 2025nov12: above enum is supposed to be deprecated; revisit this file and update so no longer being used. 
 // **************************

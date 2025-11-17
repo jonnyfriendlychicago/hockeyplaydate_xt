@@ -2,18 +2,44 @@
 
 import { prisma } from "@/lib/prisma";
 import { RsvpSummaryClient } from "./RsvpSummaryClient";
-import { RsvpStatus } from '@/lib/constants/rsvpEnums';
+// import { RsvpStatus } from '@/lib/constants/rsvpEnums';
+import { RsvpStatus } from '@prisma/client'; 
 
 interface RsvpSummaryProps {
-  eventId: number;
+  // eventId: number;
+  eventSlug: string; 
 }
 
-export async function RsvpSummary({ eventId }: RsvpSummaryProps) {
+export async function RsvpSummary({ 
+  // eventId 
+  eventSlug
+}: RsvpSummaryProps) {
+
+  // Look up event by slug first
+  const event = await prisma.event.findUnique({
+    where: { presentableId: eventSlug },
+    select: { id: true }
+  });
+
+  // Guard clause - if event doesn't exist, return zeros
+  // (This shouldn't happen since page already validated event exists)
+  if (!event) {
+    return (
+      <RsvpSummaryClient 
+        youthPlayers={0}
+        adultPlayers={0}
+        adultSpectators={0}
+        youthSpectators={0}
+        maybeCount={0}
+      />
+    );
+  }
   
   // Fetch all RSVPs for this event
   const rsvps = await prisma.rsvp.findMany({
     where: {
-      eventId: eventId,
+      // eventId: eventId,
+      eventId: event.id,
     },
     select: {
       rsvpStatus: true,

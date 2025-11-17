@@ -4,6 +4,7 @@
 
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function Home() {
   // // Fetch the user session
   // const session = await auth0.getSession();

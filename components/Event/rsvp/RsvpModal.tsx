@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,7 @@ import { updateMyRsvpAction, updateMemberRsvpAction } from "@/app/(root)/event/[
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
 // import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
-// import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client'; // revisit why nec?
-import { RsvpStatus } from '@prisma/client'; // revisit why nec?
-
+import { RsvpStatus } from '@prisma/client'; // use prisma to enforce valid array of values
 
 interface RsvpModalProps {
   isOpen: boolean;
@@ -61,6 +59,17 @@ export function RsvpModal({
   const [spectatorsYouth, setSpectatorsYouth] = useState<string>(
     currentRsvp?.spectatorsYouth?.toString() || '0'
   );
+
+  // Reset form state when modal opens with new data
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedStatus(currentRsvp?.rsvpStatus || null);
+      setPlayersYouth(currentRsvp?.playersYouth?.toString() || '0');
+      setPlayersAdult(currentRsvp?.playersAdult?.toString() || '0');
+      setSpectatorsAdult(currentRsvp?.spectatorsAdult?.toString() || '0');
+      setSpectatorsYouth(currentRsvp?.spectatorsYouth?.toString() || '0');
+    }
+  }, [isOpen, currentRsvp]);
 
   const { 
     executeAction, 

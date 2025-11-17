@@ -40,7 +40,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CircleX } from 'lucide-react';
 
-  export default async function EditProfilePage() {
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
+export default async function EditProfilePage() {
+  
   if (process.env.ALLOW_BACKEND_TEST_FORM !== 'true') notFound();
   // (0) authentication / security
   const session = await auth0.getSession();

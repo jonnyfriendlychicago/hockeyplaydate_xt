@@ -3,24 +3,27 @@
 // IMPORTANT FYI: THIS IS THE "CHAPTER" PAGE.  Business/design decision made to place the chapter page (i.e. chapter slug) at the highest root level, 
 // so that chapters look like this: hockeyplaydate.com/chicago-central ... rather than hockeyplaydate.com/chapters/chicago-central
 // This enhances chapter branding, eases sharing/communications among members, and improved accessibility for potential members. 
+// Note: we did consider trying to do additional engineering here so that member profile pages would be hockeyplaydate.com/jonfriend 
+// instead of of hockeyplaydate.com/member/jonfriend, but decided against, b/c personal pages, a la hockeyplaydate.com/jonfriend 
+// are NOT valuable branding like linkedIn profiles: practically no one is expected to share his HPD profile in the same way 
+// as his linkedIn profile. 
 
 import { prisma } from '@/lib/prisma';
-import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { format } from 'date-fns'; // npm install date-fns
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { format } from 'date-fns'; // npm install date-fns
-import Link from 'next/link';
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion"
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
+import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
+import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { JoinChapterButton } from '@/components/chapter/JoinChapterButton';
 import { BlockedNotice } from '@/components/chapter/BlockedNotice';
-import { getUserDisplayName } from "@/lib/helpers/getUserDisplayName";
 import { CreateEventButton } from "@/components/chapter/CreateEventButton";
-// import { redirect } from 'next/navigation';
 import { EventsTabContent } from '@/components/chapter/EventsTabContent';
-import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
 import { ChapterMembersList } from '@/components/chapter/ChapterMembersList';
 import { MembershipTab } from '@/components/chapter/MembershipTab';
 import { ChapterErrorDisplay } from '@/components/chapter/ChapterErrorDisplay';
@@ -30,6 +33,7 @@ import { ChapterErrorDisplay } from '@/components/chapter/ChapterErrorDisplay';
 
 // export const dynamic = 'force-dynamic';
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function ChapterPage({ params }: { params: { slug: string } }) {
   
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
@@ -43,7 +47,13 @@ export default async function ChapterPage({ params }: { params: { slug: string }
 
   if (!chapter) notFound();
 
-  // 1.1 - load events (with accompanying RSVPs) for this chapter
+  // 2 - Validate user, part 2: determine chapterMember permissions (which dictates downstream page behavior)
+  const userChapterMember = await getUserChapterStatus(
+    chapter.id, 
+    authenticatedUserProfile
+  );
+
+  // 3 - load events (with accompanying RSVPs) for this chapter.  rsvps loaded to get counts/etc. on events. 
   const events = await prisma.event.findMany({
     where: { chapterId: chapter.id },
     include: {
@@ -58,19 +68,13 @@ export default async function ChapterPage({ params }: { params: { slug: string }
     orderBy: { createdAt: 'desc' }, // Default order, component will re-sort
   });
   
-  // 2 - Validate user, part 2: determine chapterMember permissions
-  const userChapterMember = await getUserChapterStatus(
-    chapter.id, 
-    authenticatedUserProfile
-  );
-
-  // 3 - Display logic for obfuscated organizer names if unauthenticated
+  // 4 - Display logic for obfuscated organizer names if unauthenticated
   // const organizerNames = chapter.members.map((m) => {
   //   const name = `${m.userProfile?.givenName ?? ''} ${m.userProfile?.familyName ?? ''}`.trim();
   //   return authUser ? name : maskName(name);
   // });
 
-  // 4 - other variables
+  // 5 - other variables
   const authenticatedUserProfileNameString = getUserDisplayName(authenticatedUserProfile);
 
   const isApprovedMember = userChapterMember.genMember || userChapterMember.mgrMember; // handy short cut on whether to display/not simple stuff
@@ -156,7 +160,10 @@ export default async function ChapterPage({ params }: { params: { slug: string }
             userChapterMember={userChapterMember}
             chapterSlug={slug}
           />
-          <CreateEventButton mgrMember={userChapterMember.mgrMember} slug={slug} />
+          <CreateEventButton 
+            mgrMember={userChapterMember.mgrMember} 
+            slug={slug} 
+          />
         </div>
 
         {/* Desktop Tabs */}

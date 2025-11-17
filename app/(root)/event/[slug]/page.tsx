@@ -2,23 +2,29 @@
 
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import Link from 'next/link'; 
+// devNotes: above unbracketed, b/c Next.js uses a mix of export patterns; default exports for components: Link, Image, 
+// but Named exports for functions/utilities: redirect, notFound, useRouter, useSearchParams
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pencil, Calendar, MapPin, Clock, AlertTriangle, Building2 , UserCheck } from 'lucide-react';
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification';
 import { CopyText } from '@/components/shared/copyText';
-import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
-import EventLocationMap from '@/components/Event/EventLocationMap';
-import AddToGoogleCalendar from '@/components/Event/AddToGoogleCalendar';
+import { EventLocationMap } from '@/components/Event/EventLocationMap';
+import { AddToGoogleCalendar } from '@/components/Event/AddToGoogleCalendar';
+import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 import { MyRsvpCard } from '@/components/Event/rsvp/MyRsvpCard';
 import { RsvpSummary } from '@/components/Event/rsvp/RsvpSummary';
-import { EventErrorDisplay } from '@/components/Event/EventErrorDisplay';
 import { MemberRsvpList } from '@/components/Event/rsvp/MemberRsvpList';
+import { MemberRole } from '@prisma/client';
+// import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus';
+// 2025nov14: getUserChapterStatus is generally not optimal design, we've realized.  newer cleaner design using inherent prisma enums is better;
+// this file herin has been so duly updated.  Developer decision to not address utlization of getUserChapterStatus by the chapterMembership program; will address that later. 
 
+// devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function EventPage({ params }: { params: { slug: string } }) {
   // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
@@ -30,7 +36,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
       redirect(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
-  // 1 - validate event 
+  // 1 - validate event // 2025nov14: this could be a lib function; used all the time in files.
   const presentedEvent = await prisma.event.findFirst({
     where: {
       presentableId: params.slug,
@@ -52,15 +58,29 @@ export default async function EventPage({ params }: { params: { slug: string } }
   }
 
   // 2 - Validate user, part 2: requisite chapterMember permissions? 
-  const userStatus = await getUserChapterStatus(
-    presentedEvent.chapter.id, 
-    authenticatedUserProfile
-  );
 
-  // 2025nov08: let's use below as opportunity to exploit the enum file for chapterMembers, rather than using those bang boolean fields. 
-  if (!(userStatus.mgrMember || userStatus.genMember)) {
-    // devNotes: above reads very simple: if not (this OR that), then do such and such
-    // way more intuitive than if not this and not that, then do such and such
+  // if not, return denied page.  
+  // if yes, check if manager, for downstream checks
+  // const userStatus = await getUserChapterStatus(
+  //   presentedEvent.chapter.id, 
+  //   authenticatedUserProfile
+  // );
+
+  // if (!(userStatus.mgrMember || userStatus.genMember)) {// devNotes: above reads very simple: if not (this OR that), then do such and such; way more intuitive than if not this and not that, then do such and such
+  
+  // all of above replaced by below // 2025nov14: this should be a lib function of some type, but optimal form/content not yet known
+  const membership = await prisma.chapterMember.findFirst({
+  where: {
+    userProfileId: authenticatedUserProfile.id,
+    chapterId: presentedEvent.chapter.id,
+  },
+  });
+
+  // Check if user has access (MEMBER or MANAGER only)
+  if (!membership || 
+      (membership.memberRole !== MemberRole.MEMBER && 
+      membership.memberRole !== MemberRole.MANAGER)) {
+    // 2025nov14: devNote: below return features no tailwind/shadCNui. To be updated. 
     return (
       <section className="max-w-6xl mx-auto p-6 text-center py-12">
         <h1 className="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
@@ -76,6 +96,8 @@ export default async function EventPage({ params }: { params: { slug: string } }
       </section>
     );
   }
+
+  const isManager = membership.memberRole === MemberRole.MANAGER;
 
   // 3 - data presention helpers
   // 3a - format date/time 
@@ -104,13 +126,13 @@ export default async function EventPage({ params }: { params: { slug: string } }
     }).format(endDate);
   };
 
-  // 3d - Get current user's RSVP status
-  const userRsvp = authenticatedUserProfile 
-    ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
+  // 4 - Get current user's RSVP status
+  const userRsvp = 
+    authenticatedUserProfile ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
     : null;
   const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
-  // 4 - return it all
+  // 5 - return it all
   return (
     <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Top Bar - Chapter Name + Edit Event Button */}
@@ -126,7 +148,8 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </div>
         
         {/* Edit Button - only for managers */}
-        {userStatus.mgrMember && (
+        {/* {userStatus.mgrMember && ( */}
+        {isManager && (
           <Link href={`/event/manage-backend-test?event=${presentedEvent.presentableId}`}>
             <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-muted">
               <Pencil className="w-4 h-4" />
@@ -162,9 +185,9 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       {/* My RSVP Row  */}
       <MyRsvpCard 
-        eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+        // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
         eventSlug={presentedEvent.presentableId}
-        userProfileId={authenticatedUserProfile.id}
+        userProfileId={authenticatedUserProfile.id} // !!!!!!!!!!!!!!!!!!
       />
 
       {/* Row 1: Event Details + RSVP Summary */}
@@ -255,7 +278,8 @@ export default async function EventPage({ params }: { params: { slug: string } }
         </Card>
       
         <RsvpSummary 
-          eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId, should only be passing eventSlug.  investigate. 
+          // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
+          eventSlug={presentedEvent.presentableId}
         />
       </div>
 
@@ -291,28 +315,14 @@ export default async function EventPage({ params }: { params: { slug: string } }
           </CardHeader>
           <CardContent>
             <MemberRsvpList
-              chapterId={presentedEvent.chapterId}
-              eventId={presentedEvent.id}
+              // chapterId={presentedEvent.chapterId}
+              chapterSlug={presentedEvent.chapter.slug}
+              // eventId={presentedEvent.id}
               eventSlug={presentedEvent.presentableId}
-              currentUserProfileId={authenticatedUserProfile.id}
-              isManager={userStatus.mgrMember}
+              // currentUserProfileId={authenticatedUserProfile.id}
+              // isManager={userStatus.mgrMember}
+              // isManager={isManager}
             />
-            
-            {/* <div className="bg-muted/30 p-12 rounded-lg text-center">
-              <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Placeholder content - Member RSVP list placeholder
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Chapter member list with RSVP statuses and tabs (All, Yes, No, Maybe, No Reply)
-              </p>
-              {userStatus.mgrMember && (
-                <p className="text-xs text-muted-foreground mt-2 italic">
-                  Manager view: Will allow editing member RSVPs
-                </p>
-              )}
-            </div> */}
-
           </CardContent>
         </Card>
       </div>

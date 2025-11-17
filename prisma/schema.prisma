@@ -170,6 +170,9 @@ model ChapterMember {
   userProfile     UserProfile      @relation(fields: [userProfileId], references: [id])
   updatedByUser   UserProfile?     @relation("ChapterMemberUpdatedBy", fields: [updatedBy], references: [id])
 
+  // additional identifier(s)
+  presentableId   String?              @unique @map("presentable_id")
+
   @@unique([chapterId, userProfileId]) // each user_profile can only appear once per chapter
   @@map("chapter_member")
 
@@ -262,13 +265,12 @@ model Rsvp {
   userProfile    UserProfile?         @relation(fields: [userProfileId], references: [id])
   createdByUser   UserProfile         @relation("RsvpCreatedBy", fields: [createdBy], references: [id])
   updatedByUser   UserProfile         @relation("RsvpUpdatedBy", fields: [updatedBy], references: [id])
+
+  // additional identifier(s)
+  presentableId   String?              @unique @map("presentable_id")
   
   @@map("rsvp")
   // future fields: 
-  // createdBy       DONE
-  // respondedAt     DONE i.e. createdAt
-  // count of on-ice kids DONE 
-  // count of on-ice adults DONE
   // attributes about volunteering, i.e. music, team captain, referee, photographer, etc. 
 }
 
