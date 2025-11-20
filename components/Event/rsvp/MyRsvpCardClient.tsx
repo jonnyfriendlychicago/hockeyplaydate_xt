@@ -7,15 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, HelpCircle, AlertTriangle, Edit } from "lucide-react";
 import { RsvpModal } from "./RsvpModal";
-// import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
-// import { useRsvpError } from '@/lib/hooks/useRsvpError';
-// import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
-// import { RsvpStatus as PrismaRsvpStatus } from '@prisma/client';
 import { RsvpStatus } from '@prisma/client';
 
 interface MyRsvpCardClientProps {
   userRsvp: {
-    id: number;
+    // id: number;
+    presentableId: string; 
     // rsvpStatus: PrismaRsvpStatus | null;
     rsvpStatus: RsvpStatus | null;
     playersYouth: number | null;

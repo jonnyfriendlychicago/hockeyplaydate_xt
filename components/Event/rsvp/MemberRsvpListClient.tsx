@@ -14,14 +14,14 @@ import { RsvpModal } from './RsvpModal';
 interface MemberRsvpListClientProps {
   members: MemberWithRsvp[];
   eventSlug: string;
-  currentUserProfileId: number | null;
+  // currentUserProfileId: number | null;
   isManager: boolean;
 }
 
 export function MemberRsvpListClient({
   members,
   eventSlug,
-  currentUserProfileId,
+  // currentUserProfileId,
   isManager,
 }: MemberRsvpListClientProps) {
 
@@ -118,12 +118,14 @@ export function MemberRsvpListClient({
     return (
       <div className="space-y-2">
         {membersList.map((member) => {
-          const isOwnCard = currentUserProfileId === member.userProfileId;
+          // const isOwnCard = currentUserProfileId === member.userProfileId;
+          const isOwnCard = member.isCurrentUser; 
           const showEditButton = isManager && !isOwnCard;
 
           return (
             <MemberRsvpCard
-              key={member.id}
+              // key={member.id}
+              key={member.presentableId}
               member={member}
               isOwnCard={isOwnCard}
               showEditButton={showEditButton}
@@ -290,7 +292,8 @@ export function MemberRsvpListClient({
         } : null}
         isManagerMode={true}
         targetUserName={selectedMember ? `${selectedMember.userProfile.givenName || ''} ${selectedMember.userProfile.familyName || ''}`.trim() : undefined}
-        targetUserProfileId={selectedMember?.userProfileId}
+        // targetUserProfileId={selectedMember?.userProfileId}
+        targetUserSlug={selectedMember?.userProfile.slugDefault} 
       />
     </div>
   );

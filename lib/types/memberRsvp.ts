@@ -9,13 +9,15 @@ import { LucideIcon } from 'lucide-react';
  * Used in MemberRsvpList components
  */
 export interface MemberWithRsvp {
-  id: number;                    // chapterMember.id
-  chapterId: number;
-  userProfileId: number;
+  // id: number;                    // chapterMember.id
+  // userProfileId: number;
+  presentableId: string;
   memberRole: MemberRole;        // Only MEMBER or MANAGER will appear
   joinedAt: Date;
+  isCurrentUser: boolean; 
+  // chapterId: number;
   userProfile: {
-    id: number;
+    // id: number;
     givenName: string | null;
     familyName: string | null;
     slugDefault: string;
@@ -25,7 +27,8 @@ export interface MemberWithRsvp {
     } | null;
   };
   rsvp: {
-    id: number;
+    // id: number;
+    presentableId: string;
     rsvpStatus: RsvpStatus | null;
     playersYouth: number | null;
     playersAdult: number | null;

@@ -151,7 +151,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
     // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = updateMemberRsvpSchema.safeParse({
       eventSlug: formData.get('eventSlug'),
-      targetUserProfileId: formData.get('targetUserProfileId'),
+      // targetUserProfileId: formData.get('targetUserProfileId'),
+      targetUserSlug: formData.get('targetUserSlug'),  
       rsvpStatus: formData.get('rsvpStatus'),
       playersYouth: formData.get('playersYouth'),
       playersAdult: formData.get('playersAdult'),
@@ -163,7 +164,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
       return failure('Rsvp error 01');
     }
 
-    const { eventSlug, targetUserProfileId, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
+    // const { eventSlug, targetUserProfileId, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
+    const { eventSlug, targetUserSlug, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
 
     // 1.5 - ENFORCE: Zero out counts if status is not YES
     const finalCounts = rsvpStatus === RsvpStatus.YES ? {
@@ -197,7 +199,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
 
     // 4 - Validate target user exists and is MEMBER or MANAGER of this chapter
     const targetUserProfile = await prisma.userProfile.findUnique({
-      where: { id: targetUserProfileId },
+      // where: { id: targetUserProfileId },
+      where: { slugDefault: targetUserSlug },
       select: { id: true, userId: true }
     });
 
@@ -217,7 +220,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
     const existingRsvp = await prisma.rsvp.findFirst({
       where: {
         eventId: event.id,
-        userProfileId: targetUserProfileId
+        // userProfileId: targetUserProfileId
+        userProfileId: targetUserProfile.id 
       }
     });
 
@@ -243,7 +247,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
         data: {
           presentableId: rsvpPresentableId, 
           eventId: event.id,
-          userProfileId: targetUserProfileId,
+          // userProfileId: targetUserProfileId,
+          userProfileId: targetUserProfile.id,
           rsvpStatus,
           playersYouth: finalCounts.playersYouth,
           playersAdult: finalCounts.playersAdult,

@@ -26,7 +26,7 @@ import { MemberRole } from '@prisma/client';
 
 // devNotes: the key word 'default' below is required for Next.js page components, i.e. page.tsx
 export default async function EventPage({ params }: { params: { slug: string } }) {
-  // devNotes for future: maybe expand getAuthenticated into accepting a "desired result", i.e.,  if auth fails: sendHome; loginRedirect; getNull; etc. 
+
   // 0 - Validate user, part 1: authenticated not-dupe user? 
   const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 
@@ -187,7 +187,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
       <MyRsvpCard 
         // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
         eventSlug={presentedEvent.presentableId}
-        userProfileId={authenticatedUserProfile.id} // !!!!!!!!!!!!!!!!!!
+        // userProfileId={authenticatedUserProfile.id} // !!!!!!!!!!!!!!!!!!
       />
 
       {/* Row 1: Event Details + RSVP Summary */}
@@ -316,7 +316,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           <CardContent>
             <MemberRsvpList
               // chapterId={presentedEvent.chapterId}
-              chapterSlug={presentedEvent.chapter.slug}
+              // chapterSlug={presentedEvent.chapter.slug}
               // eventId={presentedEvent.id}
               eventSlug={presentedEvent.presentableId}
               // currentUserProfileId={authenticatedUserProfile.id}

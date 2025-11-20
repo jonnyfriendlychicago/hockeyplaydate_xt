@@ -11,7 +11,7 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 // Type safety: The merged structure matches MemberWithRsvp
 
 interface MemberRsvpListProps {
-  chapterSlug: string; 
+  // chapterSlug: string; 
   eventSlug: string;
   // chapterId: number;
   // eventId: number;
@@ -20,7 +20,7 @@ interface MemberRsvpListProps {
 }
 
 export async function MemberRsvpList({
-  chapterSlug,
+  // chapterSlug,
   eventSlug,
   // chapterId,
   // eventId,
@@ -32,48 +32,50 @@ export async function MemberRsvpList({
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
 
   // Look up chapter by slug
-  const chapter = await prisma.chapter.findUnique({
-    where: { slug: chapterSlug },
-    select: { id: true }
-  });
+  // const chapter = await prisma.chapter.findUnique({
+  //   where: { slug: chapterSlug },
+  //   select: { id: true }
+  // });
 
-  // Guard clause - if chapter doesn't exist, return empty state
-  if (!chapter) {
-    return (
-      <MemberRsvpListClient
-        members={[]}
-        eventSlug={eventSlug}
-        currentUserProfileId={null}
-        isManager={false}
-      />
-    );
-  }
+  // // Guard clause - if chapter doesn't exist, return empty state
+  // if (!chapter) {
+  //   return (
+  //     <MemberRsvpListClient
+  //       members={[]}
+  //       eventSlug={eventSlug}
+  //       currentUserProfileId={null}
+  //       isManager={false}
+  //     />
+  //   );
+  // }
   
-  // Look up event by slug 
+  // 1 - Look up event by slug 
   const event = await prisma.event.findUnique({
     where: { presentableId: eventSlug },
-    select: { id: true }
+    select: { 
+      id: true , 
+      chapterId: true  // Get chapterId from event!
+    }
   });
 
-  // Guard clause - if event doesn't exist, return empty state
-  // (This shouldn't happen since page already validated event exists)
+  // Guard clause - if event doesn't exist, return empty state.   This shouldn't happen since page already validated event exists. 
   if (!event) {
     return (
       <MemberRsvpListClient
         members={[]}
         eventSlug={eventSlug}
-        currentUserProfileId={null}
+        // currentUserProfileId={null}
         isManager={false}
       />
     );
   }
   
-  // Look up current user's membership to determine manager status
+  // 2 - Look up current user's membership to determine manager status
   const membership = authenticatedUserProfile 
     ? await prisma.chapterMember.findFirst({
         where: {
           userProfileId: authenticatedUserProfile.id,
-          chapterId: chapter.id,
+          chapterId: event.chapterId,
         },
       })
     : null;
@@ -81,20 +83,26 @@ export async function MemberRsvpList({
   const isManager = membership?.memberRole === MemberRole.MANAGER;
   const currentUserProfileId = authenticatedUserProfile?.id || null;
 
-  // Fetch all MEMBER and MANAGER roles from this chapter
-  // LEFT JOIN with RSVP data for this specific event
+  // 3 - fetch target data
+  // 3.1 - Fetch all MEMBER and MANAGER roles from this chapter
   const members = await prisma.chapterMember.findMany({
     where: {
       // chapterId,
-      chapterId: chapter.id,
+      chapterId: event.chapterId,
       memberRole: {
         in: [MemberRole.MEMBER, MemberRole.MANAGER]
       }
     },
-    include: {
+    // include: {
+    select: {  //  Change from 'include' to 'select' for precision, and add individual fields below
+      id: true,  // Used internally for joins
+      presentableId: true,  // ADD THIS - for client
+      memberRole: true,
+      joinedAt: true,
+      userProfileId: true,  // Used internally for joins  
       userProfile: {
         select: {
-          id: true,
+          id: true, // Used internally for joins  
           givenName: true,
           familyName: true,
           slugDefault: true,
@@ -106,8 +114,6 @@ export async function MemberRsvpList({
           }
         }
       },
-      // LEFT JOIN: Get RSVP if exists for this event
-      // Using a subquery approach since we need to filter by eventId
     },
     orderBy: [
       { userProfile: { familyName: 'asc' } },
@@ -115,8 +121,7 @@ export async function MemberRsvpList({
     ]
   });
 
-  // Fetch RSVPs for this event separately, then merge
-  // This is cleaner than trying to do complex nested queries
+  // 3.2 - Fetch RSVPs for this event 
   const rsvps = await prisma.rsvp.findMany({
     where: {
       // eventId,
@@ -126,8 +131,9 @@ export async function MemberRsvpList({
       }
     },
     select: {
-      id: true,
-      userProfileId: true,
+      // id: true,
+      presentableId: true,
+      userProfileId: true, // used for joining
       rsvpStatus: true,
       playersYouth: true,
       playersAdult: true,
@@ -136,12 +142,33 @@ export async function MemberRsvpList({
     }
   });
 
-  // Merge RSVPs into members data
+  // 3.3 Merge RSVPs into members data ... and strip database IDs before sending to client
   const membersWithRsvp = members.map(member => {
     const rsvp = rsvps.find(r => r.userProfileId === member.userProfileId);
+    const isCurrentUser = currentUserProfileId === member.userProfileId;
     return {
-      ...member,
-      rsvp: rsvp || null
+      isCurrentUser,  //  Pass boolean flag instead of ID
+      // ...member,
+      // rsvp: rsvp || null , 
+      //  above replaced by below: only include public-safe fields
+      presentableId: member.presentableId,
+      memberRole: member.memberRole,
+      joinedAt: member.joinedAt,
+      userProfile: {
+        givenName: member.userProfile.givenName,
+        familyName: member.userProfile.familyName,
+        slugDefault: member.userProfile.slugDefault,
+        slugVanity: member.userProfile.slugVanity,
+        authUser: member.userProfile.authUser,
+      },
+      rsvp: rsvp ? {
+        presentableId: rsvp.presentableId,
+        rsvpStatus: rsvp.rsvpStatus,
+        playersYouth: rsvp.playersYouth,
+        playersAdult: rsvp.playersAdult,
+        spectatorsAdult: rsvp.spectatorsAdult,
+        spectatorsYouth: rsvp.spectatorsYouth,
+      } : null,
     };
   });
 
@@ -149,7 +176,7 @@ export async function MemberRsvpList({
     <MemberRsvpListClient
       members={membersWithRsvp}
       eventSlug={eventSlug}
-      currentUserProfileId={currentUserProfileId}
+      // currentUserProfileId={currentUserProfileId}
       isManager={isManager}
     />
   );

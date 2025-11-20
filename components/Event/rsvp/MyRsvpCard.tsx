@@ -2,18 +2,33 @@
 
 import { prisma } from "@/lib/prisma";
 import { MyRsvpCardClient } from "./MyRsvpCardClient";
+import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
 
 interface MyRsvpCardProps {
   // eventId: number;
   eventSlug: string;
-  userProfileId: number;
+  // userProfileId: number;
 }
 
 export async function MyRsvpCard({ 
   // eventId, 
   eventSlug, 
-  userProfileId 
+  // userProfileId 
 }: MyRsvpCardProps) {
+
+  // 0 - Validate user, part 1: authenticated not-dupe user? 
+  const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+
+  // Guard clause: If no authenticated user, return empty state.  This prevents TS errors downstream. 
+  // We use empty state return (instead of redirect the redirect) since the parent page already handles auth. This component should gracefully degrade, not redirect.
+  if (!authenticatedUserProfile) {
+    return (
+      <MyRsvpCardClient 
+        userRsvp={null}
+        eventSlug={eventSlug}
+      />
+    );
+  }
 
   // 1 - Look up event by slug 
   const event = await prisma.event.findUnique({
@@ -32,22 +47,16 @@ export async function MyRsvpCard({
     );
   }
   
-  // Fetch user's RSVP for this event
-  // const userRsvp = await prisma.rsvp.findFirst({
-  //   where: {
-  //     eventId: eventId,
-  //     userProfileId: userProfileId
-  //   }
-  // });
-  // above creates TS issue; replaced by below: 
+  // 2 - Fetch user's RSVP for this event
   const userRsvp = await prisma.rsvp.findFirst({
     where: {
       // eventId: eventId,
       eventId: event.id,
-      userProfileId: userProfileId
+      userProfileId: authenticatedUserProfile.id
     },
     select: {
-      id: true,
+      // id: true,
+      presentableId: true, 
       rsvpStatus: true,
       playersYouth: true,
       playersAdult: true,

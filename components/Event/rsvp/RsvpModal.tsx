@@ -11,7 +11,6 @@ import { CheckCircle, XCircle, HelpCircle } from "lucide-react";
 import { updateMyRsvpAction, updateMemberRsvpAction } from "@/app/(root)/event/[slug]/rsvpActions";
 import { RSVP_ERROR_KEYS } from '@/lib/constants/errorKeys';
 import { useRsvpAction } from '@/lib/hooks/useRsvpAction';
-// import { RsvpStatus } from '@/lib/constants/rsvpEnums'; // no longer using this deprecated file
 import { RsvpStatus } from '@prisma/client'; // use prisma to enforce valid array of values
 
 interface RsvpModalProps {
@@ -19,8 +18,6 @@ interface RsvpModalProps {
   onClose: () => void;
   eventSlug: string;
   currentRsvp: { // devNote: this should be a type, like ChapterMemberWithProfile? 
-    // rsvpStatus: string;
-    // rsvpStatus: PrismaRsvpStatus | null; 
     rsvpStatus: RsvpStatus | null; 
     playersYouth: number | null; 
     playersAdult: number | null;
@@ -29,7 +26,8 @@ interface RsvpModalProps {
   } | null;
   isManagerMode: boolean; // For manager mode (Phase 4)
   targetUserName?: string; // For manager mode (Phase 4)
-  targetUserProfileId?: number; // For manager mode (Phase 4)
+  // targetUserProfileId?: number; // For manager mode (Phase 4)
+  targetUserSlug?: string;
 }
 
 export function RsvpModal({ 
@@ -39,7 +37,8 @@ export function RsvpModal({
   currentRsvp,
   isManagerMode, // For manager mode (Phase 4)
   targetUserName, // For manager mode (Phase 4)
-  targetUserProfileId
+  // targetUserProfileId
+  targetUserSlug
 }: RsvpModalProps) {
   
   // Initialize form state with current values or defaults
@@ -174,11 +173,13 @@ export function RsvpModal({
     // });
 
     // above replaced by below; above await function only works for updateMy...; below is conditional action call based on manager mode
-    if (isManagerMode && targetUserProfileId) {
+    // if (isManagerMode && targetUserProfileId) {
+    if (isManagerMode && targetUserSlug) {  
       // Manager updating another member's RSVP
       await executeAction(updateMemberRsvpAction, {
         eventSlug,
-        targetUserProfileId: targetUserProfileId.toString(),
+        // targetUserProfileId: targetUserProfileId.toString(),
+        targetUserSlug: targetUserSlug, 
         rsvpStatus: selectedStatus,
         ...countsToSubmit
       });
