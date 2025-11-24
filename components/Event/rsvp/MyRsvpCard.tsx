@@ -5,15 +5,11 @@ import { MyRsvpCardClient } from "./MyRsvpCardClient";
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
 
 interface MyRsvpCardProps {
-  // eventId: number;
   eventSlug: string;
-  // userProfileId: number;
 }
 
 export async function MyRsvpCard({ 
-  // eventId, 
   eventSlug, 
-  // userProfileId 
 }: MyRsvpCardProps) {
 
   // 0 - Validate user, part 1: authenticated not-dupe user? 
@@ -50,12 +46,10 @@ export async function MyRsvpCard({
   // 2 - Fetch user's RSVP for this event
   const userRsvp = await prisma.rsvp.findFirst({
     where: {
-      // eventId: eventId,
       eventId: event.id,
       userProfileId: authenticatedUserProfile.id
     },
     select: {
-      // id: true,
       presentableId: true, 
       rsvpStatus: true,
       playersYouth: true,

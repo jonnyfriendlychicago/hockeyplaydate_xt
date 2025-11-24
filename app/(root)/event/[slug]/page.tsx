@@ -6,8 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link'; 
-// devNotes: above unbracketed, b/c Next.js uses a mix of export patterns; default exports for components: Link, Image, 
-// but Named exports for functions/utilities: redirect, notFound, useRouter, useSearchParams
+// devNotes: above unbracketed, b/c Next.js uses a mix of export patterns; default exports for components: Link, Image, but named exports for functions/utilities: redirect, notFound, useRouter, useSearchParams
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pencil, Calendar, MapPin, Clock, AlertTriangle, Building2 , UserCheck } from 'lucide-react';
@@ -43,12 +42,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
     },
     include: {
       chapter: true,
-      // below removed, should have never been pulling full rsvp objects, which inherently include db IDs
-      // rsvps: {
-      //   include: {
-      //     userProfile: true,
-      //   },
-      // },
     },
   });
 
@@ -100,21 +93,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
   const isManager = membership.memberRole === MemberRole.MANAGER;
 
-  // Fetch ONLY current user's RSVP status for Google Calendar button
-  // const userRsvp = authenticatedUserProfile 
-  //   ? await prisma.rsvp.findFirst({
-  //       where: {
-  //         eventId: presentedEvent.id,
-  //         userProfileId: authenticatedUserProfile.id,
-  //       },
-  //       select: {
-  //         rsvpStatus: true,  // Only select what's needed
-  //       },
-  //     })
-  //   : null;
-
-  // const userRsvpStatus = userRsvp?.rsvpStatus || null;
-
   // 3 - data presention helpers
   // 3a - format date/time 
   const formatEventDateTime = (date: Date | null) => {
@@ -143,11 +121,6 @@ export default async function EventPage({ params }: { params: { slug: string } }
   };
 
   // 4 - Get current user's RSVP status
-  // const userRsvp = 
-  //   authenticatedUserProfile ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
-  //   : null;
-
-  // above replaced by below
   const userRsvp = authenticatedUserProfile 
   ? await prisma.rsvp.findFirst({
       where: {
@@ -214,9 +187,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
       {/* My RSVP Row  */}
       <MyRsvpCard 
-        // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
         eventSlug={presentedEvent.presentableId}
-        // userProfileId={authenticatedUserProfile.id} // !!!!!!!!!!!!!!!!!!
       />
 
       {/* Row 1: Event Details + RSVP Summary */}
@@ -299,15 +270,12 @@ export default async function EventPage({ params }: { params: { slug: string } }
                   endsAt: presentedEvent.endsAt,
                 }}
                 userRsvpStatus={userRsvpStatus}
-                // className="bg-blue-600 hover:bg-blue-700 text-white"
-                // 2025oct28 Line above encountering errors, revisit
               />
             </div>
           </CardContent>
         </Card>
       
         <RsvpSummary 
-          // eventId={presentedEvent.id} // 2025nov10: we should not be passing eventId
           eventSlug={presentedEvent.presentableId}
         />
       </div>
@@ -344,13 +312,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
           </CardHeader>
           <CardContent>
             <MemberRsvpList
-              // chapterId={presentedEvent.chapterId}
-              // chapterSlug={presentedEvent.chapter.slug}
-              // eventId={presentedEvent.id}
               eventSlug={presentedEvent.presentableId}
-              // currentUserProfileId={authenticatedUserProfile.id}
-              // isManager={userStatus.mgrMember}
-              // isManager={isManager}
             />
           </CardContent>
         </Card>

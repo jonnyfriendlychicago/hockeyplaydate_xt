@@ -26,7 +26,6 @@ interface RsvpModalProps {
   } | null;
   isManagerMode: boolean; // For manager mode (Phase 4)
   targetUserName?: string; // For manager mode (Phase 4)
-  // targetUserProfileId?: number; // For manager mode (Phase 4)
   targetUserSlug?: string;
 }
 
@@ -37,12 +36,10 @@ export function RsvpModal({
   currentRsvp,
   isManagerMode, // For manager mode (Phase 4)
   targetUserName, // For manager mode (Phase 4)
-  // targetUserProfileId
   targetUserSlug
 }: RsvpModalProps) {
   
   // Initialize form state with current values or defaults
-  // const [selectedStatus, setSelectedStatus] = useState<string | null>(
   const [selectedStatus, setSelectedStatus] = useState<RsvpStatus | null>(  // this line enforces the enum values from rsvpStatus! so, no longer plain string
     currentRsvp?.rsvpStatus || null
   );
@@ -74,8 +71,6 @@ export function RsvpModal({
     executeAction, 
     isSubmitting 
   } = useRsvpAction({
-    // errorKey: RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
-    // below replaces above: with introduction of other-member-rsvp-mgmt, we need conditional error key based on mode
     errorKey: isManagerMode ? RSVP_ERROR_KEYS.UPDATE_MEMBER_RSVP : RSVP_ERROR_KEYS.UPDATE_MY_RSVP,
     onSuccess: () => {
       // setSelectedStatus(null); 
@@ -98,7 +93,6 @@ export function RsvpModal({
   const showCounts = selectedStatus === RsvpStatus.YES;
 
   // Handle status change - clear counts if not YES
-  // const handleStatusChange = (status: string) => {
   const handleStatusChange = (status: RsvpStatus) => {
     setSelectedStatus(status);
     if (status !== RsvpStatus.YES) {
@@ -166,19 +160,10 @@ export function RsvpModal({
     //   spectatorsYouth: '0'
     // };
 
-    // await executeAction(updateMyRsvpAction, {
-    //   eventSlug,
-    //   rsvpStatus: selectedStatus,
-    //   ...countsToSubmit
-    // });
-
-    // above replaced by below; above await function only works for updateMy...; below is conditional action call based on manager mode
-    // if (isManagerMode && targetUserProfileId) {
     if (isManagerMode && targetUserSlug) {  
       // Manager updating another member's RSVP
       await executeAction(updateMemberRsvpAction, {
         eventSlug,
-        // targetUserProfileId: targetUserProfileId.toString(),
         targetUserSlug: targetUserSlug, 
         rsvpStatus: selectedStatus,
         ...countsToSubmit
@@ -244,7 +229,6 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.YES ? "default" : "outline"}
-                // onClick={() => setSelectedStatus(RsvpStatus.YES)}
                 onClick={() => handleStatusChange(RsvpStatus.YES)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"
@@ -256,7 +240,6 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.MAYBE ? "default" : "outline"}
-                // onClick={() => setSelectedStatus(RsvpStatus.MAYBE)}
                 onClick={() => handleStatusChange(RsvpStatus.MAYBE)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"
@@ -268,7 +251,6 @@ export function RsvpModal({
               <Button
                 type="button"
                 variant={selectedStatus === RsvpStatus.NO ? "default" : "outline"}
-                // onClick={() => setSelectedStatus(RsvpStatus.NO)}
                 onClick={() => handleStatusChange(RsvpStatus.NO)}
                 disabled={isSubmitting}
                 className="flex flex-col items-center gap-1 h-auto py-3"

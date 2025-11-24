@@ -11,9 +11,7 @@ import { RsvpStatus } from '@prisma/client';
 
 interface MyRsvpCardClientProps {
   userRsvp: {
-    // id: number;
     presentableId: string; 
-    // rsvpStatus: PrismaRsvpStatus | null;
     rsvpStatus: RsvpStatus | null;
     playersYouth: number | null;
     playersAdult: number | null;
@@ -23,7 +21,6 @@ interface MyRsvpCardClientProps {
   eventSlug: string;
 }
 
-// function getStatusConfig(status: PrismaRsvpStatus | null) {
 function getStatusConfig(status: RsvpStatus | null) {
   switch (status) {
     case RsvpStatus.YES:
@@ -66,10 +63,8 @@ export function MyRsvpCardClient({
   userRsvp, 
 }: MyRsvpCardClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [modalError, setModalError] = useRsvpError(RSVP_ERROR_KEYS.UPDATE_MY_RSVP);
 
   const openModal = () => {
-    // setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -83,7 +78,7 @@ export function MyRsvpCardClient({
     (userRsvp.playersYouth || 0) === 0 &&
     (userRsvp.playersAdult || 0) === 0;
 
-  // // Compact mode: No RSVP or player warning
+  // // Compact mode: No RSVP or player warning [devNote 2025nov23: no clear idea about this, revisit]
   // const isCompact = !userRsvp || showPlayerWarning;
 
   // Only show counts for YES status
@@ -100,13 +95,6 @@ export function MyRsvpCardClient({
     <>
       <Card className={`border-2 ${statusConfig.borderColor} shadow-lg`}>
         <CardContent className="p-0">
-          
-          {/* Display modal error if exists */}
-          {/* {modalError && (
-            <div className="p-4 bg-red-50 border-b-2 border-red-200">
-              <p className="text-red-800 text-sm font-medium">{modalError}</p>
-            </div>
-          )} */}
 
           <div className={`${statusConfig.bgColor} ${statusConfig.textColor} p-4`}>
             <div className="flex items-center justify-between">

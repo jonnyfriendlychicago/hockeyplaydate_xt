@@ -7,12 +7,11 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
+import { RsvpStatus } from '@prisma/client';
+import { ActionResult, failure } from '@/lib/types/serverActionResults'
+import { createPresentableId } from '@/lib/idGenerators/createPresentableId';
 import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { updateMyRsvpSchema } from '@/lib/validation/rsvpValSchema'
-import { ActionResult, failure } from '@/lib/types/serverActionResults'
-import { RsvpStatus } from '@prisma/client';
-import { createPresentableId } from '@/lib/idGenerators/createPresentableId';
-
 import { updateMemberRsvpSchema } from '@/lib/validation/rsvpValSchema'
 
 // **********************************
@@ -151,7 +150,6 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
     // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = updateMemberRsvpSchema.safeParse({
       eventSlug: formData.get('eventSlug'),
-      // targetUserProfileId: formData.get('targetUserProfileId'),
       targetUserSlug: formData.get('targetUserSlug'),  
       rsvpStatus: formData.get('rsvpStatus'),
       playersYouth: formData.get('playersYouth'),
@@ -164,7 +162,6 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
       return failure('Rsvp error 01');
     }
 
-    // const { eventSlug, targetUserProfileId, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
     const { eventSlug, targetUserSlug, rsvpStatus, playersYouth, playersAdult, spectatorsAdult, spectatorsYouth } = parseResult.data;
 
     // 1.5 - ENFORCE: Zero out counts if status is not YES
@@ -199,7 +196,6 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
 
     // 4 - Validate target user exists and is MEMBER or MANAGER of this chapter
     const targetUserProfile = await prisma.userProfile.findUnique({
-      // where: { id: targetUserProfileId },
       where: { slugDefault: targetUserSlug },
       select: { id: true, userId: true }
     });
@@ -220,7 +216,6 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
     const existingRsvp = await prisma.rsvp.findFirst({
       where: {
         eventId: event.id,
-        // userProfileId: targetUserProfileId
         userProfileId: targetUserProfile.id 
       }
     });
@@ -247,7 +242,6 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
         data: {
           presentableId: rsvpPresentableId, 
           eventId: event.id,
-          // userProfileId: targetUserProfileId,
           userProfileId: targetUserProfile.id,
           rsvpStatus,
           playersYouth: finalCounts.playersYouth,

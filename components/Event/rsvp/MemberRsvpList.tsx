@@ -7,47 +7,19 @@ import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/
 
 // devNotes:
 // Two-query approach: Prisma doesn't easily support LEFT JOIN with filters, so we fetch members, then RSVPs, then merge. This is clean and performant.
-// Alphabetical sorting: Matches your chapter membership pattern
+// Alphabetical sorting: Matches chapter membership pattern
 // Type safety: The merged structure matches MemberWithRsvp
 
 interface MemberRsvpListProps {
-  // chapterSlug: string; 
   eventSlug: string;
-  // chapterId: number;
-  // eventId: number;
-  // currentUserProfileId: number | null;
-  // isManager: boolean;
 }
 
 export async function MemberRsvpList({
-  // chapterSlug,
   eventSlug,
-  // chapterId,
-  // eventId,
-  // currentUserProfileId,
-  // isManager,
 }: MemberRsvpListProps) {
 
   // 0 - Validate user, part 1: is either (a) NOT authenticated or (b) is authenticated and not-dupe user
   const  authenticatedUserProfile = await getAuthenticatedUserProfileOrNull(); 
-
-  // Look up chapter by slug
-  // const chapter = await prisma.chapter.findUnique({
-  //   where: { slug: chapterSlug },
-  //   select: { id: true }
-  // });
-
-  // // Guard clause - if chapter doesn't exist, return empty state
-  // if (!chapter) {
-  //   return (
-  //     <MemberRsvpListClient
-  //       members={[]}
-  //       eventSlug={eventSlug}
-  //       currentUserProfileId={null}
-  //       isManager={false}
-  //     />
-  //   );
-  // }
   
   // 1 - Look up event by slug 
   const event = await prisma.event.findUnique({
@@ -64,7 +36,6 @@ export async function MemberRsvpList({
       <MemberRsvpListClient
         members={[]}
         eventSlug={eventSlug}
-        // currentUserProfileId={null}
         isManager={false}
       />
     );
@@ -87,7 +58,6 @@ export async function MemberRsvpList({
   // 3.1 - Fetch all MEMBER and MANAGER roles from this chapter
   const members = await prisma.chapterMember.findMany({
     where: {
-      // chapterId,
       chapterId: event.chapterId,
       memberRole: {
         in: [MemberRole.MEMBER, MemberRole.MANAGER]
@@ -124,14 +94,12 @@ export async function MemberRsvpList({
   // 3.2 - Fetch RSVPs for this event 
   const rsvps = await prisma.rsvp.findMany({
     where: {
-      // eventId,
       eventId: event.id, 
       userProfileId: {
         in: members.map(m => m.userProfileId)
       }
     },
     select: {
-      // id: true,
       presentableId: true,
       userProfileId: true, // used for joining
       rsvpStatus: true,
@@ -148,9 +116,6 @@ export async function MemberRsvpList({
     const isCurrentUser = currentUserProfileId === member.userProfileId;
     return {
       isCurrentUser,  //  Pass boolean flag instead of ID
-      // ...member,
-      // rsvp: rsvp || null , 
-      //  above replaced by below: only include public-safe fields
       presentableId: member.presentableId,
       memberRole: member.memberRole,
       joinedAt: member.joinedAt,
@@ -176,7 +141,6 @@ export async function MemberRsvpList({
     <MemberRsvpListClient
       members={membersWithRsvp}
       eventSlug={eventSlug}
-      // currentUserProfileId={currentUserProfileId}
       isManager={isManager}
     />
   );

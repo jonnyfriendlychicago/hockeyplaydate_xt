@@ -5,13 +5,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 type AddToGoogleCalendarProps = {
   event: {
@@ -26,7 +20,6 @@ type AddToGoogleCalendarProps = {
   disabled?: boolean;
 };
 
-// export default function AddToGoogleCalendar({
 export function AddToGoogleCalendar({ 
   event, 
   userRsvpStatus, 

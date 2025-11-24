@@ -11,14 +11,6 @@ import { RsvpStatus } from '@prisma/client';
 /**
  * Schema for updating own RSVP (user updates their own)
  */
-// export const updateMyRsvpSchema = z.object({
-//   eventSlug: eventSlugField,
-//   rsvpStatus: rsvpStatusField,
-//   playersYouth: rsvpCountField,
-//   playersAdult: rsvpCountField,
-//   spectatorsAdult: rsvpCountField,
-//   spectatorsYouth: rsvpCountField,
-// });
 
 export const updateMyRsvpSchema = z.object({
   eventSlug: eventSlugField,

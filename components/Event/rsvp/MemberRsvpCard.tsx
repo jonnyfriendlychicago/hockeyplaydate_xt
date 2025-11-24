@@ -4,16 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Star } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
-import { 
-  MemberWithRsvp,
-  getDisplayName,
-  getRsvpStatusLabel,
-  getRsvpStatusIcon,
-  getRsvpStatusIconColor,
-  getRsvpStatusClass,
-  formatPlayerCounts,
-  formatSpectatorCounts,
-} from "@/lib/types/memberRsvp";
+import { MemberWithRsvp, getDisplayName, getRsvpStatusLabel, getRsvpStatusIcon, getRsvpStatusIconColor, getRsvpStatusClass, formatPlayerCounts, formatSpectatorCounts } from "@/lib/types/memberRsvp";
 
 interface MemberRsvpCardProps {
   member: MemberWithRsvp;

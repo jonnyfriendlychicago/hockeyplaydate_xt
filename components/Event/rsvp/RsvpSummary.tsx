@@ -2,20 +2,17 @@
 
 import { prisma } from "@/lib/prisma";
 import { RsvpSummaryClient } from "./RsvpSummaryClient";
-// import { RsvpStatus } from '@/lib/constants/rsvpEnums';
 import { RsvpStatus } from '@prisma/client'; 
 
 interface RsvpSummaryProps {
-  // eventId: number;
   eventSlug: string; 
 }
 
 export async function RsvpSummary({ 
-  // eventId 
   eventSlug
 }: RsvpSummaryProps) {
 
-  // Look up event by slug first
+  // 1 - Look up event by slug first
   const event = await prisma.event.findUnique({
     where: { presentableId: eventSlug },
     select: { id: true }
@@ -35,10 +32,9 @@ export async function RsvpSummary({
     );
   }
   
-  // Fetch all RSVPs for this event
+  // 2 - Fetch all RSVPs for this event
   const rsvps = await prisma.rsvp.findMany({
     where: {
-      // eventId: eventId,
       eventId: event.id,
     },
     select: {
@@ -50,7 +46,7 @@ export async function RsvpSummary({
     }
   });
 
-  // Calculate counts - ONLY from YES responses
+  // 3 - calculate counts - ONLY from YES responses
   let youthPlayers = 0;
   let adultPlayers = 0;
   let adultSpectators = 0;
@@ -68,6 +64,7 @@ export async function RsvpSummary({
     }
   });
 
+  // 4 - return it 
   return (
     <RsvpSummaryClient 
       youthPlayers={youthPlayers}

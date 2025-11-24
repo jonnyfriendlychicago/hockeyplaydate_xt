@@ -288,7 +288,7 @@ export default function VenueSelector({
               </p>
             </div>
 
-                      {/* Debug info in development */}
+          {/* Debug info in development */}
           {false && process.env.NODE_ENV === 'development' && placeId && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
               <strong>Debug:</strong> Place ID: {placeId}
@@ -309,8 +309,6 @@ export default function VenueSelector({
         </>
         </div>  
         
-
-
         {/* MANUAL ENTRY FIELDS - always shown for testing */}
         
           <div className={bypassAddressValidation ? 'block' : 'hidden'}>
@@ -343,8 +341,6 @@ export default function VenueSelector({
             </>
             </div>
          
-
-
       </CardContent>
     </Card>
   );

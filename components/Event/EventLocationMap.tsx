@@ -64,7 +64,6 @@ export function EventLocationMap({
 
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleMaps`;
-      // script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,marker&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
       
@@ -101,12 +100,6 @@ export function EventLocationMap({
           title: venueName || 'Event Location',
         });
 
-        // new window.google.maps.marker.AdvancedMarkerElement({
-        //   position: { lat, lng },
-        //   map: mapInstanceRef.current,
-        //   title: venueName || 'Event Location',
-        // });
-
       } catch (error) {
         console.error('Map initialization failed:', error);
       }
@@ -131,26 +124,25 @@ export function EventLocationMap({
 
   // new function, try1
   const handleGetDirections = () => {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-  let mapsUrl;
-  if (placeId && address) {
-    // Use the official Google Maps URLs format with both query and place ID
-    mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}&query_place_id=${placeId}`;
-  } else if (address) {
-    // Fallback for manual entries
-    mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  } else {
-    return; // No valid location data
-  }
-  
-  if (isMobile) {
-    window.open(mapsUrl, '_self');
-  } else {
-    window.open(mapsUrl, '_blank');
-  }
-};
-
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    let mapsUrl;
+    if (placeId && address) {
+      // Use the official Google Maps URLs format with both query and place ID
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}&query_place_id=${placeId}`;
+    } else if (address) {
+      // Fallback for manual entries
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    } else {
+      return; // No valid location data
+    }
+    
+    if (isMobile) {
+      window.open(mapsUrl, '_self');
+    } else {
+      window.open(mapsUrl, '_blank');
+    }
+  };
 
   const handleCopyAddress = async () => {
     if (!address) return;
@@ -203,7 +195,7 @@ export function EventLocationMap({
               size="sm"
             >
               <Copy className="w-4 h-4 mr-1" />
-              {copySuccess ? 'Copied!' : 'Copy'}
+              {copySuccess ? 'Copied!' : 'Copy Address'}
             </Button>
           )}
         </div>
