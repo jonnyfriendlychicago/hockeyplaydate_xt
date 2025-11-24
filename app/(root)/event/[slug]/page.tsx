@@ -43,11 +43,12 @@ export default async function EventPage({ params }: { params: { slug: string } }
     },
     include: {
       chapter: true,
-      rsvps: {
-        include: {
-          userProfile: true,
-        },
-      },
+      // below removed, should have never been pulling full rsvp objects, which inherently include db IDs
+      // rsvps: {
+      //   include: {
+      //     userProfile: true,
+      //   },
+      // },
     },
   });
 
@@ -99,6 +100,21 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
   const isManager = membership.memberRole === MemberRole.MANAGER;
 
+  // Fetch ONLY current user's RSVP status for Google Calendar button
+  // const userRsvp = authenticatedUserProfile 
+  //   ? await prisma.rsvp.findFirst({
+  //       where: {
+  //         eventId: presentedEvent.id,
+  //         userProfileId: authenticatedUserProfile.id,
+  //       },
+  //       select: {
+  //         rsvpStatus: true,  // Only select what's needed
+  //       },
+  //     })
+  //   : null;
+
+  // const userRsvpStatus = userRsvp?.rsvpStatus || null;
+
   // 3 - data presention helpers
   // 3a - format date/time 
   const formatEventDateTime = (date: Date | null) => {
@@ -127,9 +143,22 @@ export default async function EventPage({ params }: { params: { slug: string } }
   };
 
   // 4 - Get current user's RSVP status
-  const userRsvp = 
-    authenticatedUserProfile ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
-    : null;
+  // const userRsvp = 
+  //   authenticatedUserProfile ? presentedEvent.rsvps.find(rsvp => rsvp.userProfileId === authenticatedUserProfile.id)
+  //   : null;
+
+  // above replaced by below
+  const userRsvp = authenticatedUserProfile 
+  ? await prisma.rsvp.findFirst({
+      where: {
+        eventId: presentedEvent.id,
+        userProfileId: authenticatedUserProfile.id,
+      },
+      select: {
+        rsvpStatus: true,  // Only select what's needed
+      },
+    })
+  : null;
   const userRsvpStatus = userRsvp?.rsvpStatus || null;
 
   // 5 - return it all
