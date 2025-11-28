@@ -6,13 +6,14 @@
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
 import { RsvpStatus } from '@prisma/client';
 import { ActionResult, failure } from '@/lib/types/serverActionResults'
 import { createPresentableId } from '@/lib/idGenerators/createPresentableId';
-import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
 import { updateMyRsvpSchema } from '@/lib/validation/rsvpValSchema'
 import { updateMemberRsvpSchema } from '@/lib/validation/rsvpValSchema'
+// import { getAuthenticatedUserProfileOrNull } from '@/lib/enhancedAuthentication/authUserVerification'
+// import { getUserChapterStatus } from '@/lib/helpers/getUserChapterStatus'
+import { getUserChapterMembership } from '@/lib/helpers/getUserChapterMembership'
 
 // **********************************
 // updateMyRsvpAction
@@ -22,10 +23,11 @@ import { updateMemberRsvpSchema } from '@/lib/validation/rsvpValSchema'
 export async function updateMyRsvpAction(formData: FormData): Promise<ActionResult> {
   try {
     // 0 - Validate user, part 1: authenticated not-dupe user? 
-    const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
-    if (!authenticatedUserProfile) {
-      redirect('/auth/login')
-    }
+    // const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+    // if (!authenticatedUserProfile) {
+    //   redirect('/auth/login')
+    // }
+    // above deprecated by implementation of getUserChapterMembership
 
     // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = updateMyRsvpSchema.safeParse({
@@ -68,16 +70,39 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
     }
 
     // 3 - Validate user, part 2: requisite chapterMember permissions? 
-    const userStatus = await getUserChapterStatus(event.chapter.id, authenticatedUserProfile)
+          // const userStatus = await getUserChapterStatus(event.chapter.id, authenticatedUserProfile)
+
+          // // Only MEMBER or MANAGER can RSVP
+          // const canRsvp = userStatus.genMember || userStatus.mgrMember
+
+          // if (!canRsvp) {
+          //   return failure('Rsvp error 03');
+          // }
+
+    // above replaced by below, implementation of getUserChapterMembership
+    const userChapterMember = await getUserChapterMembership(event.chapter.slug);
+
+    // Must be authenticated
+    if (userChapterMember.isAnonymous) {
+      redirect('/auth/login');
+    }
 
     // Only MEMBER or MANAGER can RSVP
-    const canRsvp = userStatus.genMember || userStatus.mgrMember
-
-    if (!canRsvp) {
+    if (!userChapterMember.hasAccess) {
       return failure('Rsvp error 03');
     }
 
-    // 4 - Check if RSVP record for this event + userProfile already exists
+    // 4 - Get user profile for database operations
+    const authenticatedUserProfile = await prisma.userProfile.findUnique({
+      where: { slugDefault: userChapterMember.authenticatedUserSlug! },
+      select: { id: true }
+    });
+
+    if (!authenticatedUserProfile) {
+      return failure('Rsvp error 04');
+    }
+
+    // 5 - Check if RSVP record for this event + userProfile already exists
     const existingRsvp = await prisma.rsvp.findFirst({
       where: {
         eventId: event.id,
@@ -85,7 +110,7 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
       }
     });
 
-    // 5 - Run the update/insert
+    // 6 - Run the update/insert
     if (existingRsvp) {
       // Update existing RSVP
       await prisma.rsvp.update({
@@ -142,10 +167,11 @@ export async function updateMyRsvpAction(formData: FormData): Promise<ActionResu
 export async function updateMemberRsvpAction(formData: FormData): Promise<ActionResult> {
   try {
     // 0 - Validate user, part 1: authenticated not-dupe user? 
-    const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
-    if (!authenticatedUserProfile) {
-      redirect('/auth/login')
-    }
+        // const authenticatedUserProfile = await getAuthenticatedUserProfileOrNull()
+        // if (!authenticatedUserProfile) {
+        //   redirect('/auth/login')
+        // }
+    // above deprecated by implementation of getUserChapterMembership
 
     // 1 - Parse and validate-via-zod input; must occur before anything else
     const parseResult = updateMemberRsvpSchema.safeParse({
@@ -188,31 +214,76 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
     }
 
     // 3 - Validate requester has MANAGER permissions
-    const requesterStatus = await getUserChapterStatus(event.chapter.id, authenticatedUserProfile)
+              // const requesterStatus = await getUserChapterStatus(event.chapter.id, authenticatedUserProfile)
 
-    if (!requesterStatus.mgrMember) {
+              // if (!requesterStatus.mgrMember) {
+              //   return failure('Rsvp error 04');
+              // }
+
+              // const requesterChapterMember = await getUserChapterMembership(event.chapter.slug);
+
+              // if (requesterChapterMember.isAnonymous) {
+              //   redirect('/auth/login');
+              // }
+
+              // if (!requesterChapterMember.isManager) {
+              //   return failure('Rsvp error 03');
+              // }
+
+              // above deprecated by implementation of getUserChapterMembership
+    const requesterChapterMember = await getUserChapterMembership(event.chapter.slug);
+
+    if (requesterChapterMember.isAnonymous) {
+      redirect('/auth/login');
+    }
+
+    if (!requesterChapterMember.isManager) {
+      return failure('Rsvp error 03');
+    }
+
+    // 4 - Get requester's profile for database operations (updatedBy/createdBy)
+    const requesterProfile = await prisma.userProfile.findUnique({
+      where: { slugDefault: requesterChapterMember.authenticatedUserSlug! },
+      select: { id: true }
+    });
+
+    if (!requesterProfile) {
       return failure('Rsvp error 04');
     }
 
-    // 4 - Validate target user exists and is MEMBER or MANAGER of this chapter
+    // 5 - Validate target user exists and is MEMBER or MANAGER of this chapter
     const targetUserProfile = await prisma.userProfile.findUnique({
       where: { slugDefault: targetUserSlug },
-      select: { id: true, userId: true }
+      // select: { id: true, userId: true }
+      select: { id: true,  }
     });
 
     if (!targetUserProfile) {
       return failure('Rsvp error 05');
     }
 
-    const targetStatus = await getUserChapterStatus(event.chapter.id, targetUserProfile);
+          // const targetStatus = await getUserChapterStatus(event.chapter.id, targetUserProfile);
+          // const canEditTargetRsvp = targetStatus.genMember || targetStatus.mgrMember;
 
-    const canEditTargetRsvp = targetStatus.genMember || targetStatus.mgrMember;
+          // if (!canEditTargetRsvp) {
+          //   return failure('Rsvp error 05');
+          // }
 
-    if (!canEditTargetRsvp) {
-      return failure('Rsvp error 05');
+    // above deprecated by implementation of getUserChapterMembership
+
+    const targetMembership = await prisma.chapterMember.findFirst({
+      where: {
+        userProfileId: targetUserProfile.id,
+        chapterId: event.chapter.id,
+        memberRole: { in: ['MEMBER', 'MANAGER'] }
+      }
+    });
+
+    if (!targetMembership) {
+      return failure('Rsvp error 06');
     }
 
-    // 5 - Check if RSVP record for this event + target user already exists
+    // 6 - Check if RSVP record for this event + target user already exists
     const existingRsvp = await prisma.rsvp.findFirst({
       where: {
         eventId: event.id,
@@ -220,7 +291,7 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
       }
     });
 
-    // 6 - Run the update/insert
+    // 7 - Run the update/insert
     if (existingRsvp) {
       // Update existing RSVP
       await prisma.rsvp.update({
@@ -231,7 +302,8 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
           playersAdult: finalCounts.playersAdult,
           spectatorsAdult: finalCounts.spectatorsAdult,
           spectatorsYouth: finalCounts.spectatorsYouth,
-          updatedBy: authenticatedUserProfile.id,
+          // updatedBy: authenticatedUserProfile.id,
+          updatedBy: requesterProfile.id,
         }
       });
     } else {
@@ -248,8 +320,10 @@ export async function updateMemberRsvpAction(formData: FormData): Promise<Action
           playersAdult: finalCounts.playersAdult,
           spectatorsAdult: finalCounts.spectatorsAdult,
           spectatorsYouth: finalCounts.spectatorsYouth,
-          createdBy: authenticatedUserProfile.id,
-          updatedBy: authenticatedUserProfile.id,
+          // createdBy: authenticatedUserProfile.id,
+          // updatedBy: authenticatedUserProfile.id,
+          createdBy: requesterProfile.id,
+          updatedBy: requesterProfile.id,
         }
       });
     }
